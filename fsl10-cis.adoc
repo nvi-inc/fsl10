@@ -1,0 +1,562 @@
+= CIS recommendations for FSL10
+David E Horsley
+Dec 2018
+
+== File system Configuration (§2.1-2.17)
+
+During installation use the supplemental document ``CIS recommended
+partitions for FSL10.''
+
+== Disable Unused file systems (§2.18-2.24)
+
+If you don’t need these file systems disabling them will decrease any
+risk they may pose. Add the following to `/etc/modprobe.d/CIS.conf`:
+
+....
+install cramfs /bin/true
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install squashfs /bin/true
+install udf /bin/true
+....
+
+== Restrict Core Dumps (§4.1)
+
+Core dumps can leak sensitive information and yield information on
+vulnerabilities. Disabling them for SUID executables by adding to
+`/etc/sysctl.conf` the line
+
+....
+fs.suid_dumpable = 0
+....
+
+To disable them entirely, add, to /etc/security/limits.conf, the line
+
+....
+* hard core 0
+....
+
+For more fine grained restrictions, see the examples therein.
+
+== Active AppArmor (§4.5)
+
+AppArmor provides a Mandatory Access Control (MAC) system that greatly
+augments the default Discretionary Access Control (DAC) model.
+
+Install with
+
+....
+apt-get install apparmor apparmor-profiles apparmor-utils
+....
+
+then add `apparmor=1` and `security=apparmor` to `GRUB_CMDLINE_LINUX` in
+/etc/default/grub, eg:
+
+....
+GRUB_CMDLINE_LINUX="apparmor=1 security=apparmor"
+....
+
+(you may need to merge it with existing parameters there)
+
+Update the boot loader:
+
+....
+update-grub
+....
+
+Reboot, then enforce the profiles with:
+
+....
+aa-enforce /etc/apparmor.d/*
+....
+
+*TODO:* we may need some FS profiles. This looks like a good guide:
+https://medium.com/information-and-technology/so-what-is-apparmor-64d7ae211ed
+
+== Disable Unused services (§ 6.2 6.3 6.7)
+
+Avahi advertises and discovers services on the network. It enable
+zero-config services, though increases the remote attack surface of the
+server. If you do not need it, disable it by running
+
+....
+systemctl disable avahi-daemon
+....
+
+CUPS is used for print services. If you do not need to print, disable
+the service with:
+
+....
+systemctl disable cups
+....
+
+If you do not need NFS, then you do not need RPC bind. Disable it with
+
+....
+update-rc.d rpcbind disable
+....
+
+== Disable Packet Redirects and Log suspicious Packets (§ 7.1.2, 7.2.2, 7.2.4)
+
+ICMP Redirects are used to send routing information to other hosts. As a
+host itself does not act as a router (in a host only configuration),
+there is no need to send redirects.
+
+Enabling logging un-routable packets allows an administrator to
+investigate the possibility that an attacker is sending spoofed packets
+to their server.
+
+In `/etc/sysctl.conf` set
+
+....
+net.ipv4.conf.all.send_redirects=0
+net.ipv4.conf.default.send_redirects=0
+net.ipv4.conf.all.secure_redirects=0
+net.ipv4.conf.default.secure_redirects=0
+net.ipv4.conf.all.log_martians=1
+net.ipv4.conf.default.log_martians=1
+   
+....
+
+== Setup TCP wrappers (§7.4)
+
+TCP Wrappers provides a simple access list and standardized logging
+method for services capable of supporting it.
+
+Install with
+
+....
+apt install tcpd
+....
+
+Set default to deny with
+
+....
+echo "ALL: ALL" > /etc/hosts.deny
+....
+
+Then edit `/etc/hosts.allow` to allow specific hosts to access services.
+
+== Disable Uncommon Network Protocols (§7.5)
+
+DCCP, SCTP, RDS, and TIPC are uncommon and can likely be disabled to
+reduce the remote attack surface. Add the following to
+`/etc/modprobe.d/CIS.conf` to disable support of these protocols in the
+kernel
+
+....
+install dccp /bin/true
+install sctp /bin/true
+install rds /bin/true
+install tipc /bin/true
+....
+
+== Setup a Firewall (§7.7)
+
+Install UFW (uncomplicated firewall)
+
+....
+apt install ufw
+ufw allow OpenSSH
+ufw logging on
+ufw enable
+....
+
+This sets up a default deny firewall for incoming connections, enables
+incoming SSH connections and sets logging for all connections.
+
+== Install and Configure `auditd` (§8.1)
+
+System auditing, through `auditd`, allows system administrators to
+monitor their systems such that they can detect unauthorized access or
+modification of data. By default, auditd will audit SELinux AVC denials,
+system logins, account modifications, and authentication events. Events
+will be logged to `/var/log/audit/audit.log`.
+
+Install `auditd` with
+
+....
+apt install auditd
+....
+
+The default configuration on Debian sets `auditd` to keep 5 logs of 8MB
+each. These this behaviour can be changed by editing
+`/etc/audit/auditd.conf`. CIS benchmarks recommend keeping all audit
+logs, this can be achieved by setting
+
+....
+max_log_file_action = keep_logs
+....
+
+Beware that this may eventually take substantial amount of space on your
+log partition.
+
+Next, configure `grub` to instruct the kernel to begin auditing at boot.
+This allows auditing of processes that startup before `auditd`. Edit
+`/etc/default/grub` to include `audit=1` as part of
+`GRUB_CMDLINE_LINUX`, eg
+
+....
+GRUB_CMDLINE_LINUX="audit=1"
+....
+
+note you will need to merge this with existing arguments.
+
+Next you will need to configure more fine-grained auditing. Created the
+file `/etc/audit/rules.d/cis.rules` and add the following
+
+....
+## time events
+-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
+-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change
+-a always,exit -F arch=b64 -S clock_settime -k time-change
+-a always,exit -F arch=b32 -S clock_settime -k time-change
+-w /etc/localtime -p wa -k time-change
+
+## user config events
+-w /etc/group -p wa -k identity
+-w /etc/passwd -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/security/opasswd -p wa -k identity
+
+## network events
+-a exit,always -F arch=b64 -S sethostname -S setdomainname -k system-locale
+-a exit,always -F arch=b32 -S sethostname -S setdomainname -k system-locale
+-w /etc/issue -p wa -k system-locale
+-w /etc/issue.net -p wa -k system-locale
+-w /etc/hosts -p wa -k system-locale
+-w /etc/network -p wa -k system-locale
+
+## MAC permission modification
+-w /etc/selinux/ -p wa -k MAC-policy
+
+## Login/Logout
+-w /var/log/faillog -p wa -k logins
+-w /var/log/lastlog -p wa -k logins
+-w /var/log/tallylog -p wa -k logins
+
+## Sessions
+
+-w /var/run/utmp -p wa -k session
+-w /var/log/wtmp -p wa -k session
+-w /var/log/btmp -p wa -k session
+
+## DAC permission modification
+-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 \
+    -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 \
+    -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 \
+    -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 \
+    -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S \
+    lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S \
+    lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+
+## Unauthorized access attemps to files
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate \
+    -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate \
+    -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate \
+    -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate \
+    -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+
+## mount events
+-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+
+## file deletion
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 \
+    -F auid!=4294967295 -k delete
+-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 \ 
+    -F auid!=4294967295 -k delete
+
+## log changes to sudoers
+-w /etc/sudoers -p wa -k scope
+
+## log sysadmin actions
+-w /var/log/sudo.log -p wa -k actions
+
+## kernel modules
+-w /sbin/insmod -p x -k modules
+-w /sbin/rmmod -p x -k modules
+-w /sbin/modprobe -p x -k modules
+## For 32 bit systems
+##-a always,exit -F arch=b32 -S init_module -S delete_module -k modules
+## For 64 bit systems
+-a always,exit -F arch=b64 -S init_module -S delete_module -k modules
+
+## make rules immutable
+-e 2
+....
+
+Next, make a rule to monitor privileged programs (those that have the
+setuid and/or setgid bit set on execution) to determine if unprivileged
+users are running these commands.
+
+....
+find PART -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
+"-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
+-k privileged" }' > /etc/audit/rules.d/cis-suid.rules
+....
+
+Lastly generate the file combined rules file `/etc/audit/audit.rules` by
+running
+
+....
+augenrules
+....
+
+To instruct `auditd` to reload the configuration now, run
+
+....
+pkill -HUP -P 1 auditd
+....
+
+== Install and configure `rsyslog` (§8.2)
+
+The `rsyslog` software is recommended as a replacement for the default
+`syslogd` daemon and provides improvements over `syslogd`, such as
+connection-oriented (i.e. TCP) transmission of logs, the option to log
+to database formats, and the encryption of log data en route to a
+central logging server.
+
+Install with
+
+....
+apt install rsyslog
+....
+
+On Debian, it may already be installed.
+
+Next create and set permissions on rsyslog log files. For each
+`<logfile>` in `/etc/rsyslog.conf` and in `/etc/rsyslog.d/*` files
+perform the following
+
+....
+touch <logfile>
+chown root:root <logfile>
+chmod og-rwx <logfile>
+....
+
+Storing log data on a remote host protects log integrity from local
+attacks. If an attacker gains root access on the local system, they
+could tamper with or remove log data that is stored on the local system.
+It is advised to configure `rsyslog` to send logs to a central logging
+server.
+
+If your log host is `loghost.example.com`, add the following to
+/etc/rsyslog.conf
+
+....
+*.* @@loghost.example.com
+....
+
+== Install Advanced Intrusion Detection Environment (AIDE) (§8.3)
+
+AIDE is a file integrity checking tool, similar in nature to Tripwire.
+While it cannot prevent intrusions, it can detect unauthorized changes
+to configuration files by alerting when the files are changed. When
+setting up AIDE, decide internally what the site policy will be
+concerning integrity checking. Review the AIDE quick start guide and
+AIDE documentation before proceeding.
+
+To install AIDE run
+
+....
+apt install aide
+....
+
+then initialize with
+
+....
+aideinit
+cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db
+....
+
+configure a cron job to run AIDE periodically
+
+....
+crontab -u root -e
+....
+
+then add
+
+....
+0 5 * * * /usr/sbin/aide --check
+....
+
+== Configure `logrotate` (§8.4)
+
+_________________________________________________________________________________________________________________________________________________________________________________
+Logs need to be retained on the system for 53 weeks, we will adjust this
+when it’s reporting to a central system and at that point the logs will
+have to be retained for 3 months
+_________________________________________________________________________________________________________________________________________________________________________________
+
+Increase the retention period of system logs by editing
+`/etc/logrotate.d/rsyslog`. This should be configured to store logs for
+at least 1 year.
+
+== Configure cron (§9.1)
+
+Cron should be installed by default.
+
+Permissions of the crontab files should be changed to prevent
+circumvention of auditing controls. Run the following to ensure only the
+system administrator can schedule and edit jobs:
+
+....
+chown root:root /etc/crontab
+chmod og-rwx /etc/crontab
+chown root:root /etc/cron.hourly
+chmod og-rwx /etc/cron.hourly
+chown root:root /etc/cron.daily
+chmod og-rwx /etc/cron.daily
+chown root:root /etc/cron.weekly
+chmod og-rwx /etc/cron.weekly
+chown root:root /etc/cron.monthly
+chmod og-rwx /etc/cron.monthly
+chown root:root /etc/cron.d
+chmod og-rwx /etc/cron.d
+....
+
+Next, set `cron` and `at` to default deny and use a whitelist instead
+
+....
+rm /etc/cron.deny
+rm /etc/at.deny
+touch /etc/cron.allow
+touch /etc/at.allow
+chmod og-rwx /etc/cron.allow
+chmod og-rwx /etc/at.allow
+chown root:root /etc/cron.allow
+chown root:root /etc/at.allow
+....
+
+== Set Password Creation Requirement Parameters (§9.2)
+
+Instal the password strength evaluator PAM extension:
+
+....
+apt install libpam-cracklib
+....
+
+Then add the following in `/etc/pam.d/common-password`
+
+....
+password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
+....
+
+*TODO:* need the NASA params here.
+
+== Configure SSH (§9.3)
+
+To improve security and auditing of SSH, edit `/etc/ssh/sshd_config` so
+that the parameters macth
+
+....
+Protocol 2
+LogLevel INFO
+MaxAuthTries 4
+IgnoreRhosts yes
+HostbasedAuthentication no
+PermitRootLogin no
+PermitEmptyPasswords no
+PermitUserEnvironment no
+Ciphers aes128-ctr,aes192-ctr,aes256-ctr
+ClientAliveInterval 300 # NB this may need to be tweaked
+ClientAliveCountMax 0
+
+# Set one or more of these
+AllowUsers <userlist>
+AllowGroups <grouplist>
+DenyUsers <userlist>
+DenyGroups <grouplist>
+
+Banner /etc/issue.net
+....
+
+The `/etc/ssh/sshd_config` file needs to be protected from unauthorized
+changes by non-privileged users,
+
+....
+chown root:root /etc/ssh/sshd_config
+chmod 600 /etc/ssh/sshd_config
+....
+
+== Restrict root Login to System Console (§9.4)
+
+From `/etc/securetty`, remove entries for any consoles that are not in a
+physically secure location.
+
+== Restrict Access to the su Command (§9.5)
+
+Add users that can access to `wheel` group then edit `/etc/pam.d/su`
+
+....
+auth required pam_wheel.so use_uid
+....
+
+Note, using `sudo` in place of `su`, provides system administrators
+better control of the escalation of user privileges to execute
+privileged commands.
+
+== Set password parameters (§10.1)
+
+Edit `/etc/login.defs` to contain
+
+....
+PASS_MAX_DAYS 90
+PASS_MIN_DAYS 7
+PASS_WARN_DAYS 10
+....
+
+Then update existing users with
+
+....
+chage --maxdays 90 --mindays 7 --warndays 10 <user>
+....
+
+== Disable System Accounts Section (§10.2)
+
+prog and oper are required.
+
+== Set Default umask for Users (§10.4)
+
+Edit `/etc/bash.bashrc` and any other appropriate files for other shells
+to have
+
+....
+umask 077
+....
+
+== Lock Inactive User Accounts (§10.5)
+
+*TODO:* needs evaluation for FS systems
+
+== Set Warning Banner for Standard Login Services (§11.1)
+
+*TODO:* needs language
+
+....
+touch /etc/motd
+# EG
+echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue
+echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
+chown root:root /etc/motd
+chmod 644 /etc/motd
+chown root:root /etc/issue
+chmod 644 /etc/issue
+chown root:root /etc/issue.net
+chmod 644 /etc/issue.net
+....
+
+The above should not contain any lines containing `\m , \r , \s or \v`.
