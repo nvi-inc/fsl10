@@ -27,10 +27,11 @@ accounts.
 
 run `visudo` then add at end:
 
-    %operators    ALL=(oper) NOPASSWD: ALL
+    %operators      ALL=(oper) NOPASSWD: ALL
     %programmers    ALL=(prog) NOPASSWD: ALL
+    %programmers    ALL=(oper) NOPASSWD: ALL
 
-Then add each user to these groups:
+Then add each users to these groups, eg:
 
     adduser dhorsley programmers
     adduser dhorsley operators
@@ -41,21 +42,15 @@ Authorized users can then switch to prog or oper with:
 
 ## Make sure /usr2 permissions are correct
 
-Code should be owned by prog and readable by group rtx. 
-
-Probably just 
-
-    chmod -R prog:rtx
+    chmod prog:rtx /usr2
 
 ## Install MGO station code
 
 (Can perhaps be done be Dave or Ed using prog)
 
-## Install fieldtalk modbus 
+## Install fieldtalk modbus  library in /usr2
 
 (Can perhaps be done be Dave or Ed using prog)
 
     cd /usr2 
     tar czf FT-MBMP-LX-ALL-2.9.0.tar.gz
-
-should be extracted in /usr2 and owned by prog.
