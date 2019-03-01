@@ -1,33 +1,45 @@
 = Installing FS Linux 10: An A-Z Installation Guide.
-J.F.H. Quick and D. Horsley 
+J.F.H. Quick and D.E. Horsley 
+Feb 2019
 :sectnums:
+:experimental:
+:downarrow: &darr;
 
 Please note that for each step in this guide, we recommend you carefully read all
 the included caveats and notes as the material is not always logically
-sequential i.e. instructions may proceed explanations that impact what you
+sequential, i.e. instructions may proceed explanations that impact what you
 actually type.
 
 
 == Choosing architecture and creating installation media
 
-To install Debian 9, you can either use a DVD or USB drive. The latter 
-is likely faster. Directions for creating your installation media can be found online.
+// TODO: what will be the first FS release which will support 64 bit?
 
-As of FSL10 both `i386` and `amd64` architecture are supported. In-spite of
-its name `amd64` architecture for both AMD and Intel x86_64
-processors. Some work may be required when porting station code from a 32-bit
-to a 64-bit OS.
+As of Field System version 9.13.?, both `i386` and `amd64` architecture are
+supported natively. However, some work may be required to port your station
+code from a 32-bit to a 64-bit OS. Some automatic tools have been developed
+for this, and can be provided upon request.
 
-You can install a DVD drive, USB device or over the network. The
-details of creating your installation media can be found in the Debian
-installation guide available from: https://www.debian.org/releases/stretch/installmanual
+To install Debian 9, you can either use a DVD or USB drive. The latter is
+faster and necessary if you wish to use UEFI. Directions for creating your
+installation media can be found online. 
 
-Any revision of 9.x installation's should work fine, but older
-revisions will want to download many security patches from the network which
-may already be included in the latest revision. Note also that installing
-from DVDs as described here is recommended mainly for sites with little to
-poor Internet connectivity (even then use of a single DVD may suffice) and
-the equivalent use of a Debian GNU/Linux 9.x "Stretch" - Official i386/amd64
+NOTE: Don't be confused by the `amd64` name, this architecture is 
+supports modern x86-64 processors produced by both AMD and Intel.
+This includes CPU lines such as Ryzen, Epyc, Core, and Xeon.
+The naming scheme dates back to when Intel had a completing and
+incompatible 64 bit architecture.
+
+You can install a DVD drive, USB device or over the network. The details of
+creating your installation media can be found in the Debian installation
+guide available from: https://www.debian.org/releases/stretch/installmanual
+
+Any revision of 9.x installation's should work fine, but older revisions
+will want to download many security patches from the network which may
+already be included in the latest revision. Note also that installing from
+DVDs as described here is recommended mainly for sites with little to poor
+Internet connectivity (even then use of a single DVD may suffice) and the
+equivalent use of a Debian GNU/Linux 9.x "Stretch" - Official i386/amd64
 "netinst" CD would suffice for installation at most sites with good
 connectivity.
 
@@ -37,97 +49,115 @@ WARNING: This guide assumes that you have two disks installed in the machine
 in order to set them up as a RAID pair. For RAID to work seamlessly with a
 third disk later, you must make sure that the smallest disk of the three
 disks available is used as the first of this initial RAID pair. Use of a
-single disk (for atest install etc.) is also annotated below.
+single disk (for a test install etc.) is also annotated below.
 
+// TODO: perhaps we need some general advice on setting motherboards
 
 === Insert/plug-in your installation media and reboot.
 
-Making sure that the BIOS time is set to the current Universal time, ie. UTC, and
-the BIOS is set to boot from the device --- To boot of the installation media
-you may need to bring up your motherboards boot menu which is typically
-accessed by pressing `F12`.
+Make sure that the BIOS time is set to the current Universal time, ie.
+UTC, and the BIOS is set to boot from the device -- To boot of the
+installation media you may need to bring up your motherboards boot menu
+which is typically accessed by pressing kbd:[F12].
 
 
-=== At the 'Installer boot menu', highlight "Install" 
+=== Set boot options and boot installer
 
-(or "Graphical install" - only the installer interface differs - but this may
-not work on some video hardware), press <Tab>, add the additional options
+// FIXME: if booting UEFI, this is a little different. Need instructions here.
+// should we just try to avoid UEFI altogether?
+
+At the 'Installer boot menu':
+
+. _highlight_ *Install* (or "Graphical install" -- only the installer
+  interface differs -- but this may not work on some video hardware)
+. press kbd:[Tab] (BIOS); or kbd:[e], kbd:[{downarrow}] three times, kbd:[End] (UEFI)
+. To the end of the displayed command, add the additional options:
 
    locale=C netcfg/disable_dhcp=true time/zone=UTC
 
-to the end of the displayed command line and press  <Enter>.  
+. press kbd:[Enter] (BIOS) or kbd:[F10] (UEFI)
 
-NOTE: You may omit the 'netcfg/disable_dhcp=true' if you want to use DHCP to
+// TODO: is "locale=C" required? Not having a UTF8 locale set does cause
+// problems with some modern terminal programs. Tmux for example is unhappy about this.
+
+NOTE: You may omit the `netcfg/disable_dhcp=true` if you want to use DHCP to
 configure the network settings of this machine, though this is not
 advised.
 
+The installer will now boot.
+
 === Select your continent or region
-from the available list and press  <Enter>,
-then select your country, territory or area and press  <Enter>  again.
+
+Find your region from the available list and press kbd:[Enter],
+then select your country, territory or area and press  kbd:[Enter] again.
 (These notes were produced by selecting "North America" and then
 "United States" - you may experience small differences if you select
 another location)
 
-=== Select a keyboard layout to use from the keymap list 
-(the most common one is "American English") and press  <Enter>.
+=== Select a keyboard layout
+
+Find your keyboard on the keymap list and press  kbd:[Enter].
+(the most common one is "American English")
 
 The installation media is now scanned and additional installer components loaded.
 
 === If you are presented with a dialog asking for non-free firmware files
-to operate some of your hardware, you may need to locate the files
-requested (especially if they relate to your network or disk-drive
-interfaces)  and place them on a USB stick which should be inserted at
-this stage.  If you do have the required files select '<Yes>', otherwise
-press <Tab> to select '<No>', then press <Enter> to continue.
+
+You may need to locate the files requested (especially if they relate to
+your network or disk-drive interfaces)  and place them on a USB stick which
+should be inserted at this stage.  If you do have the required files select
+'kbd:[Yes]', otherwise press kbd:[Tab] to select kbd:[No], then press
+kbd:[Enter] to continue.
 
 === If you are presented with a dialog asking which interface to use 
-for the installation (typically only shown if two or more network interfaces are
-found, which might include a virtual firewire interface in some cases)
-select the interface you require (usually 'eth0') and press  <Enter>.
+Typically only shown if two or more network interfaces are
+found, which might include a virtual firewire interface in some cases.
+Select the interface you require (usually 'eth0') and press  kbd:[Enter].
 
 ====
 Unless you are using DHCP (which is not advisable) you will be prompted to:
 Type in the required static IP address in the form xxx.xxx.xxx.xxx (where
-xxx is any integer from 1 - 254 inclusive) and press  <Enter>.
+xxx is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
 Type in the required netmask in the form 255.yyy.yyy.yyy (where yyy is
-typically 0, 64, 128, 192 or 255) and press  <Enter>.
+typically 0, 64, 128, 192 or 255) and press  kbd:[Enter].
 Type in the required gateway IP address in the form xxx.xxx.xxx.xxx (where
-xxx is any integer from 1 - 254 inclusive) and press  <Enter>.
+xxx is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
 Type in the required nameserver IP addresses, space separated, in the form
 xxx.xxx.xxx.xxx (where xxx is any integer from 1 - 254 inclusive) and
-press  <Enter>.
+press  kbd:[Enter].
 
 Alternatively, if you are only using the installer to initialize new disks,
-you may want to use <Go Back> and directly select "Detect disks" from the
+you may want to use kbd:[Go Back] and directly select "Detect disks" from the
 main menu to skip forward to step 10 below.
 ====
 
-=== Backspace over the default hostname "debian" and type in the name
-
-you require (if not already retrieved vis DNS), then press  <Enter>.
-Enter the required Internet Domain name (if not found) and press  <Enter>.
+=== Set a hostname
+Backspace over the default hostname "debian" and type in the name
+you require (if not already retrieved vis DNS), then press  kbd:[Enter].
+Enter the required Internet Domain name (if not found) and press  kbd:[Enter].
 
 === Enter a suitable root password
 
 Twice as prompted.
 
-=== Enter "Desktop User" for the name of the new user
-then press  <Enter>  to accept "desktop" as the username and enter a (real)
+=== Setup first account
+
+Enter "Desktop User" for the name of the new user
+then press  kbd:[Enter]  to accept "desktop" as the username and enter a (real)
 password twice as prompted.
 
-=== The installer now tries to set the time using NTP
+=== Get network time
+
+The installer now tries to set the time using NTP
 If this is not possible at your site due to your firewall etc. you may need
-to press <Enter> to cancel this process.
+to press kbd:[Enter] to cancel this process.
 
-=== Setup guided partitioning 
+=== Setup partitions 
 
-IMPORTANT: For NASA stations, or sites those that wish to use CIS
-           recommended partitions, follow the supplementary guide and
-           continue on at "Configure the package manager as follows"
-
-On both primary and secondary disks as follows:
-
-(for a single disk 'RAID', follow the steps for the primary only)
+IMPORTANT: For NASA stations, or those sites that wish to use 
+CIS recommended partitions, follow the supplementary guide 
+<<fsl10-cis-partitions.adoc#,CIS recommended partitions for FSL10>>, and
+continue on to <<Configure the package manager>>
 
 ======
 The example shown here is for SATA IDE / SCSI disks (larger than 2TB ie.
@@ -145,194 +175,238 @@ below change from #2, #3 and #4 as shown to the values in parentheses ie.
 presence of a small boot partition labelled 'biosgrub' as partition #1.
 ======
 
-Partition the primary disk:
+When prompted, select *Setup guided partitioning*
 
-* Select "Guided - use entire disk" and press  <Enter>.
-* Select "SCSI1 (0,0,0) (sda)" and press  <Enter>.
-* Select "Separate /home partition" and press  <Enter>.
+On both primary and secondary disks as follows:
+
+// TODO: perhaps its better to have the default GPT. It seems most new
+// systems have >= 2TB disks. We may also need some instructions on getting
+// the motherboard settings right. UEFI
+
+
+==== Partition the primary disk:
+
+* Select *Guided - use entire disk* and press  kbd:[Enter].
+* Select *SCSI1 (0,0,0) (sda)* and press  kbd:[Enter].
+* Select *Separate /home partition* and press  kbd:[Enter].
 
 If you are asked about removing existing software RAID partitions
-select "Yes" and press  <Enter>.
+select *Yes* and press  kbd:[Enter].
 
-Partition the secondary disk (if available):
+==== Partition the secondary disk (if available):
 
-* Select "Guided partitioning" and press  <Enter>.
-* Select "Guided - use entire disk" and press  <Enter>.
-* Select "SCSI2 (0,0,0) (sdb)" and press  <Enter>.
-* Select "Separate /home partition" and press  <Enter>.
+* Select *Guided partitioning* and press  kbd:[Enter].
+* Select *Guided - use entire disk* and press  kbd:[Enter].
+* Select *SCSI2 (0,0,0) (sdb)* and press  kbd:[Enter].
+* Select *Separate /home partition* and press  kbd:[Enter].
 
 If you are asked about removing existing software RAID partitions
-select "Yes" and press  <Enter>.
+select *Yes* and press  kbd:[Enter].
 
-Setup the primary disk for RAID use:
+==== Setup the primary disk for RAID use:
 
-* Select partition #2 (or #1 for a DOS partition table) of SCSI1(0,0,0) (sda)
-  and press <Enter>.
-* Select "Use as:" and press  <Enter>.
-* Select "physical volume for RAID" and press  <Enter>.
-* Select "Done setting up the partition" and press <Enter>.
+* Select partition #2 (or #1 for a DOS partition table) of 
+  *SCSI1(0,0,0) (sda)* and press kbd:[Enter].
+* Select *Use as:* and press  kbd:[Enter].
+* Select *physical volume for RAID* and press  kbd:[Enter].
+* Select *Done setting up the partition* and press kbd:[Enter].
 
 Repeat this procedure on partitions #3 (or #5 for a DOS partition table)
 and #4 (or #6 for a DOS partition table) of the primary disk.
 
-Setup the secondary disk (if available) for RAID use:
+==== Setup the secondary disk (if available) for RAID use:
 
-* Select partition #2 (or #1 for a DOS partition table) of SCSI2(0,0,0) (sdb)
-  and press <Enter>.
-* Select "Use as:" and press  <Enter>.
-* Select "physical volume for RAID" and press  <Enter>.
-* Select "Done setting up the partition" and press <Enter>.
+* Select partition #2 (or #1 for a DOS partition table) of 
+  *SCSI2(0,0,0) (sdb)* and press kbd:[Enter].
+* Select *Use as:* and press  kbd:[Enter].
+* Select *physical volume for RAID* and press  kbd:[Enter].
+* Select *Done setting up the partition* and press kbd:[Enter].
 
 Repeat this procedure on partitions #3 (or #5 for a DOS partition table)
 and #4 (or #6 for a DOS partition table) of the secondary disk.
 
-Construct the three multi-disk devices from the corresponding partitions
-of the disk(s) as follows:
+==== Construct the three multi-disk devices
 
-NOTE: that if you are doing a single disk only install, you should select
+NOTE: If you are doing a single disk only install, you should select
 only one partition for each MD device below - a secondary disk can then
 be added later using the instructions for recovering from disk failure.
 
-* Select "Configure software RAID" and press  <Enter>.
-* Select "<Yes>" and press  <Enter>  to write the changes to the disks.
+* Select *Configure software RAID* and press  kbd:[Enter].
+* Select *Yes* and press  kbd:[Enter]  to write the changes to the disks.
 
-(If you just wanted to initialise a disk or disks so they can be added to
+====
+If you just wanted to initialise a disk or disks so they can be added to
 an already existing RAID array eg. the third FS backup disk, you can now
 exit the installer at this point - you need not create any MD devices.
-Simply select "Finish" and press <Enter>, next <Go Back> and press
-<Enter>,  scroll down to select "Abort the Installation" and press
-<Enter>,  select <Yes> to confirm and press <enter>.)
+Simply select "Finish" and press kbd:[Enter], next kbd:[Go Back] and press
+kbd:[Enter],  scroll down to select "Abort the Installation" and press
+kbd:[Enter],  select kbd:[Yes] to confirm and press kbd:[enter].
+====
 
-* Select "Create MD device" and press  <Enter>.
-* Select "RAID1" and press  <Enter>.
-* Confirm "2" as number of active devices by pressing  <Enter>.
-* Confirm "0" as number of spare devices by pressing  <Enter>.
-* Choose "/dev/sda2" (or "/dev/sda1") by pressing  <Space>
-   and "/dev/sdb2" (or "/dev/sdb1") likewise (if available),
-* Then press  <Tab>  to select "<Continue>" and press  <Enter>.
+* Select *Create MD device* and press  kbd:[Enter].
+* Select *RAID1* and press  kbd:[Enter].
+* Confirm *2* as number of active devices by pressing  kbd:[Enter].
+* Confirm *0* as number of spare devices by pressing  kbd:[Enter].
+* Choose */dev/sda2* (or */dev/sda1*) by pressing  kbd:[Space]
+   and */dev/sdb2* (or */dev/sdb1*) likewise (if available),
+* Then press  kbd:[Tab]  to select *Continue* and press kbd:[Enter].
 
-* Select "Create MD device" and press  <Enter>.
-* Select "RAID1" and press  <Enter>.
-* Confirm "2" as number of active devices by pressing  <Enter>.
-* Confirm "0" as number of spare devices by pressing  <Enter>.
-* Choose "/dev/sda3" (or "/dev/sda5") by pressing  <Space>
-   and "/dev/sdb3" (or "/dev/sdb5") likewise (if available),
-* Then press  <Tab>  to select "<Continue>" and press  <Enter>.
+---
 
-* Select "Create MD device" and press  <Enter>.
-* Select "RAID1" and press  <Enter>.
-* Confirm "2" as number of active devices by pressing  <Enter>.
-* Confirm "0" as number of spare devices by pressing  <Enter>.
-* Choose "/dev/sda4" (or "/dev/sda6") by pressing  <Space>
-  and "/dev/sdb4" (or "/dev/sdb6") likewise (if available),
-* Then press  <Tab>  to select "<Continue>" and press  <Enter>.
+* Select *Create MD device* and press  kbd:[Enter].
+* Select *RAID1* and press  kbd:[Enter].
+* Confirm *2* as number of active devices by pressing  kbd:[Enter].
+* Confirm *0* as number of spare devices by pressing  kbd:[Enter].
+* Choose */dev/sda3* (or */dev/sda5*) by pressing  kbd:[Space]
+   and */dev/sdb3* (or */dev/sdb5*) likewise (if available),
+* Then press  kbd:[Tab]  to select *Continue* and press  kbd:[Enter].
 
-Select "Finish" and press  <Enter>.
+---
 
-Now assign the multi-disk devices to the requisite filesystems as follows:
+* Select *Create MD device* and press  kbd:[Enter].
+* Select *RAID1* and press  kbd:[Enter].
+* Confirm *2* as number of active devices by pressing  kbd:[Enter].
+* Confirm *0* as number of spare devices by pressing  kbd:[Enter].
+* Choose */dev/sda4* (or */dev/sda6*) by pressing  kbd:[Space]
+  and */dev/sdb4* (or */dev/sdb6*) likewise (if available),
+* Then press  kbd:[Tab]  to select *Continue* and press  kbd:[Enter].
 
-* Select partition #1 of RAID1 device #0 and press  <Enter>.
-** Select "Use as:" and press  <Enter>.
-***  Select "Ext4 journaling file system" and press  <Enter>.
-**** If "Format the partition:" appears, select it and press  <Enter>,
-     such that it reads "yes,format it".
-*** Select "Mount point:" and press  <Enter>.
-**** Select "/ - the root file system" and press  <Enter>.
-*** Select "Done setting up the partition" and press <Enter>.
+Select *Finish* and press  kbd:[Enter].
 
-* Select partition #1 of RAID1 device #1 and press  <Enter>.
-** Select "Use as:" and press  <Enter>.
-*** Select "swap area" and press  <Enter>.
-** Select "Done setting up the partition" and press <Enter>.
+==== Assign the multi-disk devices to the requisite filesystems
 
-* Select partition #1 of RAID1 device #2 and press  <Enter>.
-** Select "Use as:" and press  <Enter>.
-*** Select "Ext4 journaling file system" and press  <Enter>.
-** If "Format the partition:" appears, select it and press  <Enter>,
-   such that it reads "yes,format it".
-** Select "Mount point:" and press  <Enter>.
-      Select "Enter manually" and press  <Enter>.
-   Type in "/usr2" and press  <Enter>.
-   Select "Done setting up the partition" and press <Enter>.
+* Select partition #1 of RAID1 device #0 and press  kbd:[Enter].
+** Select *Use as:* and press  kbd:[Enter].
+***  Select *Ext4 journaling file system* and press  kbd:[Enter].
+**** If *Format the partition:* appears, select it and press  kbd:[Enter],
+     such that it reads *yes,format it*.
+*** Select *Mount point:* and press  kbd:[Enter].
+**** Select */ - the root file system* and press  kbd:[Enter].
+*** Select *Done setting up the partition* and press kbd:[Enter].
 
-Select "Finish partitioning and write changes to disk" and press  <Enter>.
-Select "<Yes>" and press  <Enter>  to write the changes to the disks.
+* Select partition #1 of RAID1 device #1 and press  kbd:[Enter].
+** Select *Use as:* and press  kbd:[Enter].
+*** Select *swap area* and press  kbd:[Enter].
+** Select *Done setting up the partition* and press kbd:[Enter].
+
+* Select partition #1 of RAID1 device #2 and press  kbd:[Enter].
+** Select *Use as:* and press  kbd:[Enter].
+*** Select *Ext4 journaling file system* and press  kbd:[Enter].
+** If *Format the partition:* appears, select it and press  kbd:[Enter],
+   such that it reads *yes,format it*.
+** Select *Mount point:* and press  kbd:[Enter].
+*** Select *Enter manually* and press  kbd:[Enter].
+*** Type in */usr2* and press  kbd:[Enter].
+** Select *Done setting up the partition* and press kbd:[Enter].
+
+* Select *Finish partitioning and write changes to disk* and press  kbd:[Enter].
+Select *Yes* and press  kbd:[Enter]  to write the changes to the disks.
 
 The Debian base system is now installed from the DVD in the drive.
 
 === Configure the package manager
+
+
+// TODO: too many NOTES! 
 
 NOTE: Scanning the additional DVDs (and obtaining copies of them in the
    first place) is entirely optional, and is only useful if you don't have a
    reliable network connection to a suitable Debian mirror and hence would
    prefer not to download packages you get from the DVD.
    + 
-   Note also that if you start from a "netinst" CD image the installer now
+   If you start from a "netinst" CD image the installer now
    assumes you will install only from the network, and jumps straight to
    the "Choose your country..." part of the dialogue as detailed below.
+
 
 NOTE: If you do want to use a mirror in future, it is better not to scan any
 DVDs at this stage and to scan them later during Stage 2 using 'apt-cdrom'.
 
 For each additional DVD you wish to scan, insert it in the drive, select
-"<Yes>" and press  <Enter>  to perform the scan (which takes a while.)
+*Yes* and press  kbd:[Enter]  to perform the scan (which takes a while.)
 
 (If you are using DVDs, and are prompted to insert another DVD, you
 will need to use 'eject /dev/cdrom' from another virtual console to do this)
 
-Select "<No>" and press  <Enter>  to continue once you are done.
+Select *No* and press  kbd:[Enter]  to continue once you are done.
 If prompted, insert the Debian GNU/Linux 9.x "Stretch" - Official i386/amd64
-Binary-1 DVD back into the DVD-ROM drive and press  <Enter>.
+Binary-1 DVD back into the DVD-ROM drive and press  kbd:[Enter].
 
 WARNING: If you do scan additional DVDs, the following useful dialogue
 which allows you to select a suitable network mirror from a country-based
 list may be suppressed.
 
-Select "<Yes>" and press  <Enter>  to use a network mirror (unless you
+Select *Yes* and press  kbd:[Enter]  to use a network mirror (unless you
 have inadequate Internet access - but then you must scan all DVDs.)
-Choose your country from the list if available and press  <Enter>.
+Choose your country from the list if available and press  kbd:[Enter].
 (If your country is not available choose the country nearest to you in a
 network connectivity sense.)
 Select the fastest Debian mirror from those available.
+
+TIP: The new `deb.debian.org` mirror is a good choice for most
+sites as it uses DNS to find a local mirror.
 
 Enter any necessary HTTP: proxy information (usually left blank.)
 
 === Do not participate in popularity-contest
 
-Select "<No>" and press  <Enter>  
+Select *No* and press kbd:[Enter]  
 
-=== Select "SSH server"
 
-By pressing <Space> on it (unless you don't want it).  If you have a small
-disks and are worried about space, then you can also press <Space> on
-"Desktop Environment" to unselect it (which may then change the dialogue
-presented below).  Finally press <Tab> to select "<Continue>" and then
-<Enter>  to install the standard system.
+
+=== Choose your packages
+
+Select *SSH server* By pressing kbd:[Space] on it (unless you don't want it).  
+
+TIP: If you have a small disks and are worried about space, then you can
+also press kbd:[Space] on "Desktop Environment" to unselect it (which may
+then change the dialogue presented below).
+
+Finally press kbd:[Tab] to select *Continue* and then
+kbd:[Enter]  to install the standard system.
 
 The Debian standard system is now installed from the installation media plus any
 updates from the network mirror and/or security.debian.org site if they can be
 reached. This can take a while, up to one and half hours or more.
 
 === Install the GRUB bootloader
-Press <Enter> to install to the master boot record of the primary disk.
+
+// FIXME: need a comment about UEFI here
+
+When prompted, press kbd:[Enter] to install to the master boot record of the
+primary disk.
 
 === Remove installation media 
-the DVD from the DVD-ROM drive (it should be auto-ejected)
-and press  <Enter>  to reboot into the newly installed system.
+The DVD from the DVD-ROM drive (it should be auto-ejected), or unplug the
+USB drive and press  kbd:[Enter]  to reboot into the newly installed system.
 
-[It would generally be wise to disable booting from DVD-ROM and floppy ie. 
+TIP: It would generally be wise to disable booting from DVD-ROM and floppy ie. 
 anything other than the hard drive, in the BIOS just in case someone
-leaves something nasty in the machine's removable drives by mistake.]
+leaves something nasty in the machine's removable drives by mistake.
 
 
 == Second Stage Installation:
 
-=== Enter "root" and the root password you set earlier 
-to login to virtual console 1.
+You can now boot to your new OS.
+
+=== Login as root 
+
+Switch to Virtual Console 3, by pressing kbd:[Ctrl+Alt+F3].
+
+Enter `root` and press kbd:[Enter], then enter the root password you set
+earlier.
+
+NOTE: Previous versions of Debian ran X11 on virtual console 7. As of
+Debian 9, the desktop environment consoles are virtual console 1 and 2. 
+
+
+TIP: If the login screen is painfully slow, you should disable Wayland in
+GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
 
 === Remove the dummy "Desktop User"
 
-(unless you want another account that that is set up to use the default desktop environment) as follows:
+Unless you want another account that that is set up to use the default
+desktop environment, delete "desktop" with:
 
    deluser --remove-home desktop
 
@@ -340,12 +414,13 @@ NOTE: If you do keep this account, you will not be able to run the FS from
 it unless you add this account into the additional hardware access groups
 such as is done for oper/prog by FSADAPT.
 
-=== Should you wish to make APT use an HTTP proxy for downloads
-create the new file /etc/apt/apt.conf.d/00proxies using "vi" containing:
+=== Setup HTTP Proxy for APT (Optional)
+Should you wish to make APT use an HTTP proxy for downloads,
+create the new file `/etc/apt/apt.conf.d/00proxies` using `vi` containing:
 
    ACQUIRE::http::Proxy "http://proxy.some.where:8080/"; 
 
-to use a proxy "proxy.some.where" at port 8080 for example.
+to use a proxy `proxy.some.where` at port 8080 for example.
 
 === Edit /etc/apt/sources.list 
 
@@ -374,45 +449,48 @@ all these entries (but CD/DVD entries might use "unstable".)
 
 === Next tell APT to update its internal source list of packages using
 
+TIP: Recent versions of Debian have the `apt` program, which gives a more
+     user-friendly interface to the package manager than `apt-get`
+
    apt update 
 
 NOTE: It is also possible to add additional DVDs at this stage using the
-'apt-cdrom add' command, 
+'apt-cdrom add' command 
 
-=== Install the latest linux kernel and matching headers for your architecture
+=== Install the latest Linux kernel and matching headers for your architecture
 
 (run 'cat /proc/version' to see what flavour you require):
 
-   apt-get install linux-image-686-pae linux-headers-686-pae
+   apt install linux-image-686-pae linux-headers-686-pae
 
 (on Intel Pentium Pro/II/III/4M/D, Xeon, Core of Atom and AMD GeodeNX,
 Athlon (K7), Duron, Opteron, Sempron, Turion or Phenon 32-bit processors,)
    
 _OR_
 
-   apt-get install linux-image-amd64 linux-headers-amd64
+   apt install linux-image-amd64 linux-headers-amd64
 
-(on AMD64 or Intel EM64T 64-bit processors.)
+(on AMD64 or Intel EM64T 64-bit processors, also known as x86_64.)
 
-pressing <Enter> to confirm the installation of +- 12 new packages.
+pressing kbd:[Enter] to confirm the installation of +- 12 new packages.
 
 NOTE: that if you are using DVDs, and are prompted to insert another DVD, you
 may need to use 'eject /dev/cdrom' from another virtual console to do this)
 
 === Download the FS Linux 10 "dpkg" package selections as follows:
 
-   ftp ftp.hartrao.ac.za <CR>
-   user: ftp <CR>
-   password: < your@email.address > <CR>
-         cd /pub/fs9x <CR>
-   get fsl9.selections <CR>
-   quit <CR>
+   ftp ftp.hartrao.ac.za kbd:[CR]
+   user: ftp kbd:[CR]
+   password: kbd:[ your@email.address ] kbd:[CR]
+         cd /pub/fs9x kbd:[CR]
+   get fsl9.selections kbd:[CR]
+   quit kbd:[CR]
 
 === Feed the package selections into "dpkg"
 
 using the commands
 
-   apt-get install dselect
+   apt install dselect
    dselect update
    dpkg --set-selections < fsl10.selections
 
@@ -422,7 +500,7 @@ run using the command
 
    apt-get dselect-upgrade
 
-then pressing <Enter> to confirm any updating of installed packages (where
+then pressing kbd:[Enter] to confirm any updating of installed packages (where
 you have an Internet connection) and the installation of +-105 new packages
 (unless you did not select the Desktop or added other tasks earlier -
 currently downloading at least 95MB from the Internet and/or DVDs).
@@ -446,28 +524,25 @@ Technically, you only have to wait for the /dev/md0 RAID to complete its
 recovery before proceeding to the next step, the other two RAIDs only need
 to complete their recovery before you reboot in stage 3 below.
 
-=== Install "GRUB" into Master Boot Record of the secondary disk (if available)
-by running:
+=== Install "GRUB" secondary disk (if available)
+
+// TODO: this needs to mention UEFI grub too.
+
+Install GRUB to the Master Boot Record by running:
 
    dpkg-reconfigure -plow grub-pc
 
-and after pressing <Enter> twice to accept the kernel command line extra
+and after pressing kbd:[Enter] twice to accept the kernel command line extra
 arguments and default command line argruments, use the arrow keys and
-<Space> to select both /dev/sda and /dev/sdb (but not /dev/md0) and
-press <Enter> to finalise the reconfiguration.
+kbd:[Space] to select both /dev/sda and /dev/sdb (but not /dev/md0) and
+press kbd:[Enter] to finalise the reconfiguration.
 (You should then see "Installation finished. No error reported" appear
 twice in the progress messages as GRUB is re-installed to both drives.)
 
-=== Check that X-windows has been setup correctly 
-(if it isn't started already) using
-
-   startx
-
-to start it up, and use "Logout" from the drop-down menu labelled 'root'
-at the top right of the screen to shut it down again.
-
 === Clean up the APT download directory
-so the update mechanism will work correctly
+// TODO: perhaps we can change to `apt-listchanges`
+
+So that the update mechanism will work correctly, run
 
    apt-get clean
 
@@ -479,12 +554,12 @@ so the update mechanism will work correctly
 
 Eg:
 
-   ftp ftp.hartrao.ac.za <CR>
-   user: ftp <CR>
-   password: < your@email.address > <CR>
-         cd /pub/fs9x <CR>
-   get fsadapt-9.0.x.tgz <CR>
-   quit <CR>
+   ftp ftp.hartrao.ac.za kbd:[CR]
+   user: ftp kbd:[CR]
+   password: kbd:[ your@email.address ] kbd:[CR]
+         cd /pub/fs9x kbd:[CR]
+   get fsadapt-9.0.x.tgz kbd:[CR]
+   quit kbd:[CR]
 
 === Unpack the FSADAPT 9.0.x tarball
 
@@ -500,15 +575,17 @@ as follows:
     ./fsadapt
 
 === FS Adaptation: Modifications (Window 1)
+
 All of the steps shown in Window 1 are
 required and should already be pre-selected apart from "noident", "ftpdlog"
 and "govt" which are optional.  After selecting any additional optional
-step required, simply press <Enter> with "<  OK  >" selected to continue.
+step required, simply press kbd:[Enter] with *OK* selected to continue.
 
 === FS Adaptation: Setup (Window 2)
+
 All of the steps in Window 2 need to be done once
 with the exception of "sshkeys" which can be used to recover old SSH keys
-from a backup.  So simply press <Enter> with the "<  OK  >" selected to
+from a backup.  So simply press kbd:[Enter] with the *OK* selected to
 continue.
 
 NOTE: The "updates" option relies on email to 'root' being re-directed to some
@@ -517,24 +594,28 @@ NOTE: The "updates" option relies on email to 'root' being re-directed to some
       by default which would definitely be a problem if you have removed that!
 
 === GPIB driver configuration
+
 On the "/etc/gpib.conf" screen, use the up/down
-arrow keys to select the required GPIB controller and press <Enter> on
-"<  OK  >" to continue.
+arrow keys to select the required GPIB controller and press kbd:[Enter] on
+*OK* to continue.
 
 === Serial port configuration
+
 On the "/etc/default/grub: serial port configuration" screen
 up/down arrow keys to select the required RS232 serial card and press
-<Enter> on "<  OK  >" to continue.
+kbd:[Enter] on *OK* to continue.
 
 === FS Adaptation: Settings (Window 3)
-On Window 3 modify the email settings as required.  Simply press <Enter> on
-"<  OK  >" to continue.
+
+On Window 3 modify the email settings as required.  Simply press kbd:[Enter] on
+*OK* to continue.
 
 === FS Adaptation: Network Services (Window 4) 
+
 The Window 4 will show what services are enabled.  Use the up/down arrows
-and <Space> to select "secure" and press <Enter> on "<  OK  >".  Thereafter
-use the up/down arrows and <Space> to select those services you actually
-need and press <Enter> on "<  OK  >" to set them up and finish with
+and kbd:[Space] to select "secure" and press kbd:[Enter] on *OK*.  Thereafter
+use the up/down arrows and kbd:[Space] to select those services you actually
+need and press kbd:[Enter] on *OK* to set them up and finish with
 FSADAPT.  (This will complain about the current start and stop runlevels of
 the avahi-daemon if you have disabled it as recommended for a secure
 system.) 
@@ -552,7 +633,7 @@ entering the passwords twice as prompted.
 
 === Place a copy of the latest fs-9.11.x archive in your "/tmp" directory
 
-where 'x' denotes the latest patch number (>=9.11.6) in the following.
+where 'x' denotes the latest patch number (>=9.13.?) in the following.
 
 === Extract the FS source from the archive
 
@@ -566,14 +647,14 @@ where 'x' denotes the latest patch number (>=9.11.6) in the following.
 
 and enter 'y' to confirm installation.
 
-=== Make the FS itself:
+=== Make the FS
 
 IMPORTANT: Log-out of the console as root, and log-in again as prog.
 
    cd /usr2/fs
    make >& /dev/null
 
-and then
+then
 
   make
 
@@ -598,10 +679,15 @@ NOTE: Sometimes the RAID system gets stuck and using 'cat /proc/mdstat' does
       until 'cat /proc/mdstat' shows that all the RAIDs are successfully set up.
 
 The final step is to remove any DVD from the machine and to restart the machine
-using "reboot" as root or <Control>-<Alt>-<Del> whilst watching that everything
+using "reboot" as root or kbd:[Ctrl+Alt+Del] whilst watching that everything
 starts up smoothly.
 
 Your new FS machine should now be ready to be customised to your requirements
-by tailoring the control files in /usr2/control and adding suitable station
-specific software to /usr2/st.  See the files in the /usr2/fs/misc directory
+by tailoring the control files in `/usr2/control` and adding suitable station
+specific software to `/usr2/st`.  See the files in the `/usr2/fs/misc` directory
 for more information.
+
+== Post install hardening
+
+For NASA stations or those who wish to conform to the CIS recommendations, now move on
+to the <<fsl10-cis.adoc#,CIS hardening FSL10>> document.

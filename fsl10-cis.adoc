@@ -1,11 +1,18 @@
-= CIS recommendations for FSL10
+= CIS hardening FSL10
 David E Horsley
 Dec 2018
 
-== File system Configuration (§2.1-2.17)
+These notes detail adding extra security features to Field System Linux 10
+as advised by Center for Internet Security. With exception of the
+<<Partition Configuration>>, are all to be performed post-installation.
+In general, each section can be applied in any particular order or skipped entirely.
 
-During installation use the supplemental document ``CIS recommended
-partitions for FSL10.''
+All commands need to be run as `root`
+
+== Partition Configuration
+
+During installation use the supplemental document 
+<<fsl10-cis-partitions.adoc#,CIS recommended partitions for FSL10>> during the partition section.
 
 == Disable Unused file systems (§2.18-2.24)
 
@@ -72,8 +79,8 @@ Reboot, then enforce the profiles with:
 aa-enforce /etc/apparmor.d/*
 ....
 
-*TODO:* we may need some FS profiles. This looks like a good guide:
-https://medium.com/information-and-technology/so-what-is-apparmor-64d7ae211ed
+// TODO: we may need some FS profiles. This looks like a good guide:
+// https://medium.com/information-and-technology/so-what-is-apparmor-64d7ae211ed
 
 == Disable Unused services (§ 6.2 6.3 6.7)
 
@@ -455,12 +462,12 @@ Then add the following in `/etc/pam.d/common-password`
 password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
 ....
 
-*TODO:* need the NASA params here.
+// TODO: need the NASA params here.
 
 == Configure SSH (§9.3)
 
 To improve security and auditing of SSH, edit `/etc/ssh/sshd_config` so
-that the parameters macth
+that the parameters match
 
 ....
 Protocol 2
@@ -527,9 +534,11 @@ chage --maxdays 90 --mindays 7 --warndays 10 <user>
 
 == Disable System Accounts Section (§10.2)
 
+// TODO: 
+
 prog and oper are required.
 
-== Set Default umask for Users (§10.4)
+== Set Default `umask` for Users (§10.4)
 
 Edit `/etc/bash.bashrc` and any other appropriate files for other shells
 to have
