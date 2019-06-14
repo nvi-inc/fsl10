@@ -16,19 +16,18 @@ actually type.
 // TODO: what will be the first FS release which will support 64 bit?
 
 As of Field System version 9.13.?, both `i386` and `amd64` architecture are
-supported natively. However, some work may be required to port your station
-code from a 32-bit to a 64-bit OS. Some automatic tools have been developed
-for this, and can be provided upon request.
+supported natively. However, some work may be required to port your station code
+from a 32-bit to a 64-bit OS. Some automatic tools have been developed for this,
+and can be provided upon request.
 
 To install Debian 9, you can either use a DVD or USB drive. The latter is
-faster and necessary if you wish to use UEFI. Directions for creating your
+faster, and also necessary if you wish to use UEFI. Directions for creating your
 installation media can be found online. 
 
-NOTE: Don't be confused by the `amd64` name, this architecture is 
-supports modern x86-64 processors produced by both AMD and Intel.
-This includes CPU lines such as Ryzen, Epyc, Core, and Xeon.
-The naming scheme dates back to when Intel had a completing and
-incompatible 64 bit architecture.
+NOTE: Don't be confused by the `amd64` name, this architecture is supports
+modern x86-64 processors produced by both AMD and Intel. This includes CPU lines
+such as Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel
+had a completing and incompatible 64 bit architecture.
 
 You can install a DVD drive, USB device or over the network. The details of
 creating your installation media can be found in the Debian installation
@@ -43,6 +42,8 @@ equivalent use of a Debian GNU/Linux 9.x "Stretch" - Official i386/amd64
 "netinst" CD would suffice for installation at most sites with good
 connectivity.
 
+// TODO: perhaps we need some general advice on setting motherboards
+
 == First Stage Installation
 
 WARNING: This guide assumes that you have two disks installed in the machine
@@ -51,13 +52,11 @@ third disk later, you must make sure that the smallest disk of the three
 disks available is used as the first of this initial RAID pair. Use of a
 single disk (for a test install etc.) is also annotated below.
 
-// TODO: perhaps we need some general advice on setting motherboards
-
 === Insert/plug-in your installation media and reboot.
 
-Make sure that the BIOS time is set to the current Universal time, ie.
-UTC, and the BIOS is set to boot from the device -- To boot of the
-installation media you may need to bring up your motherboards boot menu
+Make sure that the motherboard time is set to the current Universal time, ie.
+UTC, and the motherboard can boot from the device -- To boot of the
+installation media you may need to bring up your motherboards boot menu,
 which is typically accessed by pressing kbd:[F12].
 
 
@@ -70,19 +69,21 @@ At the 'Installer boot menu':
 
 . _highlight_ *Install* (or "Graphical install" -- only the installer
   interface differs -- but this may not work on some video hardware)
-. press kbd:[Tab] (BIOS); or kbd:[e], kbd:[{downarrow}] three times, kbd:[End] (UEFI)
+    * BIOS: press kbd:[Tab]; or
+    * UEFI: kbd:[e], kbd:[{downarrow}] three times, then kbd:[End]
 . To the end of the displayed command, add the additional options:
 
    locale=C netcfg/disable_dhcp=true time/zone=UTC
 
-. press kbd:[Enter] (BIOS) or kbd:[F10] (UEFI)
+. press :
+    * BIOS: kbd:[Enter] (BIOS)
+    * UEFI: kbd:[F10] 
 
 // TODO: is "locale=C" required? Not having a UTF8 locale set does cause
 // problems with some modern terminal programs. Tmux for example is unhappy about this.
 
 NOTE: You may omit the `netcfg/disable_dhcp=true` if you want to use DHCP to
-configure the network settings of this machine, though this is not
-advised.
+configure the network settings of this machine, though this is not advised.
 
 The installer will now boot.
 
@@ -154,153 +155,87 @@ to press kbd:[Enter] to cancel this process.
 
 === Setup partitions 
 
-IMPORTANT: For NASA stations, or those sites that wish to use 
-CIS recommended partitions, follow the supplementary guide 
-<<fsl10-cis-partitions.adoc#,CIS recommended partitions for FSL10>>, and
-continue on to <<Configure the package manager>>
-
-======
-The example shown here is for SATA IDE / SCSI disks (larger than 2TB ie.
-using GPT partition tables - for smaller disks using DOS partition tables
-the partition numbering will be different) where the standard supported
-configuration is two removable disks typically appearing as the first
-two "SCSI" disks ie.  SCSIx (sda) / SCSIy (sdb).  Note that the exact
-SCSIx numbering is not important and may well vary from one SATA chipset
-driver to another, but should follow in the sequence the SATA ports are
-marked on the motherboard unless the drives are from multiple manufacturers.
-
-Note that for DOS partition tables, the partition numbers referred to
-below change from #2, #3 and #4 as shown to the values in parentheses ie.
-#1, #5 and #6 respectively.  GPT partition tables can be recognised by the
-presence of a small boot partition labelled 'biosgrub' as partition #1.
-======
-
-When prompted, select *Setup guided partitioning*
-
-On both primary and secondary disks as follows:
-
-// TODO: perhaps its better to have the default GPT. It seems most new
-// systems have >= 2TB disks. We may also need some instructions on getting
-// the motherboard settings right. UEFI
-
-
-==== Partition the primary disk:
-
-* Select *Guided - use entire disk* and press  kbd:[Enter].
-* Select *SCSI1 (0,0,0) (sda)* and press  kbd:[Enter].
-* Select *Separate /home partition* and press  kbd:[Enter].
-
-If you are asked about removing existing software RAID partitions
-select *Yes* and press  kbd:[Enter].
-
-==== Partition the secondary disk (if available):
-
-* Select *Guided partitioning* and press  kbd:[Enter].
-* Select *Guided - use entire disk* and press  kbd:[Enter].
-* Select *SCSI2 (0,0,0) (sdb)* and press  kbd:[Enter].
-* Select *Separate /home partition* and press  kbd:[Enter].
-
-If you are asked about removing existing software RAID partitions
-select *Yes* and press  kbd:[Enter].
-
-==== Setup the primary disk for RAID use:
-
-* Select partition #2 (or #1 for a DOS partition table) of 
-  *SCSI1(0,0,0) (sda)* and press kbd:[Enter].
-* Select *Use as:* and press  kbd:[Enter].
-* Select *physical volume for RAID* and press  kbd:[Enter].
-* Select *Done setting up the partition* and press kbd:[Enter].
-
-Repeat this procedure on partitions #3 (or #5 for a DOS partition table)
-and #4 (or #6 for a DOS partition table) of the primary disk.
-
-==== Setup the secondary disk (if available) for RAID use:
-
-* Select partition #2 (or #1 for a DOS partition table) of 
-  *SCSI2(0,0,0) (sdb)* and press kbd:[Enter].
-* Select *Use as:* and press  kbd:[Enter].
-* Select *physical volume for RAID* and press  kbd:[Enter].
-* Select *Done setting up the partition* and press kbd:[Enter].
-
-Repeat this procedure on partitions #3 (or #5 for a DOS partition table)
-and #4 (or #6 for a DOS partition table) of the secondary disk.
-
-==== Construct the three multi-disk devices
-
-NOTE: If you are doing a single disk only install, you should select
-only one partition for each MD device below - a secondary disk can then
-be added later using the instructions for recovering from disk failure.
-
-* Select *Configure software RAID* and press  kbd:[Enter].
-* Select *Yes* and press  kbd:[Enter]  to write the changes to the disks.
-
+NOTE:
 ====
-If you just wanted to initialise a disk or disks so they can be added to
-an already existing RAID array eg. the third FS backup disk, you can now
-exit the installer at this point - you need not create any MD devices.
-Simply select "Finish" and press kbd:[Enter], next kbd:[Go Back] and press
-kbd:[Enter],  scroll down to select "Abort the Installation" and press
-kbd:[Enter],  select kbd:[Yes] to confirm and press kbd:[enter].
+These notes assume you have disks larger than 2TB so that GPT will be the partition
+format selected by the installer. They also assume you are using BIOS (also called
+"legacy") boot method for your system for both installation and the final system. This
+setting is found in your motherboard menu. If you wish to use UEFI boot, make sure you
+use boot of your USB drive with UEFI and follow the alternative steps where given.
 ====
 
-* Select *Create MD device* and press  kbd:[Enter].
-* Select *RAID1* and press  kbd:[Enter].
-* Confirm *2* as number of active devices by pressing  kbd:[Enter].
-* Confirm *0* as number of spare devices by pressing  kbd:[Enter].
-* Choose */dev/sda2* (or */dev/sda1*) by pressing  kbd:[Space]
-   and */dev/sdb2* (or */dev/sdb1*) likewise (if available),
-* Then press  kbd:[Tab]  to select *Continue* and press kbd:[Enter].
+When prompted, select *Manual*
 
----
+. Select first disk, something like `SCSI1 (0,0,0) (sda) - 4 TB ATA SATA HARDDISK`, and
+preset kbd:[Enter]
 
-* Select *Create MD device* and press  kbd:[Enter].
-* Select *RAID1* and press  kbd:[Enter].
-* Confirm *2* as number of active devices by pressing  kbd:[Enter].
-* Confirm *0* as number of spare devices by pressing  kbd:[Enter].
-* Choose */dev/sda3* (or */dev/sda5*) by pressing  kbd:[Space]
-   and */dev/sdb3* (or */dev/sdb5*) likewise (if available),
-* Then press  kbd:[Tab]  to select *Continue* and press  kbd:[Enter].
+. Installer may warn: *You have selected an entire device to partition…*. Select *Yes*
 
----
+. Select the *FREE SPACE* under the first device
 
-* Select *Create MD device* and press  kbd:[Enter].
-* Select *RAID1* and press  kbd:[Enter].
-* Confirm *2* as number of active devices by pressing  kbd:[Enter].
-* Confirm *0* as number of spare devices by pressing  kbd:[Enter].
-* Choose */dev/sda4* (or */dev/sda6*) by pressing  kbd:[Space]
-  and */dev/sdb4* (or */dev/sdb6*) likewise (if available),
-* Then press  kbd:[Tab]  to select *Continue* and press  kbd:[Enter].
+. Select *Create a new partition*
 
-Select *Finish* and press  kbd:[Enter].
+. Enter *1MB* in the size, then select *Beginning* of the disk.
+** UEFI:  Enter *1GB* in the size, then select *Beginning* of the disk.
 
-==== Assign the multi-disk devices to the requisite filesystems
+. Select *Use as* then select *Reserved BIOS boot area*
+** UEFI: Select *Use as* then select *EFI System Partition (ESP)*
 
-* Select partition #1 of RAID1 device #0 and press  kbd:[Enter].
-** Select *Use as:* and press  kbd:[Enter].
-***  Select *Ext4 journaling file system* and press  kbd:[Enter].
-**** If *Format the partition:* appears, select it and press  kbd:[Enter],
-     such that it reads *yes,format it*.
-*** Select *Mount point:* and press  kbd:[Enter].
-**** Select */ - the root file system* and press  kbd:[Enter].
-*** Select *Done setting up the partition* and press kbd:[Enter].
+. Then *Done setting up the partition*.
 
-* Select partition #1 of RAID1 device #1 and press  kbd:[Enter].
-** Select *Use as:* and press  kbd:[Enter].
-*** Select *swap area* and press  kbd:[Enter].
-** Select *Done setting up the partition* and press kbd:[Enter].
+. Next select the *FREE SPACE* and *Create a new partition* again.
 
-* Select partition #1 of RAID1 device #2 and press  kbd:[Enter].
-** Select *Use as:* and press  kbd:[Enter].
-*** Select *Ext4 journaling file system* and press  kbd:[Enter].
-** If *Format the partition:* appears, select it and press  kbd:[Enter],
-   such that it reads *yes,format it*.
-** Select *Mount point:* and press  kbd:[Enter].
-*** Select *Enter manually* and press  kbd:[Enter].
-*** Type in */usr2* and press  kbd:[Enter].
-** Select *Done setting up the partition* and press kbd:[Enter].
+. This time choose the whole amount of free space (the default).
 
-* Select *Finish partitioning and write changes to disk* and press  kbd:[Enter].
-Select *Yes* and press  kbd:[Enter]  to write the changes to the disks.
+. Select *Use as: physical volume for RAID*, then *Done setting up the partition*
+
+. Apply the same to the second disk. 
+
+. Select *Configure software RAID*, select *Yes* to write the changes
+  to the disks.
+
+. Select *Create MD device*, choose *RAID 1* and enter *2* as number
+of devices and *0* as number of spare.
+
+. Select the two raid partitions we just created, (these should be sda2 and sdb2)
+
+. Select *Finish*.
+
+. Back in partitioning, Select the space _under_ *RAID device #0*
+
+. Select *use as* then select *Physical volume for LVM* then *Done setting up the partition*
+
+. Now choose the 3rd option of the partition manager *Configure the Logical Volume Manager*.
+
+. *Create volume group* enter *vg0* select the raid device *md0*.
+
+. For each item in the following table of the following run *Create logical volume*, select *vg0* as
+the volume group and assign
++
+.Logical volumes
+|=======================================
+| Mount point    | LV label | Size
+
+| /              | root     | 50 GB
+| /boot          | boot     | 1 GB
+| swap           | swap     | 4 GB
+| /tmp           | tmp      | 4 GB
+| /var           | var\*    | 8 GB
+| /var/log       | log\*    | 4 GB
+| /var/log/audit | audit\*  | 500 MB
+| /home          | home     | 4 GB
+| /usr2          | usr2     | remaining space *less 50 GB*
+|=======================================
+
+. Then  *for each logical volume* except swap,:
+    . Select the "free space" and press kbd:[Enter]
+    . select *Use as ext4* and select the mount point as appropriate.
+
+. Back in the partition screen, select *Finish* and write changes to the disks. For big disks, it may take some time to create the ext4 file systems.
+
+. At *Install GRUB to Master Boot Record* select *yes* then select */dev/sda*
+** UEFI: you will not be presented with this option
+
 
 The Debian base system is now installed from the DVD in the drive.
 
