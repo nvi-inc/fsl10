@@ -1,6 +1,7 @@
 = Installing FS Linux 10: An A-Z Installation Guide.
 J.F.H. Quick and D.E. Horsley 
-Draft, Aug 2019
+Draft Aug 2019
+
 :sectnums:
 :experimental:
 :downarrow: &darr;
