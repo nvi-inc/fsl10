@@ -23,8 +23,8 @@ To install Debian 9, you can either use a DVD or USB drive. The latter is
 faster, and also necessary if you wish to use UEFI. Directions for creating your
 installation media can be found online. 
 
-NOTE: Don't be confused by the `amd64` name, this architecture is supports
-modern x86-64 processors produced by both AMD and Intel. This includes CPU lines
+NOTE: Don't be confused by the `amd64` name, this architecture is supports both
+AMD and Intel manufactured x86-64 processors. This includes CPU lines
 such as Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel
 had a completing and incompatible 64 bit architecture.
 
