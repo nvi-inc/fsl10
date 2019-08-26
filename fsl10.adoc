@@ -220,7 +220,7 @@ of devices and *0* as number of spare.
 . *Create volume group* enter *vg0* select the raid device *md0*.
 
 . For each item in the following table of the following run *Create logical volume*, select *vg0* as
-the volume group and assign
+the volume group and assign. Those marked with "*" are optional for non-NASA stations
 +
 .Logical volumes
 |=======================================
@@ -230,9 +230,9 @@ the volume group and assign
 | /boot          | boot     | 1 GB
 | swap           | swap     | 4 GB
 | /tmp           | tmp      | 4 GB
-| /var           | var\*    | 8 GB
-| /var/log       | log\*    | 4 GB
-| /var/log/audit | audit\*  | 500 MB
+| /var           | var*    | 8 GB
+| /var/log       | log*    | 4 GB
+| /var/log/audit | audit*  | 500 MB
 | /home          | home     | 4 GB
 | /usr2          | usr2     | remaining space *less 50 GB*
 |=======================================
