@@ -1,6 +1,6 @@
 = Installing FS Linux 10: An A-Z Installation Guide.
 J.F.H. Quick and D.E. Horsley 
-Feb 2019
+Draft, Aug 2019
 :sectnums:
 :experimental:
 :downarrow: &darr;
@@ -13,9 +13,7 @@ actually type.
 
 == Choosing architecture and creating installation media
 
-// TODO: what will be the first FS release which will support 64 bit?
-
-As of Field System version 9.13.?, both `i386` and `amd64` architecture are
+As of Field System version 10.0, both `i386` and `amd64` architecture are
 supported natively. However, some work may be required to port your station code
 from a 32-bit to a 64-bit OS. Some automatic tools have been developed for this,
 and can be provided upon request.
@@ -42,7 +40,24 @@ equivalent use of a Debian GNU/Linux 9.x "Stretch" - Official i386/amd64
 "netinst" CD would suffice for installation at most sites with good
 connectivity.
 
+== Motherboard setup
+
 // TODO: perhaps we need some general advice on setting motherboards
+//
+NOTE: This is somehting we may change before final release of FSL10. Legacy mode/BIOS emulation might be easier,
+especially with disk rotations.
+
+Modern motherboards offer two forms of booting: native UEFI or BIOS emulation ("Legacy"). There is no
+particular advantage to UEFI boot other than the ability to enable secure boot, which is not supported by
+Debian at the time of writing anyway. Either are supported by this installation guide, and you will be
+given alternatives when the instructions.
+
+Decide which boot mode you wan to use and select it through the motherboard setup menu (typically by
+pressing kbd:[DEL] during POST.
+
+Also make sure that the motherboard time is set to the current Universal time, ie.
+UTC, and the motherboard can boot from the installation media.
+
 
 == First Stage Installation
 
@@ -54,20 +69,15 @@ single disk (for a test install etc.) is also annotated below.
 
 === Insert/plug-in your installation media and reboot.
 
-Make sure that the motherboard time is set to the current Universal time, ie.
-UTC, and the motherboard can boot from the device -- To boot of the
-installation media you may need to bring up your motherboards boot menu,
-which is typically accessed by pressing kbd:[F12].
+To boot of the installation media you may need to bring up your motherboards boot menu, which is typically
+accessed by pressing kbd:[F12].
 
 
 === Set boot options and boot installer
 
-// FIXME: if booting UEFI, this is a little different. Need instructions here.
-// should we just try to avoid UEFI altogether?
-
 At the 'Installer boot menu':
 
-. _highlight_ *Install* (or "Graphical install" -- only the installer
+. _Highlight_ `Install` (or `Graphical install` -- only the installer
   interface differs -- but this may not work on some video hardware)
     * BIOS: press kbd:[Tab]; or
     * UEFI: kbd:[e], kbd:[{downarrow}] three times, then kbd:[End]
@@ -75,12 +85,12 @@ At the 'Installer boot menu':
 
    locale=C netcfg/disable_dhcp=true time/zone=UTC
 
-. press :
+. Press:
     * BIOS: kbd:[Enter] (BIOS)
     * UEFI: kbd:[F10] 
 
-// TODO: is "locale=C" required? Not having a UTF8 locale set does cause
-// problems with some modern terminal programs. Tmux for example is unhappy about this.
+// TODO: "locale=C" is begining to be a problem. Not having a UTF-8 locale set does cause
+// some problems. Tmux for example is unhappy about this.
 
 NOTE: You may omit the `netcfg/disable_dhcp=true` if you want to use DHCP to
 configure the network settings of this machine, though this is not advised.
@@ -156,13 +166,13 @@ to press kbd:[Enter] to cancel this process.
 === Setup partitions 
 
 NOTE:
-====
+===
 These notes assume you have disks larger than 2TB so that GPT will be the partition
 format selected by the installer. They also assume you are using BIOS (also called
 "legacy") boot method for your system for both installation and the final system. This
 setting is found in your motherboard menu. If you wish to use UEFI boot, make sure you
 use boot of your USB drive with UEFI and follow the alternative steps where given.
-====
+===
 
 When prompted, select *Manual*
 
