@@ -1,4 +1,4 @@
-= Installing FS Linux 10: An A-Z Installation Guide.
+= FS Linux 10 Installation Guide
 J.F.H. Quick and D.E. Horsley 
 Draft Aug 2019
 
@@ -44,9 +44,8 @@ connectivity.
 == Motherboard setup
 
 // TODO: perhaps we need some general advice on setting motherboards
-//
-NOTE: This is somehting we may change before final release of FSL10. Legacy mode/BIOS emulation might be easier,
-especially with disk rotations.
+NOTE: This is somehting we may change before final release of FSL10. Legacy mode/BIOS emulation
+might be easier, especially with disk rotations.
 
 Modern motherboards offer two forms of booting: native UEFI or BIOS emulation ("Legacy"). There is no
 particular advantage to UEFI boot other than the ability to enable secure boot, which is not supported by
@@ -87,7 +86,7 @@ At the 'Installer boot menu':
    locale=C netcfg/disable_dhcp=true time/zone=UTC
 
 . Press:
-    * BIOS: kbd:[Enter] (BIOS)
+    * BIOS: kbd:[Enter]
     * UEFI: kbd:[F10] 
 
 // TODO: "locale=C" is begining to be a problem. Not having a UTF-8 locale set does cause
@@ -108,8 +107,7 @@ another location)
 
 === Select a keyboard layout
 
-Find your keyboard on the keymap list and press  kbd:[Enter].
-(the most common one is "American English")
+Find your keyboard on the keymap list and press  kbd:[Enter]. (The most common one is "American English")
 
 The installation media is now scanned and additional installer components loaded.
 
@@ -128,14 +126,14 @@ Select the interface you require (usually 'eth0') and press  kbd:[Enter].
 
 ====
 Unless you are using DHCP (which is not advisable) you will be prompted to:
-Type in the required static IP address in the form xxx.xxx.xxx.xxx (where
+Type in the required static IP address in the form `xxx.xxx.xxx.xxx` (where
 xxx is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
-Type in the required netmask in the form 255.yyy.yyy.yyy (where yyy is
+Type in the required netmask in the form `255.yyy.yyy.yyy` (where yyy is
 typically 0, 64, 128, 192 or 255) and press  kbd:[Enter].
-Type in the required gateway IP address in the form xxx.xxx.xxx.xxx (where
+Type in the required gateway IP address in the form `xxx.xxx.xxx.xxx` (where
 xxx is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
 Type in the required nameserver IP addresses, space separated, in the form
-xxx.xxx.xxx.xxx (where xxx is any integer from 1 - 254 inclusive) and
+`xxx.xxx.xxx.xxx` (where xxx is any integer from 1 - 254 inclusive) and
 press  kbd:[Enter].
 
 Alternatively, if you are only using the installer to initialize new disks,
@@ -166,14 +164,8 @@ to press kbd:[Enter] to cancel this process.
 
 === Setup partitions 
 
-NOTE:
-===
-These notes assume you have disks larger than 2TB so that GPT will be the partition
-format selected by the installer. They also assume you are using BIOS (also called
-"legacy") boot method for your system for both installation and the final system. This
-setting is found in your motherboard menu. If you wish to use UEFI boot, make sure you
-use boot of your USB drive with UEFI and follow the alternative steps where given.
-===
+NOTE: These notes assume you have disks larger than 2TB so that GPT will be the partition
+format selected by the installer.
 
 When prompted, select *Manual*
 
@@ -298,8 +290,6 @@ Enter any necessary HTTP: proxy information (usually left blank.)
 
 Select *No* and press kbd:[Enter]  
 
-
-
 === Choose your packages
 
 Select *SSH server* By pressing kbd:[Space] on it (unless you don't want it).  
@@ -346,7 +336,7 @@ NOTE: Previous versions of Debian ran X11 on virtual console 7. As of
 Debian 9, the desktop environment consoles are virtual console 1 and 2. 
 
 
-TIP: If the login screen is painfully slow, you should disable Wayland in
+TIP: If the login screen is painfully slow, try disabling Wayland in
 GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
 
 === Remove the dummy "Desktop User"
@@ -370,7 +360,7 @@ to use a proxy `proxy.some.where` at port 8080 for example.
 
 === Edit /etc/apt/sources.list 
 
-using "vi" and comment out all 'cdrom' entries
+Using your favourite text editor, eg `vi`, and comment out all 'cdrom' entries
 (unless you don't have a decent Internet connection and need to use DVDs,
 whereupon the dialogue presented below may differ) and check you have the
 equivalent of the following entries towards the top of the file, adding
