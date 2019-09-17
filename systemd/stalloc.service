@@ -1,0 +1,10 @@
+[Unit]
+Description=Allocated station shared memory
+
+[Service]
+Type=oneshot
+ExecStart=/usr2/st/bin/stalloc
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

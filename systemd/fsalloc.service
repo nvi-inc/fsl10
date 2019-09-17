@@ -1,0 +1,10 @@
+[Unit]
+Description=Allocate Field System shared memory
+
+[Service]
+Type=oneshot
+ExecStart=/usr2/fs/bin/fsalloc
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
