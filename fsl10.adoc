@@ -210,7 +210,7 @@ of devices and *0* as number of spare.
 
 . Now choose the 3rd option of the partition manager *Configure the Logical Volume Manager*.
 
-. *Create volume group* enter *vg0* select the raid device *md0*.
+. *Create volume group* enter *vg0*, then select the raid device *md0* by pressing kbd:[Space].
 
 . For each item in the following table of the following run *Create logical volume*, select *vg0* as
 the volume group and assign. Those marked with "*" are optional for non-NASA stations
