@@ -178,13 +178,15 @@ preset kbd:[Enter]
 
 . Select *Create a new partition*
 
-. Enter *1MB* in the size, then select *Beginning* of the disk.
+.  Then for
+** BIOS: Enter *1MB* in the size, then select *Beginning* of the disk.
 ** UEFI:  Enter *1GB* in the size, then select *Beginning* of the disk.
 
-. Select *Use as* then select *Reserved BIOS boot area*
+. Then for
+** BIOS: Select *Use as* then select *Reserved BIOS boot area*
 ** UEFI: Select *Use as* then select *EFI System Partition (ESP)*
 
-. Then *Done setting up the partition*.
+. Now press *Done setting up the partition*.
 
 . Next select the *FREE SPACE* and *Create a new partition* again.
 
@@ -192,7 +194,7 @@ preset kbd:[Enter]
 
 . Select *Use as: physical volume for RAID*, then *Done setting up the partition*
 
-. Apply the same to the second disk. 
+. *Go to step 1 and Apply the same procedure to the second disk.*
 
 . Select *Configure software RAID*, select *Yes* to write the changes
   to the disks.
@@ -204,7 +206,7 @@ of devices and *0* as number of spare.
 
 . Select *Finish*.
 
-. Back in partitioning, Select the space _under_ *RAID device #0*
+. Back in partitioning, Select the space _under_ *RAID1 device #0* and press kbd:[Enter]
 
 . Select *use as* then select *Physical volume for LVM* then *Done setting up the partition*
 
@@ -212,8 +214,8 @@ of devices and *0* as number of spare.
 
 . *Create volume group* enter *vg0*, then select the raid device *md0* by pressing kbd:[Space].
 
-. For each item in the following table of the following run *Create logical volume*, select *vg0* as
-the volume group and assign. Those marked with "*" are optional for non-NASA stations
+. For each item in the following table run *Create logical volume*, select *vg0* as
+the volume group and assign the corresonding label. Those marked with "*" are optional for non-NASA stations
 +
 .Logical volumes
 |=======================================
@@ -227,14 +229,21 @@ the volume group and assign. Those marked with "*" are optional for non-NASA sta
 | /var/log       | log*    | 4 GB
 | /var/log/audit | audit*  | 500 MB
 | /home          | home     | 4 GB
-| /usr2          | usr2     | remaining space *less 50 GB*
+| /usr2          | usr2     | remaining disk space *less about 50 GB*
 |=======================================
 
-. Then  *for each logical volume* except swap,:
-    . Select the "free space" and press kbd:[Enter]
-    . select *Use as ext4* and select the mount point as appropriate.
+. In the LVM configuration window, select *Finish*
 
-. Back in the partition screen, select *Finish* and write changes to the disks. For big disks, it may take some time to create the ext4 file systems.
+. Then  for each logical volume in the table except swap,:
+    . Select the "free space" and press kbd:[Enter]
+    . Select *Use as* and press kbd:[Enter] then select *Ext4 journaling file system* 
+    . Select *Mount point*, press kbd:[Enter], then select the appropriate mount point from the list or 
+      use *Enter manually* if not there.
+    . Select *Done setting up this partition*
+
+. For the swap logical volume, select *Use as* then select *swap area*
+
+. Back in the partition screen, select *Finish partitioning and write changes to the disks*. For big disks, it may take some time to create the ext4 file systems.
 
 . At *Install GRUB to Master Boot Record* select *yes* then select */dev/sda*
 ** UEFI: you will not be presented with this option
