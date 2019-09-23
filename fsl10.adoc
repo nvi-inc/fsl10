@@ -169,10 +169,12 @@ format selected by the installer.
 
 When prompted, select *Manual*
 
-. Select first disk, something like `SCSI1 (0,0,0) (sda) - 4 TB ATA SATA HARDDISK`, and
-preset kbd:[Enter]
+==== Setup the first disk
 
-. Installer may warn: *You have selected an entire device to partition…*. Select *Yes*
+. If needed create a new partition table by:
+.. Select first disk, something like `SCSI1 (0,0,0) (sda) - 4 TB ATA SATA HARDDISK`, and
+    preset kbd:[Enter]
+.. Installer may warn: *You have selected an entire device to partition…*. Select *Yes*
 
 . Select the *FREE SPACE* under the first device
 
@@ -194,7 +196,11 @@ preset kbd:[Enter]
 
 . Select *Use as: physical volume for RAID*, then *Done setting up the partition*
 
-. *Go to step 1 and Apply the same procedure to the second disk.*
+==== Setup the second disk
+
+Repeat the process for the second disk
+
+==== Setup RAID
 
 . Select *Configure software RAID*, select *Yes* to write the changes
   to the disks.
@@ -210,12 +216,19 @@ of devices and *0* as number of spare.
 
 . Select *use as* then select *Physical volume for LVM* then *Done setting up the partition*
 
-. Now choose the 3rd option of the partition manager *Configure the Logical Volume Manager*.
+==== Setup Logical Volume Manager (LVM)
 
-. *Create volume group* enter *vg0*, then select the raid device *md0* by pressing kbd:[Space].
+. Now choose the 3rd option of the partition manager *Configure the Logical
+Volume Manager* and select "yes" when prompted to write the changes to disk
 
-. For each item in the following table run *Create logical volume*, select *vg0* as
-the volume group and assign the corresonding label. Those marked with "*" are optional for non-NASA stations
+. Choose *Create volume group* 
+. Enter a name appropriate for the machine and group, eg *gs-fs1*, and press kbd:[Enter]
+. Select the raid device *md0* by pressing kbd:[Space], then press kbd:[Enter]
+to continue
+
+. For each item in the following table run *Create logical volume*, select the
+your volume group and assign the corresonding label. Those marked with "*" are
+optional for non-NASA stations
 +
 .Logical volumes
 |=======================================
@@ -247,21 +260,24 @@ the volume group and assign the corresonding label. Those marked with "*" are op
 the disks*. For big disks, it may take some time to create the ext4 file
 systems.
 
-
 === Configure the package manager
 
+If you start from a "netinst" CD image, the installer now
+assumes you will install only from the network, and jumps straight to
+the "Choose your country..." part of the dialogue as detailed below.
 
-// TODO: too many NOTES! 
+Select the fastest Debian mirror from those available.
 
+TIP: The new `deb.debian.org` mirror is a good choice for most
+sites as it uses DNS to find a local mirror.
+
+Enter any necessary HTTP: proxy information (usually left blank.)
+
+If you are using DVD installer you will be prompted to scan additional DVDs.
 Scanning the additional DVDs (and obtaining copies of them in the
 first place) is entirely optional, and is only useful if you don't have a
 reliable network connection to a suitable Debian mirror and hence would
 prefer not to download packages you get from the DVD.
-
-If you start from a "netinst" CD image the installer now
-assumes you will install only from the network, and jumps straight to
-the "Choose your country..." part of the dialogue as detailed below.
-
 
 NOTE: If you do want to use a mirror in future, it is better not to scan any
 DVDs at this stage and to scan them later during Stage 2 using 'apt-cdrom'.
@@ -286,29 +302,20 @@ Choose your country from the list if available and press  kbd:[Enter].
 (If your country is not available choose the country nearest to you in a
 network connectivity sense.)
 
-Select the fastest Debian mirror from those available.
-
-TIP: The new `deb.debian.org` mirror is a good choice for most
-sites as it uses DNS to find a local mirror.
-
-Enter any necessary HTTP: proxy information (usually left blank.)
-
 === Do not participate in popularity-contest
 
-When prompted to join the popularity-contest,
-select *No* and press kbd:[Enter]  
+When prompted to join the popularity-contest, select *No* and press kbd:[Enter]  
 
 === Choose your packages
 
-When prompted to choose packages, 
-select *SSH server* By pressing kbd:[Space] on it (unless you don't want it).  
+When prompted to choose packages, select *SSH server* by highlighting it with
+the arrow keys and pressing kbd:[Space] on it (unless you don't want it). 
 
 TIP: If you have a small disks and are worried about space, then you can
 also press kbd:[Space] on "Desktop Environment" to unselect it (which may
 then change the dialogue presented below).
 
-Finally press kbd:[Tab] to select *Continue* and then
-kbd:[Enter] to install the standard system.
+Finally press, kbd:[Enter] to install the standard system.
 
 The Debian standard system is now installed from the installation media plus any
 updates from the network mirror and/or security.debian.org site if they can be
@@ -316,9 +323,8 @@ reached.
 
 This can take a while, up to one and half hours or more.
 
-=== Install the GRUB bootloader
 
-// FIXME: need a comment about UEFI here
+=== Install the GRUB bootloader
 
 . At *Install GRUB to Master Boot Record* select *yes* then select */dev/sda*
 ** UEFI: you will not be presented with this option; GRUB will automatically be
@@ -337,7 +343,7 @@ anything other than the hard drive, in the BIOS just in case someone
 leaves something nasty in the machine's removable drives by mistake.
 
 
-== Second Stage Installation:
+== Second Stage Installation
 
 You can now boot to your new OS.
 
@@ -398,7 +404,9 @@ security.debian.org mirror in the middle of the file.
 IMPORTANT: you _MUST_ use "stretch" and _NOT_ "stable" for the distribution in
 all these entries (but CD/DVD entries might use "unstable".)
 
-=== Next tell APT to update its internal source list of packages using
+=== Update APT's list of packages
+
+Next tell APT to update its internal source list of packages using
 
 TIP: Recent versions of Debian have the `apt` program, which gives a more
      user-friendly interface to the package manager than `apt-get`
@@ -434,24 +442,27 @@ may need to use 'eject /dev/cdrom' from another virtual console to do this)
 
 === Download the FS Linux 10 "dpkg" package selections
 
-As follows:
-
 // TODO: this needs to be updated
+
+As follows:
 
     ftp ftp.hartrao.ac.za
     user: ftp
     password: your@email.address
     cd /pub/fs9x
-    get fsl9.selections
+    get fsl10_amd64.selections OR get fsl10_686.selections
     quit
 
 === Feed the package selections into "dpkg"
+
+// TODO: these selections can be shrunk
+// Also need to add some things
 
 using the commands
 
    apt install dselect
    dselect update
-   dpkg --set-selections < fsl10.selections
+   dpkg --set-selections < fsl10_amd64.selections
 
 
 === Start the additional package installation
@@ -470,23 +481,17 @@ access and the exact revision of DVDs used):
    
 Installation runs to completion.
 
-=== Wait for the RAID1 disk mirroring to set up
+=== Install GRUB secondary disk (if available)
 
-Watch its progress with:
+==== EFI
 
-   cat /proc/mdstat
+Run the command
 
-until none of the three arrays shows a recovery in progress.  This can take
-a significant amount of time, particularly with large disks.  For example
-my 80GB test disks took over half an hour.
+    cp /dev/sda1 /dev/sdb1
 
-Technically, you only have to wait for the /dev/md0 RAID to complete its
-recovery before proceeding to the next step, the other two RAIDs only need
-to complete their recovery before you reboot in stage 3 below.
+=== BIOS
 
-=== Install "GRUB" secondary disk (if available)
-
-// TODO: this needs to mention UEFI grub too.
+// TODO: is this still right?
 
 Install GRUB to the Master Boot Record by running:
 
@@ -583,7 +588,9 @@ system.)
 Note that the FSADAPT script can be re-run at a later date should you need to
 change the adaptations.
 
-=== Now set proper passwords for the 'oper' and 'prog' accounts:
+=== Set Passwords
+
+Set passwords for the 'oper' and 'prog' accounts with:
 
    passwd oper
    passwd prog
@@ -591,7 +598,9 @@ change the adaptations.
 entering the passwords twice as prompted.
 
 
-=== Place a copy of the latest fs-9.11.x archive in your "/tmp" directory
+=== Download FS archive 
+
+Place a copy of the latest fs-9.11.x archive in your "/tmp" directory
 
 where 'x' denotes the latest patch number (>=9.13.?) in the following.
 
@@ -620,23 +629,13 @@ then
 
 to confirm that everything compiled correctly.
 
-=== Wait for the RAID1 disk mirroring to set up, watching its progress with:
+=== Wait for the RAID1 disk mirroring to set up
+
+watching its progress with:
 
    cat /proc/mdstat
 
 until none of the three arrays shows a recovery in progress.
-
-NOTE: Sometimes the RAID system gets stuck and using 'cat /proc/mdstat' does
-      not show any active re-syncs but only a RAID set with "resync=PENDING".
-      In this case, you will need to re-trigger the RAID set up process as root
-      by 'failing' the secondary disk partition in the appropriate RAID pair,
-      'removing' it and 'adding' it back as shown in the following example:
-      +
-         mdadm /dev/md1 -f /dev/sdb3
-         mdadm /dev/md1 -r /dev/sdb3
-         mdadm /dev/md1 -a /dev/sdb3
-      +
-      until 'cat /proc/mdstat' shows that all the RAIDs are successfully set up.
 
 The final step is to remove any DVD from the machine and to restart the machine
 using "reboot" as root or kbd:[Ctrl+Alt+Del] whilst watching that everything
@@ -647,7 +646,10 @@ by tailoring the control files in `/usr2/control` and adding suitable station
 specific software to `/usr2/st`.  See the files in the `/usr2/fs/misc` directory
 for more information.
 
+
 == Post install hardening
+
+=== Additional secruity and CIS Benchmarks
 
 For NASA stations or those who wish to conform to the CIS recommendations, now move on
 to the <<fsl10-cis.adoc#,CIS hardening FSL10>> document.
