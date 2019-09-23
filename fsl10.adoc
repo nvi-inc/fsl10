@@ -243,27 +243,24 @@ the volume group and assign the corresonding label. Those marked with "*" are op
 
 . For the swap logical volume, select *Use as* then select *swap area*
 
-. Back in the partition screen, select *Finish partitioning and write changes to the disks*. For big disks, it may take some time to create the ext4 file systems.
+. Back in the partition screen, select *Finish partitioning and write changes to
+the disks*. For big disks, it may take some time to create the ext4 file
+systems.
 
-. At *Install GRUB to Master Boot Record* select *yes* then select */dev/sda*
-** UEFI: you will not be presented with this option
-
-
-The Debian base system is now installed from the DVD in the drive.
 
 === Configure the package manager
 
 
 // TODO: too many NOTES! 
 
-NOTE: Scanning the additional DVDs (and obtaining copies of them in the
-   first place) is entirely optional, and is only useful if you don't have a
-   reliable network connection to a suitable Debian mirror and hence would
-   prefer not to download packages you get from the DVD.
-   + 
-   If you start from a "netinst" CD image the installer now
-   assumes you will install only from the network, and jumps straight to
-   the "Choose your country..." part of the dialogue as detailed below.
+Scanning the additional DVDs (and obtaining copies of them in the
+first place) is entirely optional, and is only useful if you don't have a
+reliable network connection to a suitable Debian mirror and hence would
+prefer not to download packages you get from the DVD.
+
+If you start from a "netinst" CD image the installer now
+assumes you will install only from the network, and jumps straight to
+the "Choose your country..." part of the dialogue as detailed below.
 
 
 NOTE: If you do want to use a mirror in future, it is better not to scan any
@@ -288,6 +285,7 @@ have inadequate Internet access - but then you must scan all DVDs.)
 Choose your country from the list if available and press  kbd:[Enter].
 (If your country is not available choose the country nearest to you in a
 network connectivity sense.)
+
 Select the fastest Debian mirror from those available.
 
 TIP: The new `deb.debian.org` mirror is a good choice for most
@@ -297,29 +295,38 @@ Enter any necessary HTTP: proxy information (usually left blank.)
 
 === Do not participate in popularity-contest
 
-Select *No* and press kbd:[Enter]  
+When prompted to join the popularity-contest,
+select *No* and press kbd:[Enter]  
 
 === Choose your packages
 
-Select *SSH server* By pressing kbd:[Space] on it (unless you don't want it).  
+When prompted to choose packages, 
+select *SSH server* By pressing kbd:[Space] on it (unless you don't want it).  
 
 TIP: If you have a small disks and are worried about space, then you can
 also press kbd:[Space] on "Desktop Environment" to unselect it (which may
 then change the dialogue presented below).
 
 Finally press kbd:[Tab] to select *Continue* and then
-kbd:[Enter]  to install the standard system.
+kbd:[Enter] to install the standard system.
 
 The Debian standard system is now installed from the installation media plus any
 updates from the network mirror and/or security.debian.org site if they can be
-reached. This can take a while, up to one and half hours or more.
+reached. 
+
+This can take a while, up to one and half hours or more.
 
 === Install the GRUB bootloader
 
 // FIXME: need a comment about UEFI here
 
+. At *Install GRUB to Master Boot Record* select *yes* then select */dev/sda*
+** UEFI: you will not be presented with this option; GRUB will automatically be
+   installed
+
 When prompted, press kbd:[Enter] to install to the master boot record of the
 primary disk.
+
 
 === Remove installation media 
 The DVD from the DVD-ROM drive (it should be auto-ejected), or unplug the
@@ -344,11 +351,10 @@ earlier.
 NOTE: Previous versions of Debian ran X11 on virtual console 7. As of
 Debian 9, the desktop environment consoles are virtual console 1 and 2. 
 
-
 TIP: If the login screen is painfully slow, try disabling Wayland in
 GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
 
-=== Remove the dummy "Desktop User"
+=== Remove the dummy "Desktop User" (optional)
 
 Unless you want another account that that is set up to use the default
 desktop environment, delete "desktop" with:
@@ -375,14 +381,14 @@ whereupon the dialogue presented below may differ) and check you have the
 equivalent of the following entries towards the top of the file, adding
 in 'contrib' and/or 'non-free' as needed:
 
-   deb http://ftp.us.debian.org/debian/ stretch main contrib non-free
-   deb-src http://ftp.us.debian.org/debian/ stretch main contrib non-free
+   deb http://deb.debian.org/debian/ stretch main contrib non-free
+   deb-src http://deb.debian.org/debian/ stretch main contrib non-free
 
 and likewise the equivalent of the following entries towards the bottom of
 the file, again adding in 'contrib' and/or non-free as needed:
 
-   deb http://ftp.us.debian.org/debian/ stretch-updates main contrib non-free
-   deb-src http://ftp.us.debian.org/debian/ stretch-updates main contrib non-free
+   deb http://deb.debian.org/debian/ stretch-updates main contrib non-free
+   deb-src http://deb.debian.org/debian/ stretch-updates main contrib non-free
 
 (where you can use any suitable mirror instead of "ftp.us.debian.org")
 
@@ -404,7 +410,11 @@ NOTE: It is also possible to add additional DVDs at this stage using the
 
 === Install the latest Linux kernel and matching headers for your architecture
 
-(run 'cat /proc/version' to see what flavour you require):
+// TODO: is this needed anymore?
+
+Run 'cat /proc/version' to see what flavour you require.
+
+then run
 
    apt install linux-image-686-pae linux-headers-686-pae
 
@@ -422,14 +432,18 @@ pressing kbd:[Enter] to confirm the installation of +- 12 new packages.
 NOTE: that if you are using DVDs, and are prompted to insert another DVD, you
 may need to use 'eject /dev/cdrom' from another virtual console to do this)
 
-=== Download the FS Linux 10 "dpkg" package selections as follows:
+=== Download the FS Linux 10 "dpkg" package selections
 
-   ftp ftp.hartrao.ac.za kbd:[CR]
-   user: ftp kbd:[CR]
-   password: kbd:[ your@email.address ] kbd:[CR]
-         cd /pub/fs9x kbd:[CR]
-   get fsl9.selections kbd:[CR]
-   quit kbd:[CR]
+As follows:
+
+// TODO: this needs to be updated
+
+    ftp ftp.hartrao.ac.za
+    user: ftp
+    password: your@email.address
+    cd /pub/fs9x
+    get fsl9.selections
+    quit
 
 === Feed the package selections into "dpkg"
 
@@ -441,7 +455,8 @@ using the commands
 
 
 === Start the additional package installation
-run using the command
+
+Run using the command
 
    apt-get dselect-upgrade
 
