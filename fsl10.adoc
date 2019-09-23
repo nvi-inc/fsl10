@@ -341,6 +341,9 @@ leaves something nasty in the machine's removable drives by mistake.
 
 You can now boot to your new OS.
 
+TIP: If the login screen is painfully slow, try disabling Wayland in
+GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
+
 === Login as root 
 
 Switch to Virtual Console 3, by pressing kbd:[Ctrl+Alt+F3].
@@ -350,9 +353,6 @@ earlier.
 
 NOTE: Previous versions of Debian ran X11 on virtual console 7. As of
 Debian 9, the desktop environment consoles are virtual console 1 and 2. 
-
-TIP: If the login screen is painfully slow, try disabling Wayland in
-GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
 
 === Remove the dummy "Desktop User" (optional)
 
