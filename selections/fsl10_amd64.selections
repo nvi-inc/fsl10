@@ -103,6 +103,7 @@ cups-filters-core-drivers			install
 cups-pk-helper					install
 cups-ppdc					install
 cups-server-common				install
+curl						install
 dash						install
 dbus						install
 dbus-user-session				install
@@ -119,6 +120,8 @@ debhelper					install
 debian-archive-keyring				install
 debian-faq					install
 debianutils					install
+default-jre					install
+default-jre-headless				install
 desktop-base					install
 desktop-file-utils				install
 dh-autoreconf					install
@@ -132,6 +135,7 @@ discover					install
 discover-data					install
 distro-info-data				install
 dleyna-server					install
+dmeventd					install
 dmidecode					install
 dmsetup						install
 dns-root-data					install
@@ -184,6 +188,7 @@ file-roller					install
 findutils					install
 finger						install
 firefox-esr					install
+firmware-linux-free				install
 five-or-more					install
 flex						install
 folks-common					install
@@ -429,6 +434,7 @@ gstreamer1.0-x:amd64				install
 gtk-update-icon-cache				install
 gtk2-engines:amd64				install
 gtk2-engines-pixbuf:amd64			install
+guile-2.0-libs:amd64				install
 gv						install
 gvfs:amd64					install
 gvfs-backends					install
@@ -453,8 +459,11 @@ hwdata						install
 hyphen-en-us					install
 i965-va-driver:amd64				install
 iagno						install
+iamerican					install
+ibritish					install
 idle						install
 idle-python2.7					install
+ienglish-common					install
 ifupdown					install
 iio-sensor-proxy				install
 imagemagick					install
@@ -477,9 +486,11 @@ iproute2					install
 iptables					install
 iputils-arping					install
 iputils-ping					install
+irqbalance					install
 isc-dhcp-client					install
 isc-dhcp-common					install
 iso-codes					install
+ispell						install
 iw						install
 java-common					install
 javascript-common				install
@@ -631,6 +642,7 @@ libchromaprint1:amd64				install
 libcilkrts5:amd64				install
 libck-connector0:amd64				install
 libclamav7:amd64				install
+libclamav9:amd64				install
 libclang-common-3.9-dev				install
 libclang1-3.9:amd64				install
 libclass-accessor-perl				install
@@ -745,6 +757,7 @@ libexempi3:amd64				install
 libexif12:amd64					install
 libexiv2-14:amd64				install
 libexpat1:amd64					install
+libexpat1-dev:amd64				install
 libexttextcat-2.0-0:amd64			install
 libexttextcat-data				install
 libf2c2:amd64					install
@@ -886,6 +899,7 @@ libgraphite2-3:amd64				install
 libgrilo-0.3-0:amd64				install
 libgs9:amd64					install
 libgs9-common					install
+libgsasl7					install
 libgsf-1-114:amd64				install
 libgsf-1-common					install
 libgsf-bin					install
@@ -1007,6 +1021,7 @@ libkpathsea6:amd64				install
 libkrb5-3:amd64					install
 libkrb5support0:amd64				install
 libksba8:amd64					install
+libkyotocabinet16v5:amd64			install
 liblangtag-common				install
 liblangtag1:amd64				install
 liblapack3					install
@@ -1041,6 +1056,7 @@ liblua5.1-0:amd64				install
 liblua5.2-0:amd64				install
 liblua5.3-0:amd64				install
 liblvm2app2.2:amd64				install
+liblvm2cmd2.02:amd64				install
 liblwp-mediatypes-perl				install
 liblwp-protocol-https-perl			install
 liblwres141:amd64				install
@@ -1058,6 +1074,8 @@ libmagickwand-6.q16-3:amd64			install
 libmail-java					install
 libmail-sendmail-perl				install
 libmailtools-perl				install
+libmailutils5:amd64				install
+libmariadbclient18:amd64			install
 libmbim-glib4:amd64				install
 libmbim-proxy					install
 libmediaart-2.0-0:amd64				install
@@ -1135,6 +1153,7 @@ libnss-mdns:amd64				install
 libnss-myhostname:amd64				install
 libnss3:amd64					install
 libntfs-3g871					install
+libntlm0:amd64					install
 libnuma1:amd64					install
 liboauth0:amd64					install
 libodfgen-0.1-1:amd64				install
@@ -1236,8 +1255,10 @@ libpython-stdlib:amd64				install
 libpython2.7:amd64				install
 libpython2.7-minimal:amd64			install
 libpython2.7-stdlib:amd64			install
+libpython3-dev:amd64				install
 libpython3-stdlib:amd64				install
 libpython3.5:amd64				install
+libpython3.5-dev:amd64				install
 libpython3.5-minimal:amd64			install
 libpython3.5-stdlib:amd64			install
 libqmi-glib5:amd64				install
@@ -1254,6 +1275,7 @@ libraw1394-11:amd64				install
 libraw15:amd64					install
 librdf0:amd64					install
 libreadline-dev:amd64				install
+libreadline5:amd64				install
 libreadline7:amd64				install
 librecode0:amd64				install
 librelaxng-datatype-java			install
@@ -1482,6 +1504,7 @@ libwinpr-crt0.1:amd64				install
 libwinpr-crypto0.1:amd64			install
 libwinpr-dsparse0.1:amd64			install
 libwinpr-environment0.1:amd64			install
+libwinpr-error0.1:amd64				install
 libwinpr-file0.1:amd64				install
 libwinpr-handle0.1:amd64			install
 libwinpr-heap0.1:amd64				install
@@ -1601,9 +1624,12 @@ libzvbi0:amd64					install
 lightsoff					install
 linux-base					install
 linux-compiler-gcc-6-x86			install
+linux-headers-4.9.0-11-amd64			install
+linux-headers-4.9.0-11-common			install
 linux-headers-4.9.0-8-amd64			install
 linux-headers-4.9.0-8-common			install
 linux-headers-amd64				install
+linux-image-4.9.0-11-amd64			install
 linux-image-4.9.0-8-amd64			install
 linux-image-amd64				install
 linux-kbuild-4.9				install
@@ -1621,9 +1647,12 @@ lua-expat:amd64					install
 lua-json					install
 lua-lpeg:amd64					install
 lua-socket:amd64				install
+lvm2						install
 m17n-contrib					install
 m17n-db						install
 m4						install
+mailutils					install
+mailutils-common				install
 make						install
 man-db						install
 manpages					install
@@ -1655,6 +1684,7 @@ multiarch-support				install
 mutt						install
 mutter						install
 mutter-common					install
+mysql-common					install
 mythes-en-us					install
 nano						install
 nautilus					install
@@ -1787,6 +1817,7 @@ python-openssl					install
 python-pep8					install
 python-pexpect					install
 python-pil:amd64				install
+python-pip-whl					install
 python-pkg-resources				install
 python-ptyprocess				install
 python-pyasn1					install
@@ -1817,17 +1848,24 @@ python3-apparmor				install
 python3-apt					install
 python3-brlapi					install
 python3-cairo					install
+python3-cffi-backend				install
 python3-chardet					install
+python3-crypto					install
+python3-cryptography				install
 python3-cups					install
 python3-cupshelpers				install
 python3-dbus					install
 python3-debian					install
 python3-debianbts				install
+python3-dev					install
 python3-frozendict				install
 python3-future					install
 python3-gi					install
 python3-gi-cairo				install
 python3-httplib2				install
+python3-idna					install
+python3-keyring					install
+python3-keyrings.alt				install
 python3-libapparmor				install
 python3-louis					install
 python3-mako					install
@@ -1835,8 +1873,10 @@ python3-markupsafe				install
 python3-minimal					install
 python3-pexpect					install
 python3-pil:amd64				install
+python3-pip					install
 python3-pkg-resources				install
 python3-ptyprocess				install
+python3-pyasn1					install
 python3-pyatspi					install
 python3-pycodestyle				install
 python3-pycurl					install
@@ -1848,16 +1888,23 @@ python3-reportlab				install
 python3-reportlab-accel:amd64			install
 python3-requests				install
 python3-requests-futures			install
+python3-secretstorage				install
+python3-setuptools				install
 python3-six					install
 python3-smbc					install
 python3-software-properties			install
 python3-speechd					install
 python3-systemd					install
+python3-tk:amd64				install
 python3-uno					install
 python3-urllib3					install
+python3-venv					install
+python3-wheel					install
 python3-xdg					install
 python3.5					install
+python3.5-dev					install
 python3.5-minimal				install
+python3.5-venv					install
 qpdf						install
 quadrapassel					install
 rake						install
@@ -1928,6 +1975,7 @@ sysvinit-utils					install
 tali						install
 tar						install
 task-desktop					install
+task-english					install
 task-gnome-desktop				install
 task-print-server				install
 task-ssh-server					install
@@ -1982,6 +2030,7 @@ usb-modeswitch-data				install
 usbmuxd						install
 usbutils					install
 util-linux					install
+util-linux-locales				install
 va-driver-all:amd64				install
 vbetool						install
 vdpau-driver-all:amd64				install
