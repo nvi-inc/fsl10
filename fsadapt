@@ -529,20 +529,20 @@ popd
 chroot ${NEW_ROOT} apt-get -y install pgplot5 libpgplot-perl
 ;;
       rcsdir)
-##"New" Debian 2.2 and later:
-rm ${VERBO} -f ${NEW_ROOT}etc/rc.boot/fs
-chroot ${NEW_ROOT} update-rc.d fs remove >/dev/null
-rm ${VERBO} -f ${NEW_ROOT}etc/init.d/fs
-cp ${VERBO} -p etc_init.d_fs ${NEW_ROOT}etc/init.d/fs
-# xxx: considering:  update-rc.d fs start 90 S . stop 10 0 6 .
-## 'update-rc.d' want to have the file existing...
+##systemd, new in Debian 8
+chroot ${NEW_ROOT} systemctl disable fsalloc >/dev/null
+chroot ${NEW_ROOT} systemctl disable stalloc >/dev/null
+rm ${VERBO} -f ${NEW_ROOT}etc/systemd/system/fsalloc.service
+rm ${VERBO} -f ${NEW_ROOT}etc/systemd/system/stalloc.service
+cp ${VERBO} systemd/fsalloc.service ${NEW_ROOT}etc/systemd/system
+cp ${VERBO} systemd/stalloc.service ${NEW_ROOT}etc/systemd/system
 if [ $VERBO ]; then
-  chroot ${NEW_ROOT} update-rc.d fs start 90 S .
+  chroot ${NEW_ROOT} systemctl enable fsalloc.service
+  chroot ${NEW_ROOT} systemctl enable stalloc.service
 else
-  chroot ${NEW_ROOT} update-rc.d fs start 90 S . >/dev/null
+  chroot ${NEW_ROOT} systemctl enable fsalloc.service >/dev/null
+  chroot ${NEW_ROOT} systemctl enable stalloc.service >/dev/null
 fi
-rm ${VERBO} -f ${NEW_ROOT}etc/init.d/fs
-ln ${VERBO} -s /usr2/fs/misc/rc.fs ${NEW_ROOT}etc/init.d/fs
 ;;
       rtxgroup)
 # Add 'rtx' / 990 group into '/etc/group'.
