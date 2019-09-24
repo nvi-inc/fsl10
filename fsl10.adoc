@@ -486,12 +486,12 @@ So that the update mechanism will work correctly, run
 
 Eg:
 
-   ftp ftp.hartrao.ac.za kbd:[CR]
-   user: ftp kbd:[CR]
-   password: kbd:[ your@email.address ] kbd:[CR]
-         cd /pub/fs9x kbd:[CR]
-   get fsadapt-9.0.x.tgz kbd:[CR]
-   quit kbd:[CR]
+   ftp ftp.hartrao.ac.za
+   user: ftp
+   password: <your@email.address>
+   cd /pub/fs9x
+   get fsadapt-9.0.x.tgz
+   quit
 
 === Unpack the FSADAPT 9.0.x tarball
 
