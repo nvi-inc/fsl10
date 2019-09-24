@@ -119,9 +119,6 @@ debhelper					install
 debian-archive-keyring				install
 debian-faq					install
 debianutils					install
-default-java-plugin				install
-default-jre					install
-default-jre-headless				install
 desktop-base					install
 desktop-file-utils				install
 dh-autoreconf					install
@@ -456,10 +453,6 @@ hwdata						install
 hyphen-en-us					install
 i965-va-driver:amd64				install
 iagno						install
-icedtea-8-plugin:amd64				install
-icedtea-netx:amd64				install
-icedtea-netx-common				install
-iceweasel					install
 idle						install
 idle-python2.7					install
 ifupdown					install
