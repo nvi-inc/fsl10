@@ -729,11 +729,11 @@ if (grep -F '#Banner' "${NEW_ROOT}"etc/ssh/sshd_config >/dev/null); then
   /usr/sbin/invoke-rc.d ssh reload
 fi
 # GDM3 login window
-if (grep -F -i 'government' "${NEW_ROOT}"etc/gdm3/greeter.gsettings >/dev/null 2>&1); then
+if (grep -F -i 'government' "${NEW_ROOT}"etc/gdm3/greeter.dconf-defaults >/dev/null 2>&1); then
   :
 else
-  sed -i -e "s/^# banner-message-enable=true/banner-message-enable=true/" /etc/gdm3/greeter.gsettings
-  sed -i -e "s/^# banner-message-text='Welcome'/banner-message-text='This US Government computer is for authorized users only'/" /etc/gdm3/greeter.gsettings
+  sed -i -e "s/^# banner-message-enable=true/banner-message-enable=true/" /etc/gdm3/greeter.dconf-defaults
+  sed -i -e "s/^# banner-message-text='Welcome'/banner-message-text='This US Government computer is for authorized users only'/" /etc/gdm3/greeter.dconf-defaults
 fi
 ;;
       *)
@@ -810,7 +810,7 @@ if [ -x "/lib/modules/$(uname -r)/gpib" ]; then
 else
   config_gpib_def="on"
 fi
-if (grep '^disable-user-list=true' /etc/gdm3/greeter.gsettings >/dev/null); then
+if (grep '^disable-user-list=true' /etc/gdm3/greeter.dconf-defaults >/dev/null); then
   greeter_def="off"
 else
   greeter_def="on"
@@ -983,7 +983,7 @@ for GRP in dialout dip cdrom floppy scanner tape audio video backup lpadmin plug
 done
 ;;
       greeter)
-sed -i -e "s/^# disable-user-list=true/disable-user-list=true/" /etc/gdm3/greeter.gsettings
+sed -i -e "s/^# disable-user-list=true/disable-user-list=true/" /etc/gdm3/greeter.dconf-defaults
 ;; 
       serial)
 # Fix '/etc/default/grub' for VScom 400H/800H.
