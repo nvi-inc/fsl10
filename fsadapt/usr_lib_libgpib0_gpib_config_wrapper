@@ -1,0 +1,24 @@
+#!/bin/sh
+
+GPIB_CONFIG=/usr/sbin/gpib_config
+DEVICE=/dev/gpib15
+
+if [ ! -x "$GPIB_CONFIG" ]; then
+	exit 0
+fi
+
+SLEEP=10
+# Wait for udev to create the GPIB devices in /dev
+while [ ! -e "$DEVICE" ]; do
+	sleep 1
+	SLEEP=$((SLEEP-1))
+	if [ $SLEEP -lt 1 ]; then
+		break
+	fi
+done
+
+if [ ! -e "$DEVICE" ]; then
+	exit 1
+fi
+
+exec "$GPIB_CONFIG" "$@"

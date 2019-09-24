@@ -1,0 +1,6 @@
+#! /bin/sh
+if [ $1x = "-dx" ]; then
+  echo "Description: FS Linux 9"
+else
+  exec /usr/bin/lsb_release.real $@
+fi

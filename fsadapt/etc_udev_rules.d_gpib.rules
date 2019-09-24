@@ -1,0 +1,43 @@
+# The following GPIB/USB adapters require that 
+# proprietary, closed-source firmware be uploaded.
+#
+#        Agilent 82357A GPIB/USB adapter
+#        Agilent 82357B GPIB/USB adapter
+#        NI-USB-B GPIB/USB adapter
+#
+# Firmware tarballs are available from
+#       http://linux-gpib.sourceforge.net/firmware/
+#
+# The firmware must be installed as '/var/local/gpib_firmware'.
+
+KERNEL=="gpib[0-9]*", MODE="0660", GROUP="gpib"
+ACTION!="add", GOTO="gpib_rules_end"
+SUBSYSTEM!="usb", GOTO="gpib_usb_rules_end"
+
+# Agilent 82357A without firmware loaded
+ATTRS{idVendor}=="0957", ATTRS{idProduct}=="0007", RUN+="/sbin/fxload -D %N -I /var/local/gpib_firmware/agilent_82357a/82357a_fw.hex"
+
+# Agilent 82357A with firmware loaded
+ATTRS{idVendor}=="0957", ATTRS{idProduct}=="0107", RUN+="/usr/lib/libgpib0/gpib_config_wrapper"
+
+# Agilent 82357B without firmware loaded
+ATTRS{idVendor}=="0957", ATTRS{idProduct}=="0518", RUN+="/sbin/fxload -D %N -t fx2 -I /var/local/gpib_firmware/agilent_82357a/measat_releaseX1.8.hex"
+
+# Agilent 82357B with firmware loaded
+ATTRS{idVendor}=="0957", ATTRS{idProduct}=="0918", RUN+="/usr/lib/libgpib0/gpib_config_wrapper"
+
+# National Instruments NI-USB-B without firmware loaded
+ATTRS{idVendor}=="3923", ATTRS{idProduct}=="702b", RUN+="/sbin/fxload -D %N -t fx -I /var/local/gpib_firmware/ni_gpib_usb_b/niusbb_firmware.hex -s /var/local/gpib_firmware/ni_gpib_usb_b/niusbb_loader.hex"
+
+# National Instruments NI-USB-B with firmware loaded
+ATTRS{idVendor}=="3923", ATTRS{idProduct}=="702a", RUN+="/usr/lib/libgpib0/gpib_config_wrapper"
+
+# National Instruments NI-USB-HS
+ATTRS{idVendor}=="3923", ATTRS{idProduct}=="709b", RUN+="/usr/lib/libgpib0/gpib_config_wrapper"
+
+# Set ID_VENDOR and ID_MODEL acording to VID and PID
+IMPORT{program}="usb-db %p"
+
+LABEL="gpib_usb_rules_end"
+
+LABEL="gpib_rules_end"
