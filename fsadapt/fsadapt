@@ -555,13 +555,13 @@ fi
       stdaccts)
 # Add std accounts into '/etc/passwd'.
     if [ ! "$is_oper" ]; then
-	echo 'oper:x:501:990:VLBI Operator:/home/oper:/usr/bin/tcsh' >> ${NEW_ROOT}etc/passwd
+	echo 'oper:x:501:990:VLBI Operator:/home/oper:/bin/bash' >> ${NEW_ROOT}etc/passwd
 	echo 'oper:*:12256:0:99999:7:::' >> ${NEW_ROOT}etc/shadow
     fi
     mkdir -p ${NEW_ROOT}home/oper
     chown ${VERBO} 501.990 ${NEW_ROOT}home/oper
     if [ ! "$is_prog" ]; then
-	echo 'prog:x:502:990:FS Programmer:/home/prog:/usr/bin/tcsh' >> ${NEW_ROOT}etc/passwd
+	echo 'prog:x:502:990:FS Programmer:/home/prog:/bin/bash' >> ${NEW_ROOT}etc/passwd
 	echo 'prog:*:12256:0:99999:7:::' >> ${NEW_ROOT}etc/shadow
     fi
     mkdir -p ${NEW_ROOT}home/prog
