@@ -159,11 +159,11 @@ readonly DIALOG="dialog --backtitle FS/Debian/Linux-fsadapt-9.0"
 readonly PATCHOPTS="-s -p1 --set-utc"
 
 FSMESS="We are about to update a Debian 9.x + Linux 4.9.0 (FS Linux 10)"
-FSLINUX00=`cat /etc/debian_version | cut -c1-2`
-  if [ ${FSLINUX00} != "9." ]; then
+FSLINUX00=$(cut -c1-2 < /etc/debian_version)
+  if [ "${FSLINUX00}" != "9." ]; then
       echo "WARNING: Could not find Linux revision !!!"
       echo -n "Did not find an approved FS kernel.";
-      echo -n "I will run fsadapt as kernel 4.9.0 FS Linux 10"; read $ans
+      echo -n "I will run fsadapt as kernel 4.9.0 FS Linux 10"; read -r ans
   fi
 
 # Process command line arguments.
@@ -258,26 +258,26 @@ if [ ! "$SHOWPHASE1" -a ! "$SHOWPHASE2" -a ! "$SHOWPHASE3" -a ! "$SHOWPHASE4" ];
 fi
 
 # Establish default update target (a future (or current) FS root file system).
-if [ x$1 = x ]; then
+if [ x"$1" = x ]; then
   NEW_ROOT=/
 else
   NEW_ROOT=$1
 fi
 
 # Check for blank root password and refuse to continue unless set.
-blank_root=`grep '^root::' ${NEW_ROOT}etc/shadow`
-blank_oper=`grep '^oper::' ${NEW_ROOT}etc/shadow`
-unset_oper=`grep '^oper:\*:' ${NEW_ROOT}etc/shadow`
-blank_prog=`grep '^prog::' ${NEW_ROOT}etc/shadow`
-unset_prog=`grep '^prog:\*:' ${NEW_ROOT}etc/shadow`
-has_user1=`grep '^user1:' ${NEW_ROOT}etc/shadow`
+blank_root=$(grep '^root::' "${NEW_ROOT}"etc/shadow)
+blank_oper=$(grep '^oper::' "${NEW_ROOT}"etc/shadow)
+unset_oper=$(grep '^oper:\*:' "${NEW_ROOT}"etc/shadow)
+blank_prog=$(grep '^prog::' "${NEW_ROOT}"etc/shadow)
+unset_prog=$(grep '^prog:\*:' "${NEW_ROOT}"etc/shadow)
+has_user1=$(grep '^user1:' "${NEW_ROOT}"etc/shadow)
 if [ "$has_user1" ]; then
   user1_text=", 'user1'"
 else
   user1_text=""
 fi
-blank_user1=`grep '^user1::' ${NEW_ROOT}etc/shadow`
-unset_user1=`grep '^user1:\*:' ${NEW_ROOT}etc/shadow`
+blank_user1=$(grep '^user1::' "${NEW_ROOT}"etc/shadow)
+unset_user1=$(grep '^user1:\*:' "${NEW_ROOT}"etc/shadow)
 if [ "$blank_root" -o "$blank_oper" -o "$blank_prog" -o "$blank_user1" ]; then
   if [ "$NODIALOGS" ]; then
     echo "fsadapt: must set passwords for ('root', 'oper', 'prog'${user1_text}) first" >&2
@@ -300,11 +300,11 @@ fi
 
 # Determine the absolute path to the directory name where this script resides.
 SRCS=${0%fsadapt}
-if [ x$SRCS = x ]; then
+if [ x"$SRCS" = x ]; then
   SRCS="./"
 fi
 if [ ${SRCS#/} = $SRCS ]; then  # it doesn't start with a '/'
-  SRCS=`pwd`/$SRCS
+  SRCS=$(pwd)/$SRCS
 fi
 
 NEW_ROOT_DEVICE=/dev/sda1
@@ -314,21 +314,21 @@ NEW_USR2_DEVICE=/dev/sda3
 # Try to get the "true and right" device names from 'mount' output
 # if we are running $NEW_ROOT = /, i.e. a "living" system.
 # (xxx: Doesn't support multiple swap partitions yet...)
-if [ $NEW_ROOT = / ]; then
-  NEW_ROOT_DEVICE="`mount | fgrep "on / " | cut -d' ' -f1`"
-  if fgrep "swap" /etc/fstab >/dev/null; then
-    NEW_SWAP_DEVICE=`fgrep "swap" /etc/fstab | grep "none"`
-    NEW_SWAP_DEVICE="`echo $NEW_SWAP_DEVICE | cut -d' ' -f1`"
+if [ "$NEW_ROOT" = / ]; then
+  NEW_ROOT_DEVICE="$(mount | grep -F "on / " | cut -d' ' -f1)"
+  if grep -F "swap" /etc/fstab >/dev/null; then
+    NEW_SWAP_DEVICE=$(grep -F "swap" /etc/fstab | grep "none")
+    NEW_SWAP_DEVICE="$(echo "$NEW_SWAP_DEVICE" | cut -d' ' -f1)"
   fi
   # Must be a local real Ext2 file system.
-  if mount | fgrep "/usr2" | fgrep "ext" | grep '^/dev' >/dev/null; then
-    NEW_USR2_DEVICE="`mount | fgrep "/usr2" | grep "^/dev" | cut -d' ' -f1`"
+  if mount | grep -F "/usr2" | grep -F "ext" | grep '^/dev' >/dev/null; then
+    NEW_USR2_DEVICE="$(mount | grep -F "/usr2" | grep "^/dev" | cut -d' ' -f1)"
   fi
 fi
 
 # There must be a Debian-specific '/var/lib/dpkg'
 # on the new target root file system.
-if [ ! -d ${NEW_ROOT}var/lib/dpkg ]; then
+if [ ! -d "${NEW_ROOT}"var/lib/dpkg ]; then
   if [ "$NODIALOGS" ]; then
     echo "fsadapt: target new root directory ($NEW_ROOT) not valid" >&2
     exit
@@ -350,7 +350,7 @@ Select 'OK' to exit and retry." \
 fi
 
 # Now show the root, swap, usr2 settings and provide a way to back out.
-if [ $NEW_ROOT != / ]; then
+if [ "$NEW_ROOT" != / ]; then
   if [ "$NODIALOGS" ]; then
     :
   else
@@ -383,27 +383,21 @@ VERBO=''
 VVERBO=''
 VERBOQ='--quiet'
 
-if [ -L ${NEW_ROOT}usr/include/linux -a -L ${NEW_ROOT}usr/include/asm ]; then
-  kernelinc_def="off"
-else
-  kernelinc_def="on"
+if [ ! -r "${NEW_ROOT}usr/src/linux-headers-$(uname -r)" ]; then
+	chroot "${NEW_ROOT}" apt-get -y install "linux-headers-$(uname -r)"
 fi
-
-if [ ! -r ${NEW_ROOT}usr/src/linux-headers-`uname -r` ]; then
-	chroot ${NEW_ROOT} apt-get -y install linux-headers-`uname -r`
-fi
-if [ -r ${NEW_ROOT}usr/src/linux-headers-`uname -r` ]; then
-	pushd ${NEW_ROOT}usr/src >/dev/null
+if [ -r "${NEW_ROOT}usr/src/linux-headers-$(uname -r)" ]; then
+	pushd "${NEW_ROOT}"usr/src >/dev/null || exit
 	rm ${VERBO} -f linux
-	ln ${VERBO} -sfn linux-headers-`uname -r` linux
-	popd
+	ln ${VERBO} -sfn "linux-headers-$(uname -r)" linux
+	popd || exit
 else
-	echo "No kernel headers available for your `uname -r` kernel image."
+	echo "No kernel headers available for your $(uname -r) kernel image."
 	exit
 fi
 
 # Do we have apt-get cron for weekly security updates.
-if [ -r ${NEW_ROOT}etc/cron.weekly/apt-get ]; then
+if [ -r "${NEW_ROOT}etc/cron.weekly/apt-get" ]; then
   apt_get_def="off"
 else
   apt_get_def="on"
@@ -411,37 +405,37 @@ fi
 
 # Linux GPIB driver for various GPIB boards.
 GPIBVER="3.2.20"
-if [ ! -d ${NEW_ROOT}usr/src/linux-gpib-${GPIBVER} ]; then
+if [ ! -d "${NEW_ROOT}"usr/src/linux-gpib-${GPIBVER} ]; then
   atgpib_def="on"
 else
   atgpib_def="off"
 fi
 
 # PGPLOT5 and associated perl binding.
-if [ ! -f ${NEW_ROOT}usr/lib/perl5/PGPLOT.pm ]; then
+if [ ! -f "${NEW_ROOT}"usr/lib/perl5/PGPLOT.pm ]; then
   pgplot_def="on"
 else
   pgplot_def="off"
 fi
 
 # Add FS shared memory setup into init sequence
-if [ ! -L ${NEW_ROOT}etc/init.d/fs ]; then
+if [ ! -L "${NEW_ROOT}"etc/init.d/fs ]; then
   rcsdir_def="on"
 else
   rcsdir_def="off"
 fi
 
 # Add 'rtx' / 990 group into '/etc/group'.
-if (grep 'rtx:.:990' ${NEW_ROOT}etc/group >/dev/null); then
+if (grep 'rtx:.:990' "${NEW_ROOT}"etc/group >/dev/null); then
   rtxgroup_def="off"
 else
   rtxgroup_def="on"
 fi
 # Add std accounts.
-is_root=`grep '^root:' ${NEW_ROOT}etc/passwd`
-is_oper=`grep '^oper:' ${NEW_ROOT}etc/passwd`
-is_prog=`grep '^prog:' ${NEW_ROOT}etc/passwd`
-if [ "$is_root" -a "$is_oper" -a "$is_prog" ]; then
+is_root=$(grep '^root:' "${NEW_ROOT}"etc/passwd)
+is_oper=$(grep '^oper:' "${NEW_ROOT}"etc/passwd)
+is_prog=$(grep '^prog:' "${NEW_ROOT}"etc/passwd)
+if [ "$is_root" ] && [ "$is_oper" ] && [ "$is_prog" ]; then
     stdaccts_def="off"
 else
     stdaccts_def="on"
@@ -455,13 +449,13 @@ fi
 
 # Has wu-ftpd '-l'?
 ftpdlog_def="off"
-if (fgrep '/usr/sbin/ftpd -l' ${NEW_ROOT}etc/inetd.conf >/dev/null); then
+if (grep -F '/usr/sbin/ftpd -l' "${NEW_ROOT}"etc/inetd.conf >/dev/null); then
   ftpdlog_def="on"
 fi
 
 # Do we have 'GOVERNMENT' prompts?
 govt_def="off"
-if (fgrep -i 'government' ${NEW_ROOT}etc/govtwarn.txt >/dev/null 2>&1); then
+if (grep -F -i 'government' "${NEW_ROOT}"etc/govtwarn.txt >/dev/null 2>&1); then
   govt_def="on"
 fi
 
@@ -495,13 +489,13 @@ unless you are certain that you want and can to do that item again." \
     rm -f /tmp/reply
     exit
   fi
-  PHASE1=`cat /tmp/reply | sed 's!\"!!g' `
+  PHASE1=$(sed 's!\"!!g' /tmp/reply )
 else
   PHASE1="skip"
 fi
 #--
-  PATCH_ERRS=${SRCS}patch-results-`date +'%Y%m%d%H%M%S'`
-  echo -e "Output of patch commands during the FS updating process\\n`date`\\n" > $PATCH_ERRS
+  PATCH_ERRS=${SRCS}patch-results-$(date +'%Y%m%d%H%M%S')
+  echo -e "Output of patch commands during the FS updating process\\n$(date)\\n" > "$PATCH_ERRS"
   for i in $PHASE1; do
     case $i in
       skip)
@@ -514,73 +508,73 @@ VERBOQ=''
 ;;
       atgpib)
 # Linux GPIB driver for various GPIB boards.
-pushd ${NEW_ROOT}usr/src >/dev/null
+pushd "${NEW_ROOT}"usr/src >/dev/null || exit
 # Remove any old versions of NI driver.
 rm ${VERBO} -rf nigpib*
-rm ${VERBO} -f ${NEW_ROOT}usr/local/lib/libgpib.a
-rm ${VERBO} -f ${NEW_ROOT}usr/local/include/sys/ugpib.h
+rm ${VERBO} -f "${NEW_ROOT}"usr/local/lib/libgpib.a
+rm ${VERBO} -f "${NEW_ROOT}"usr/local/include/sys/ugpib.h
 # Unpack source code of appropriate package (downloaded from SourceForge)
-tar xvzf ${SRCS}/linux-gpib-${GPIBVER}.tar.gz
-popd
+tar xvzf "${SRCS}"/linux-gpib-${GPIBVER}.tar.gz
+popd || exit
 ;;
       pgplot)
 # PGPLOT5 and associated perl binding.
 # Install appropriate packages from distribution
-chroot ${NEW_ROOT} apt-get -y install pgplot5 libpgplot-perl
+chroot "${NEW_ROOT}" apt-get -y install pgplot5 libpgplot-perl
 ;;
       rcsdir)
 ##systemd, new in Debian 8
-chroot ${NEW_ROOT} systemctl disable fsalloc >/dev/null
-chroot ${NEW_ROOT} systemctl disable stalloc >/dev/null
-rm ${VERBO} -f ${NEW_ROOT}etc/systemd/system/fsalloc.service
-rm ${VERBO} -f ${NEW_ROOT}etc/systemd/system/stalloc.service
-cp ${VERBO} systemd/fsalloc.service ${NEW_ROOT}etc/systemd/system
-cp ${VERBO} systemd/stalloc.service ${NEW_ROOT}etc/systemd/system
+chroot "${NEW_ROOT}" systemctl disable fsalloc >/dev/null
+chroot "${NEW_ROOT}" systemctl disable stalloc >/dev/null
+rm ${VERBO} -f "${NEW_ROOT}"etc/systemd/system/fsalloc.service
+rm ${VERBO} -f "${NEW_ROOT}"etc/systemd/system/stalloc.service
+cp ${VERBO} systemd/fsalloc.service "${NEW_ROOT}"etc/systemd/system
+cp ${VERBO} systemd/stalloc.service "${NEW_ROOT}"etc/systemd/system
 if [ $VERBO ]; then
-  chroot ${NEW_ROOT} systemctl enable fsalloc.service
-  chroot ${NEW_ROOT} systemctl enable stalloc.service
+  chroot "${NEW_ROOT}" systemctl enable fsalloc.service
+  chroot "${NEW_ROOT}" systemctl enable stalloc.service
 else
-  chroot ${NEW_ROOT} systemctl enable fsalloc.service >/dev/null
-  chroot ${NEW_ROOT} systemctl enable stalloc.service >/dev/null
+  chroot "${NEW_ROOT}" systemctl enable fsalloc.service >/dev/null
+  chroot "${NEW_ROOT}" systemctl enable stalloc.service >/dev/null
 fi
 ;;
       rtxgroup)
 # Add 'rtx' / 990 group into '/etc/group'.
-if (grep 'rtx:.:990' ${NEW_ROOT}etc/group >/dev/null); then
+if (grep 'rtx:.:990' "${NEW_ROOT}"etc/group >/dev/null); then
   :
 else
-  chroot ${NEW_ROOT} addgroup --gid 990 rtx >/dev/null 2>&1
+  chroot "${NEW_ROOT}" addgroup --gid 990 rtx >/dev/null 2>&1
 fi
 ;;
       stdaccts)
 # Add std accounts into '/etc/passwd'.
     if [ ! "$is_oper" ]; then
-	echo 'oper:x:501:990:VLBI Operator:/home/oper:/bin/bash' >> ${NEW_ROOT}etc/passwd
-	echo 'oper:*:12256:0:99999:7:::' >> ${NEW_ROOT}etc/shadow
+	echo 'oper:x:501:990:VLBI Operator:/home/oper:/bin/bash' >> "${NEW_ROOT}"etc/passwd
+	echo 'oper:*:12256:0:99999:7:::' >> "${NEW_ROOT}"etc/shadow
     fi
-    mkdir -p ${NEW_ROOT}home/oper
-    chown ${VERBO} 501.990 ${NEW_ROOT}home/oper
+    mkdir -p "${NEW_ROOT}"home/oper
+    chown ${VERBO} 501.990 "${NEW_ROOT}"home/oper
     if [ ! "$is_prog" ]; then
-	echo 'prog:x:502:990:FS Programmer:/home/prog:/bin/bash' >> ${NEW_ROOT}etc/passwd
-	echo 'prog:*:12256:0:99999:7:::' >> ${NEW_ROOT}etc/shadow
+	echo 'prog:x:502:990:FS Programmer:/home/prog:/bin/bash' >> "${NEW_ROOT}"etc/passwd
+	echo 'prog:*:12256:0:99999:7:::' >> "${NEW_ROOT}"etc/shadow
     fi
-    mkdir -p ${NEW_ROOT}home/prog
-    chown ${VERBO} 502.990 ${NEW_ROOT}home/prog
+    mkdir -p "${NEW_ROOT}"home/prog
+    chown ${VERBO} 502.990 "${NEW_ROOT}"home/prog
 ;;
       fstab)
 # Add swap, '/usr2', '/proc' into '/etc/fstab'.
-if (fgrep 'swap' ${NEW_ROOT}etc/fstab >/dev/null); then
+if (grep -F 'swap' "${NEW_ROOT}"etc/fstab >/dev/null); then
   :
 else
-  echo $NEW_SWAP_DEVICE '  swap   swap  defaults  1  1' >> ${NEW_ROOT}etc/fstab
+  echo "$NEW_SWAP_DEVICE" '  swap   swap  defaults  1  1' >> "${NEW_ROOT}"etc/fstab
 fi
 
 # Dialog about running 'mkswap' on this partition.
 # (No point showing the dialog if we know we are running with
 #  that swap partition enabled.)
-RUNNING_SWAP_DEVICE=`fgrep "swap" /etc/fstab | grep "none"`
-RUNNING_SWAP_DEVICE="`echo $RUNNING_SWAP_DEVICE | cut -d' ' -f1`"
-if [ $NEW_SWAP_DEVICE != $RUNNING_SWAP_DEVICE ]; then
+RUNNING_SWAP_DEVICE=$(grep -F "swap" /etc/fstab | grep "none")
+RUNNING_SWAP_DEVICE="$(echo "$RUNNING_SWAP_DEVICE" | cut -d' ' -f1)"
+if [ "$NEW_SWAP_DEVICE" != "$RUNNING_SWAP_DEVICE" ]; then
   ${DIALOG} --title "Prepare this swap partition with 'mkswap'?" \
     --yesno \
 "You need to run 'mkswap' on any new swap partition at least once.\n\
@@ -594,20 +588,20 @@ If $NEW_SWAP_DEVICE is currently in use for swapping,
 please select 'No'." \
     17 74
   if [ $? = 0 ]; then
-    mkswap $NEW_SWAP_DEVICE
+    mkswap "$NEW_SWAP_DEVICE"
   fi
 fi
 
-if (fgrep '/usr2' ${NEW_ROOT}etc/fstab >/dev/null); then
+if (grep -F '/usr2' "${NEW_ROOT}"etc/fstab >/dev/null); then
   :
 else
-  mkdir -p ${NEW_ROOT}usr2
-  echo $NEW_USR2_DEVICE '  /usr2  ext2  defaults  1  1' >> ${NEW_ROOT}etc/fstab
+  mkdir -p "${NEW_ROOT}"usr2
+  echo "$NEW_USR2_DEVICE" '  /usr2  ext2  defaults  1  1' >> "${NEW_ROOT}"etc/fstab
 fi
 # Try to ensure that the partition is formatted.
 # (Mounting an unformatted partition can cause horrid things
 #  actually only if it has "old" ext2 file system after resizing a partition.)
-if (mount | fgrep $NEW_USR2_DEVICE >/dev/null); then
+if (mount | grep -F "$NEW_USR2_DEVICE" >/dev/null); then
   :
 else
   ${DIALOG} --title "Prepare this '/usr2' partition with 'mkfs.ext4'?" \
@@ -625,46 +619,46 @@ If $NEW_USR2_DEVICE is currently in use (mounted),\n\
 please select 'No'." \
     17 74
   if [ $? = 0 ]; then
-    /sbin/mkfs.ext4 $NEW_USR2_DEVICE
+    /sbin/mkfs.ext4 "$NEW_USR2_DEVICE"
   fi
 fi  # if the /usr2 device is not currently mounted
 
-if (fgrep '/cdrom' ${NEW_ROOT}etc/fstab >/dev/null); then
+if (grep -F '/cdrom' "${NEW_ROOT}"etc/fstab >/dev/null); then
   :
 else
-  mkdir -p ${NEW_ROOT}media/cdrom
-  echo '/dev/cdrom  /media/cdrom udf,iso9660 noauto,user  0 0' >> ${NEW_ROOT}etc/fstab
+  mkdir -p "${NEW_ROOT}"media/cdrom
+  echo '/dev/cdrom  /media/cdrom udf,iso9660 noauto,user  0 0' >> "${NEW_ROOT}"etc/fstab
 fi
 
-if (fgrep '/proc' ${NEW_ROOT}etc/fstab >/dev/null); then
+if (grep -F '/proc' "${NEW_ROOT}"etc/fstab >/dev/null); then
   :
 else
-  mkdir -p ${NEW_ROOT}proc
-  echo 'none        /proc  proc  defaults  1  1' >> ${NEW_ROOT}etc/fstab
+  mkdir -p "${NEW_ROOT}"proc
+  echo 'none        /proc  proc  defaults  1  1' >> "${NEW_ROOT}"etc/fstab
 fi
 ;;
       noident)
 if [ -x /usr/bin/lsb_release.real ]; then
   :
 else
-  mv ${VERBO} -f ${NEW_ROOT}usr/bin/lsb_release ${NEW_ROOT}usr/bin/lsb_release.real
-  cp ${VERBO} -p ${SRCS}usr_bin_lsb_release ${NEW_ROOT}usr/bin/lsb_release
+  mv ${VERBO} -f "${NEW_ROOT}"usr/bin/lsb_release "${NEW_ROOT}"usr/bin/lsb_release.real
+  cp ${VERBO} -p "${SRCS}"usr_bin_lsb_release "${NEW_ROOT}"usr/bin/lsb_release
 fi
-cat >${NEW_ROOT}etc/issue <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
+cat >"${NEW_ROOT}"etc/issue <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
 Welcome to FS Linux 9 on \l.
 
 EOF-marker-with-no-quoted-chars-to-get-var-expansion
-cat >${NEW_ROOT}etc/issue.net <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
+cat >"${NEW_ROOT}"etc/issue.net <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
 Welcome to FS Linux 9
 
 EOF-marker-with-no-quoted-chars-to-get-var-expansion
 ;;
       ftpdlog)
-if (fgrep '/usr/sbin/ftpd -l' ${NEW_ROOT}etc/inetd.conf >/dev/null); then
+if (grep -F '/usr/sbin/ftpd -l' "${NEW_ROOT}"etc/inetd.conf >/dev/null); then
   :
 else
-  sed -e "s,/usr/sbin/ftpd,/usr/sbin/ftpd -l," ${NEW_ROOT}etc/inetd.conf >${NEW_ROOT}etc/inetd.conf.new
-  mv ${VERBO} -f ${NEW_ROOT}etc/inetd.conf.new ${NEW_ROOT}etc/inetd.conf
+  sed -e "s,/usr/sbin/ftpd,/usr/sbin/ftpd -l," "${NEW_ROOT}"etc/inetd.conf >"${NEW_ROOT}"etc/inetd.conf.new
+  mv ${VERBO} -f "${NEW_ROOT}"etc/inetd.conf.new "${NEW_ROOT}"etc/inetd.conf
 fi
 ;;
       govt)
@@ -692,50 +686,50 @@ penalties.
 ------------------------------------------------------------------------------
 EOF-marker-with-no-quoted-chars-to-get-var-expansion
 # Login prompt:
-if (fgrep -i 'government' ${NEW_ROOT}etc/issue >/dev/null); then
+if (grep -F -i 'government' "${NEW_ROOT}"etc/issue >/dev/null); then
   :
 else
-  cat /tmp/govt.$$ >>${NEW_ROOT}etc/issue
+  cat /tmp/govt.$$ >>"${NEW_ROOT}"etc/issue
 fi
 # Network login prompt:
-if (fgrep -i 'government' ${NEW_ROOT}etc/issue.net >/dev/null); then
+if (grep -F -i 'government' "${NEW_ROOT}"etc/issue.net >/dev/null); then
   :
 else
-  cat /tmp/govt.$$ >>${NEW_ROOT}etc/issue.net
+  cat /tmp/govt.$$ >>"${NEW_ROOT}"etc/issue.net
 fi
 # FTP server:
-if (fgrep -i 'government' ${NEW_ROOT}etc/wu-ftpd/welcome.msg >/dev/null); then
+if (grep -F -i 'government' "${NEW_ROOT}"etc/wu-ftpd/welcome.msg >/dev/null); then
   :
 else
-  if [ -e ${NEW_ROOT}etc/wu-ftpd/welcome.msg ]; then
-     cat /tmp/govt.$$ >>${NEW_ROOT}etc/wu-ftpd/welcome.msg
+  if [ -e "${NEW_ROOT}"etc/wu-ftpd/welcome.msg ]; then
+     cat /tmp/govt.$$ >>"${NEW_ROOT}"etc/wu-ftpd/welcome.msg
   fi
 fi
 # Normal login screens after login (incl. xterm).
-if (fgrep -i 'government' ${NEW_ROOT}etc/govtwarn.txt >/dev/null 2>&1); then
+if (grep -F -i 'government' "${NEW_ROOT}"etc/govtwarn.txt >/dev/null 2>&1); then
   :
 else
-  cat /tmp/govt.$$ >>${NEW_ROOT}etc/govtwarn.txt
+  cat /tmp/govt.$$ >>"${NEW_ROOT}"etc/govtwarn.txt
 fi
-if (fgrep 'etc/govtwarn.txt' ${NEW_ROOT}etc/profile >/dev/null); then
+if (grep -F 'etc/govtwarn.txt' "${NEW_ROOT}"etc/profile >/dev/null); then
   :
 else
-  echo 'cat /etc/govtwarn.txt' >>${NEW_ROOT}etc/profile
+  echo 'cat /etc/govtwarn.txt' >>"${NEW_ROOT}"etc/profile
 fi
-if (fgrep 'etc/govtwarn.txt' ${NEW_ROOT}etc/csh.login >/dev/null); then
+if (grep -F 'etc/govtwarn.txt' "${NEW_ROOT}"etc/csh.login >/dev/null); then
   :
 else
-  echo 'cat /etc/govtwarn.txt' >>${NEW_ROOT}etc/csh.login
+  echo 'cat /etc/govtwarn.txt' >>"${NEW_ROOT}"etc/csh.login
 fi
 rm -f /tmp/govt.$$
 # SSH Server
-if (fgrep '#Banner' ${NEW_ROOT}etc/ssh/sshd_config >/dev/null); then
-  sed -e "s,#Banner,Banner," ${NEW_ROOT}etc/ssh/sshd_config >${NEW_ROOT}etc/ssh/sshd_config.new
-  mv ${VERBO} -f ${NEW_ROOT}etc/ssh/sshd_config.new ${NEW_ROOT}etc/ssh/sshd_config
+if (grep -F '#Banner' "${NEW_ROOT}"etc/ssh/sshd_config >/dev/null); then
+  sed -e "s,#Banner,Banner," "${NEW_ROOT}"etc/ssh/sshd_config >"${NEW_ROOT}"etc/ssh/sshd_config.new
+  mv ${VERBO} -f "${NEW_ROOT}"etc/ssh/sshd_config.new "${NEW_ROOT}"etc/ssh/sshd_config
   /usr/sbin/invoke-rc.d ssh reload
 fi
 # GDM3 login window
-if (fgrep -i 'government' ${NEW_ROOT}etc/gdm3/greeter.gsettings >/dev/null 2>&1); then
+if (grep -F -i 'government' "${NEW_ROOT}"etc/gdm3/greeter.gsettings >/dev/null 2>&1); then
   :
 else
   sed -i -e "s/^# banner-message-enable=true/banner-message-enable=true/" /etc/gdm3/greeter.gsettings
@@ -753,7 +747,7 @@ fi
 # Wait for return if in verbose mode (to see the messages before
 # 'dialog' is fired up again).
 if [ $VERBO ]; then
-  echo -n "Please press RETURN to continue. "; read $ans
+  echo -n "Please press RETURN to continue. "; read -r ans
 fi
 
 
@@ -761,7 +755,7 @@ fi
 # with our NEW_ROOT / phase 2.
 
 # Check that we are running off the "real" future '/' root,
-if [ $NEW_ROOT != / ]; then
+if [ "$NEW_ROOT" != / ]; then
   ${DIALOG} --title "Need to reboot to continue installation" \
     --msgbox \
 "\nPlease reboot the machine\n\
@@ -773,7 +767,7 @@ by rerunning this script ($0)." \
     17 74
 
   # Check for blank root password and show a reminder.
-  if (grep '^root::' ${NEW_ROOT}etc/passwd >/dev/null); then
+  if (grep '^root::' "${NEW_ROOT}"etc/passwd >/dev/null); then
     ${DIALOG} --title "Check user accounts and passwords" \
       --msgbox \
 "\nPlease remember to set a password for 'root'\n\
@@ -811,7 +805,7 @@ else
     link_home="off"
   fi
 fi
-if [ -x /lib/modules/`uname -r`/gpib ]; then
+if [ -x "/lib/modules/$(uname -r)/gpib" ]; then
   config_gpib_def="off"
 else
   config_gpib_def="on"
@@ -828,7 +822,7 @@ else
   serial_def="on"
 fi
 # Do we have sshd key files?
-if [ -r /etc/ssh/ssh_host_rsa_key -a -r /etc/ssh/ssh_host_dsa_key ]; then
+if [ -r /etc/ssh/ssh_host_rsa_key ] && [ -r /etc/ssh/ssh_host_dsa_key ]; then
   sshkeys_def="off"
 else
   sshkeys_def="on"
@@ -860,7 +854,7 @@ all of these can be safely attempted again and again.)" \
     rm -f /tmp/reply
     exit
   fi
-  PHASE2=`cat /tmp/reply | sed 's!\"!!g' `
+  PHASE2=$(sed 's!\"!!g' /tmp/reply  )
 else
   PHASE2="skip"
 fi
@@ -876,16 +870,16 @@ if [ -L /home ]; then
   :  # Do nothing if it already is a symlink.
 else
   if [ -d /home ]; then
-    for DIR in `ls /home`; do
-       if [ -d /usr2/${DIR} ]; then
+    for DIR in /home/*; do
+       if [ -d /usr2/"${DIR}" ]; then
          # Existing directory on /usr2, so save as a copy.
-         if [ -d /usr2/${DIR}.FSCOPY ]; then
-           rm ${VERBO} -rf /usr2/${DIR}.FSCOPY
+         if [ -d /usr2/"${DIR}".FSCOPY ]; then
+           rm ${VERBO} -rf /usr2/"${DIR}".FSCOPY
          fi
-         mv ${VERBO} /home/${DIR} /usr2/${DIR}.FSCOPY
+         mv ${VERBO} /home/"${DIR}" /usr2/"${DIR}".FSCOPY
        else
          # Simply move it across
-         mv ${VERBO} /home/${DIR} /usr2/
+         mv ${VERBO} /home/"${DIR}" /usr2/
        fi
        # Update user home directory in /etc/passwd to match
        sed -i -e "s,:/home/${DIR}:,:/usr2/${DIR}:," /etc/passwd
@@ -902,8 +896,8 @@ fi
       config_gpib)
 # Install the Linux-GPIB firmware collection if not yet installed
 if [ ! -r /var/local/gpib_firmware-2008-08-10 ]; then
-	(cd /var/local/;
-	 tar xvzf ${SRCS}/gpib_firmware-2008-08-10.tar.gz;
+	(cd /var/local/ || exit;
+	 tar xvzf "${SRCS}"/gpib_firmware-2008-08-10.tar.gz;
 	 ln -s gpib_firmware-2008-08-10 gpib_firmware)
 fi
 # Install the requisite firmware loader package
@@ -911,34 +905,34 @@ if [ ! -r /usr/share/doc/fxload ]; then
 	apt-get -y install fxload
 fi
 # Install default /etc/gpib.conf with device names mimicing NI driver
-if [ ${SRCS}etc_gpib.conf -nt /etc/gpib.conf ]; then
-  cp ${VERBO} -p ${SRCS}etc_gpib.conf /etc/gpib.conf
+if [ "${SRCS}"etc_gpib.conf -nt /etc/gpib.conf ]; then
+  cp ${VERBO} -p "${SRCS}"etc_gpib.conf /etc/gpib.conf
 fi
 # Compile and install Linux-GPIB package
-pushd /usr/src/linux-gpib-${GPIBVER} >/dev/null
+pushd /usr/src/linux-gpib-${GPIBVER} >/dev/null || exit
 ./configure --prefix=/usr
 make
 make install
-popd
+popd || exit
 # Add a suitable /etc/modprobe.d/gpib.conf that runs 'gpib_config'.
-if [ ${SRCS}etc_modprobe.d_gpib.conf -nt /etc/modprobe.d/gpib.conf ]; then
-  cp ${VERBO} -p ${SRCS}etc_modprobe.d_gpib.conf /etc/modprobe.d/gpib.conf
+if [ "${SRCS}"etc_modprobe.d_gpib.conf -nt /etc/modprobe.d/gpib.conf ]; then
+  cp ${VERBO} -p "${SRCS}"etc_modprobe.d_gpib.conf /etc/modprobe.d/gpib.conf
 fi
 # Add a wrapper for gpib_config to use with hotpluggable devices via udev.
 mkdir ${VERBO} -p /usr/lib/libgpib0
-if [ ${SRCS}usr_lib_libgpib0_gpib_config_wrapper -nt /usr/lib/libgpib0/gpib_config_wrapper ]; then
-  cp ${VERBO} -p ${SRCS}usr_lib_libgpib0_gpib_config_wrapper /usr/lib/libgpib0/gpib_config_wrapper
+if [ "${SRCS}"usr_lib_libgpib0_gpib_config_wrapper -nt /usr/lib/libgpib0/gpib_config_wrapper ]; then
+  cp ${VERBO} -p "${SRCS}"usr_lib_libgpib0_gpib_config_wrapper /usr/lib/libgpib0/gpib_config_wrapper
 fi
 # Add a suitable /etc/udev/rules.d/gpib.rules to set permissions on /dev/gpibX
 #  to load firmware into unitialised USB dongles that require that and to run
 #  the gpib_config wrapper on plug-in.
-if [ ${SRCS}etc_udev_rules.d_gpib.rules -nt /etc/udev/rules.d/gpib.rules ]; then
-  cp ${VERBO} -p ${SRCS}etc_udev_rules.d_gpib.rules /etc/udev/rules.d/gpib.rules
+if [ "${SRCS}"etc_udev_rules.d_gpib.rules -nt /etc/udev/rules.d/gpib.rules ]; then
+  cp ${VERBO} -p "${SRCS}"etc_udev_rules.d_gpib.rules /etc/udev/rules.d/gpib.rules
 fi
 # Wait for return if in verbose mode (to see the messages before
 # 'dialog' is fired up again).
 if [ $VERBO ]; then
-  echo -n "Please press RETURN to continue. "; read $ans
+  echo -n "Please press RETURN to continue. "; read -r ans
 fi
 ;;
       choose_gpib)
@@ -956,28 +950,28 @@ If you don't have the models mentioned, please select 'None'.\n" \
 2>/tmp/reply
 if [ $? = 0 ]; then
 ############ National Instruments PCI-GPIB card ###############
-  if [ `cat /tmp/reply` = ni_pci ]; then
+  if [ "$(cat /tmp/reply)" = ni_pci ]; then
     sed -i -e "s/board_type = \"[a-z_0-9]*/board_type = \"ni_pci/" /etc/gpib.conf
     modprobe ${VERBO} tnt4882
     gpib_config --minor 0
 ############ National Instruments GPIB/USB converter ##########
-  elif [ `cat /tmp/reply` = ni_usb ]; then
+  elif [ "$(cat /tmp/reply)" = ni_usb ]; then
     sed -i -e "s/board_type = \"[a-z_0-9]*/board_type = \"ni_usb_b/" /etc/gpib.conf
     modprobe ${VERBO} ni_usb_gpib
     gpib_config --minor 0
 ############ Agilent Technologies GPIB/USB converter ##########
-  elif [ `cat /tmp/reply` = 82357a ]; then
+  elif [ "$(cat /tmp/reply)" = 82357a ]; then
     sed -i -e "s/board_type = \"[a-z_0-9]*/board_type = \"agilent_82357a/" /etc/gpib.conf
     modprobe ${VERBO} agilent_82357a
     gpib_config --minor 0
-  elif [ `cat /tmp/reply` = None ]; then
+  elif [ "$(cat /tmp/reply)" = None ]; then
     sed -i -e "s/board_type = \"[a-z_0-9]*/board_type = \"ni_pci/" /etc/gpib.conf
   fi
 fi
 # Wait for return if in verbose mode (to see the messages before
 # 'dialog' is fired up again).
 if [ $VERBO ]; then
-  echo -n "Please press RETURN to continue. "; read $ans
+  echo -n "Please press RETURN to continue. "; read -r ans
 fi
 ;;
       set_perms)
@@ -1008,21 +1002,21 @@ If you don't have the models mentioned, please select 'None'.\n" \
 2>/tmp/reply
 if [ $? = 0 ]; then
 ############ Generic 2-port card ##############################
-  if [ `cat /tmp/reply` = 2-port ]; then
+  if [ "$(cat /tmp/reply)" = 2-port ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
     sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=6/" /etc/default/grub
     /usr/sbin/update-grub
 ############ VScom 400H #######################################
-  elif [ `cat /tmp/reply` = 4-port ]; then
+  elif [ "$(cat /tmp/reply)" = 4-port ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
     sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=8/" /etc/default/grub
     /usr/sbin/update-grub
 ############ VScom 800H #######################################
-  elif [ `cat /tmp/reply` = 8-port ]; then
+  elif [ "$(cat /tmp/reply)" = 8-port ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
     sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=12/" /etc/default/grub
     /usr/sbin/update-grub
-  elif [ `cat /tmp/reply` = None ]; then
+  elif [ "$(cat /tmp/reply)" = None ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
     sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=2/" /etc/default/grub
     /usr/sbin/update-grub
@@ -1059,10 +1053,10 @@ If this is a new 'sshd' installation, please select 'Create'.\n" \
   Defer "I'm not sure yet, ask again in a later run of 'fsadapt'" \
 2>/tmp/reply
 if [ $? = 0 ]; then
-  if [ `cat /tmp/reply` = Create ]; then
+  if [ "$(cat /tmp/reply)" = Create ]; then
     # Create new keys.
     /var/lib/dpkg/info/ssh.postinst configure
-  elif [ `cat /tmp/reply` = Defer ]; then
+  elif [ "$(cat /tmp/reply)" = Defer ]; then
     :
   fi
 fi
@@ -1077,7 +1071,7 @@ fi
 # Wait for return if in verbose mode (to see the messages before
 # 'dialog' is fired up again).
 if [ $VERBO ]; then
-  echo -n "Please press RETURN to continue. "; read $ans
+  echo -n "Please press RETURN to continue. "; read -r ans
 fi
 # Next: phase 3, things that may be done later again.
 
@@ -1103,7 +1097,7 @@ all of these can be safely attempted again and again.)" \
     rm -f /tmp/reply
     exit
   fi
-  PHASE3=`cat /tmp/reply | sed 's!\"!!g' `
+  PHASE3=$(sed 's!\"!!g' /tmp/reply)
 else
   PHASE3="skip"
 fi
@@ -1199,11 +1193,11 @@ network services according to your local security policy." \
     rm -f /tmp/reply
     exit
   fi
-  PHASE4=`cat /tmp/reply | sed 's!\"!!g' `
+  PHASE4=$(cat /tmp/reply | sed 's!\"!!g' )
 else
   PHASE4="skip"
 fi
-fphase4=`echo $PHASE4 | cut -d' ' -f1`
+fphase4=$(echo $PHASE4 | cut -d' ' -f1)
 #-- Check to see if the secure item was chosen.
 if [ "$fphase4" = "secure" ]; then
     netftp_def="off"
@@ -1240,13 +1234,13 @@ network services according to your local security policy." \
    rm -f /tmp/reply
    exit
  fi
-  PHASE4=`cat /tmp/reply | sed 's!\"!!g' `
+  PHASE4=$(sed 's!\"!!g' /tmp/reply)
 else
 :
 #  PHASE4="skip"
 fi
 #--
-fphase4=`echo $PHASE4 | cut -d' ' -f1`
+fphase4=$(echo "$PHASE4" | cut -d' ' -f1)
 if [ "$fphase4" != "skip" ]; then
   # Disable all network daemons; they need to be explicitly enabled.
   /usr/sbin/invoke-rc.d ssh stop >/dev/null 2>&1
