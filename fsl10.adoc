@@ -501,6 +501,9 @@ using the command
 
 === Start up the FSADAPT script
 
+WARNING: The Government warning template in fsadapt needs to be updated. For now, edit the
+script to replace the text with that contained in `govtwarn.txt` distributed with this guide.
+
 as follows:
 
     cd fsadapt
@@ -508,10 +511,10 @@ as follows:
 
 ==== FS Adaptation: Modifications (Window 1)
 
-All of the steps shown in Window 1 are
-required and should already be pre-selected apart from "noident", "ftpdlog"
-and "govt" which are optional.  After selecting any additional optional
-step required, simply press kbd:[Enter] with *OK* selected to continue.
+Using the arrow keys and kbd:[Space] make your selections and press kbd:[Enter].
+
+*  Do not select `rcsdir` -- this will be covered later using native systemd configurations
+*  For NASA stations select `govt` and `noident`.
 
 ==== FS Adaptation: Setup (Window 2)
 
@@ -567,9 +570,12 @@ entering the passwords twice as prompted.
 === Download the Field System
 
     cd /usr2
-    git clone https://github.com/nvi-inc/fs
-    chown -R prog:rtx /usr2/fs
+    git clone https://github.com/nvi-inc/fs fs-git
+    ln -s fs-git fs
+    chown -R prog:rtx fs-git
 
+    mkdir sched
+    chown oper:rtx sched
 
 === Install default copies of all the FS related directories
 
@@ -578,11 +584,25 @@ entering the passwords twice as prompted.
 
 and enter 'y' to confirm installation.
 
+=== Install startup units
+
+// TODO: this should go in fsadapt
+
+In the directory of this guide, copy the unit files to the system
+
+    cp systemd/* /etc/systemd/system
+
+Then enable them on startup:
+
+    systemctl enable fsalloc
+    systemctl enable stalloc
+
 === Make the FS
 
 IMPORTANT: Log-out of the console as root, and log-in again as prog.
 
    cd /usr2/fs
+   mkdir bin
    make >& /dev/null
 
 then
@@ -590,6 +610,7 @@ then
     make
 
 to confirm that everything compiled correctly.
+
 
 === Wait for the RAID1 disk mirroring to set up
 
