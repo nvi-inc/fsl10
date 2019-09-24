@@ -598,7 +598,7 @@ Set passwords for the 'oper' and 'prog' accounts with:
 entering the passwords twice as prompted.
 
 
-=== Download FS archive 
+=== Download the Field System
 
 Place a copy of the latest fs-9.11.x archive in your "/tmp" directory
 
@@ -635,7 +635,7 @@ watching its progress with:
 
    cat /proc/mdstat
 
-until none of the three arrays shows a recovery in progress.
+until the array no-longer shows a recovery in progress.
 
 The final step is to remove any DVD from the machine and to restart the machine
 using "reboot" as root or kbd:[Ctrl+Alt+Del] whilst watching that everything
@@ -647,7 +647,50 @@ specific software to `/usr2/st`.  See the files in the `/usr2/fs/misc` directory
 for more information.
 
 
-== Post install hardening
+== Post Install
+
+=== Setup additional disk
+
+NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
+
+Ensure the RAID is syncd by checking 
+
+    cat /proc/mdstat
+
+shows no resyncing in progress. If there is none, shut down the machine safely.
+
+Next, remove and place on the shelf.
+
+Boot with new secondaary disk keyed off or removed. This will ensure the machine is booted from the good disk.
+
+With the RAID now missing a disk, you may see 20-30s of "volume group not found", then the machine will boot.
+
+Once booted you, key on the disk. This will ensure the secondary disk is initialized second and is
+available as `/dev/sdb`.
+
+Next, login as root and setup the partition table on the secondary disk with
+
+    sgdisk -R/dev/sdb /dev/sda
+    sgdisk -G /dev/sdb
+
+Note, the order is important! 
+
+Now, copy the bootloader partition onto the first partition of the second disk
+
+    cp /dev/sda1 /dev/sdb1
+
+and add the second partition
+
+    mdadm /dev/md0 --add /dev/sdb2
+
+You can now resume using the computer as usual. 
+
+You can check the status of the RAID resync with
+
+    cat /proc/mdstat
+
+While the operating system can resume syncing the RAID if you reboot, it is best to avoid in case the boot partition
+is not fully synced.
 
 === Additional secruity and CIS Benchmarks
 
