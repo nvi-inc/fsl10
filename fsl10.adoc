@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick and D.E. Horsley 
-Draft Aug 2019
+Draft Sep 2019
 
 :sectnums:
 :experimental:
@@ -416,61 +416,28 @@ TIP: Recent versions of Debian have the `apt` program, which gives a more
 NOTE: It is also possible to add additional DVDs at this stage using the
 'apt-cdrom add' command 
 
-=== Install the latest Linux kernel and matching headers for your architecture
+=== Download the FS Linux 10 package selections
 
-// TODO: is this needed anymore?
 
-Run 'cat /proc/version' to see what flavour you require.
+. Get the selections by downloading this repository
++
+TODO: perhaps replace by curl
++
+    cd /usr2
+    git clone https://github.com/nvi-inc/fsl10
 
-then run
-
-   apt install linux-image-686-pae linux-headers-686-pae
-
-(on Intel Pentium Pro/II/III/4M/D, Xeon, Core of Atom and AMD GeodeNX,
-Athlon (K7), Duron, Opteron, Sempron, Turion or Phenon 32-bit processors,)
-   
-_OR_
-
-   apt install linux-image-amd64 linux-headers-amd64
-
-(on AMD64 or Intel EM64T 64-bit processors, also known as x86_64.)
-
-pressing kbd:[Enter] to confirm the installation of +- 12 new packages.
-
-NOTE: that if you are using DVDs, and are prompted to insert another DVD, you
-may need to use 'eject /dev/cdrom' from another virtual console to do this)
-
-=== Download the FS Linux 10 "dpkg" package selections
-
-// TODO: this needs to be updated
-
-As follows:
-
-    ftp ftp.hartrao.ac.za
-    user: ftp
-    password: your@email.address
-    cd /pub/fs9x
-    get fsl10_amd64.selections OR get fsl10_686.selections
-    quit
-
-=== Feed the package selections into "dpkg"
-
-// TODO: these selections can be shrunk
-// Also need to add some things
-
-using the commands
-
+. Feed the package selections into "dpkg" using the commands
++
    apt install dselect
    dselect update
-   dpkg --set-selections < fsl10_amd64.selections
+   dpkg --set-selections < selections/fsl10_amd64.selections
+   (or dpkg --set-selections < selections/fsl10_i686.selections)
 
 
-=== Start the additional package installation
+. Start the additional package installation with
 
-Run using the command
-
-   apt-get dselect-upgrade
-
+    apt-get dselect-upgrade
++
 then pressing kbd:[Enter] to confirm any updating of installed packages (where
 you have an Internet connection) and the installation of +-105 new packages
 (unless you did not select the Desktop or added other tasks earlier -
@@ -539,14 +506,14 @@ as follows:
     cd fsadapt
     ./fsadapt
 
-=== FS Adaptation: Modifications (Window 1)
+==== FS Adaptation: Modifications (Window 1)
 
 All of the steps shown in Window 1 are
 required and should already be pre-selected apart from "noident", "ftpdlog"
 and "govt" which are optional.  After selecting any additional optional
 step required, simply press kbd:[Enter] with *OK* selected to continue.
 
-=== FS Adaptation: Setup (Window 2)
+==== FS Adaptation: Setup (Window 2)
 
 All of the steps in Window 2 need to be done once
 with the exception of "sshkeys" which can be used to recover old SSH keys
@@ -558,24 +525,24 @@ NOTE: The "updates" option relies on email to 'root' being re-directed to some
       test it as well.  The installer sets it up to go the 'desktop' account
       by default which would definitely be a problem if you have removed that!
 
-=== GPIB driver configuration
+==== GPIB driver configuration
 
 On the "/etc/gpib.conf" screen, use the up/down
 arrow keys to select the required GPIB controller and press kbd:[Enter] on
 *OK* to continue.
 
-=== Serial port configuration
+==== Serial port configuration
 
 On the "/etc/default/grub: serial port configuration" screen
 up/down arrow keys to select the required RS232 serial card and press
 kbd:[Enter] on *OK* to continue.
 
-=== FS Adaptation: Settings (Window 3)
+==== FS Adaptation: Settings (Window 3)
 
 On Window 3 modify the email settings as required.  Simply press kbd:[Enter] on
 *OK* to continue.
 
-=== FS Adaptation: Network Services (Window 4) 
+==== FS Adaptation: Network Services (Window 4)
 
 The Window 4 will show what services are enabled.  Use the up/down arrows
 and kbd:[Space] to select "secure" and press kbd:[Enter] on *OK*.  Thereafter
@@ -597,21 +564,16 @@ Set passwords for the 'oper' and 'prog' accounts with:
 
 entering the passwords twice as prompted.
 
-
 === Download the Field System
 
-Place a copy of the latest fs-9.11.x archive in your "/tmp" directory
+    cd /usr2
+    git clone https://github.com/nvi-inc/fs
+    chown -R prog:rtx /usr2/fs
 
-where 'x' denotes the latest patch number (>=9.13.?) in the following.
-
-=== Extract the FS source from the archive
-
-   cd /
-   tar xzpf /tmp/fs-9.11.x.tgz
 
 === Install default copies of all the FS related directories
 
-   cd /usr2/fs-9.11.x
+   cd /usr2/fs
    make install
 
 and enter 'y' to confirm installation.
@@ -625,7 +587,7 @@ IMPORTANT: Log-out of the console as root, and log-in again as prog.
 
 then
 
-  make
+    make
 
 to confirm that everything compiled correctly.
 
