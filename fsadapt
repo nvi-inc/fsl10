@@ -419,10 +419,10 @@ else
 fi
 
 # Add FS shared memory setup into init sequence
-if [ ! -L "${NEW_ROOT}"etc/init.d/fs ]; then
-  rcsdir_def="on"
+if [ ! -L "${NEW_ROOT}"etc/systemd/system/fsalloc.service ]; then
+  systemd_def="on"
 else
-  rcsdir_def="off"
+  systemd_def="off"
 fi
 
 # Add 'rtx' / 990 group into '/etc/group'.
@@ -476,7 +476,7 @@ unless you are certain that you want and can to do that item again." \
   verbose   "Show names of files being processed in 'fsadapt'" off \
   atgpib    "Install Linux GPIB driver and library" $atgpib_def \
   pgplot    "Install PGPLOT5 and associated perl binding" $pgplot_def \
-  rcsdir    "Adjust 'rcS.d' to run FS-specific programs in boot" $rcsdir_def \
+  systemd   "Adjust systemd to run FS-specific programs in boot" $systemd_def \
   rtxgroup  "Add 'rtx' group to '/etc/group'" $rtxgroup_def \
   stdaccts  "Add 'oper' and 'prog' to '/etc/passwd and /etc/shadow'" $stdaccts_def \
   fstab     "Make sure that '/etc/fstab' includes '/usr2' etc" "on" \
@@ -522,7 +522,7 @@ popd || exit
 # Install appropriate packages from distribution
 chroot "${NEW_ROOT}" apt-get -y install pgplot5 libpgplot-perl
 ;;
-      rcsdir)
+      systemd)
 ##systemd, new in Debian 8
 chroot "${NEW_ROOT}" systemctl disable fsalloc >/dev/null
 chroot "${NEW_ROOT}" systemctl disable stalloc >/dev/null
