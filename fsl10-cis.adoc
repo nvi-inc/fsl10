@@ -402,11 +402,10 @@ then add
 
 == Configure `logrotate` (§8.4)
 
-_________________________________________________________________________________________________________________________________________________________________________________
-Logs need to be retained on the system for 53 weeks, we will adjust this
-when it’s reporting to a central system and at that point the logs will
-have to be retained for 3 months
-_________________________________________________________________________________________________________________________________________________________________________________
+
+NOTE: Logs need to be retained on the system for 53 weeks, we will adjust this
+when it’s reporting to a central system and at that point the logs will have to
+be retained for 3 months
 
 Increase the retention period of system logs by editing
 `/etc/logrotate.d/rsyslog`. This should be configured to store logs for
