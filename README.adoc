@@ -1,0 +1,10 @@
+= Field System Linux Distribution
+
+This archive contains instructions and utilities for setting up a standard Field System Linux system.
+While you can will be able to install the Field System on other Linux distributions, the system
+is a tried-and-tested setup for robust VLBI operations. 
+
+Using this guide will make it easier to
+ask the community for help.
+
+Follow the <<installation.adoc#,installation notes>> to get started.
