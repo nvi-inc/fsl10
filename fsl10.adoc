@@ -371,6 +371,23 @@ NOTE: If you do keep this account, you will not be able to run the FS from
 it unless you add this account into the additional hardware access groups
 such as is done for oper/prog by FSADAPT.
 
+=== Install GRUB secondary disk (if available)
+
+* If you installed with UEFI boot, run the command
++
+    cp /dev/sda1 /dev/sdb1
+
+* If you installed BIOS boot install GRUB to the Master Boot Record by running:
++
+   dpkg-reconfigure -plow grub-pc
++
+and after pressing kbd:[Enter] twice to accept the kernel command line extra
+arguments and default command line argruments, use the arrow keys and
+kbd:[Space] to select both /dev/sda and /dev/sdb (but not /dev/md0) and press
+kbd:[Enter] to finalise the reconfiguration. (You should then see "Installation
+finished. No error reported" appear twice in the progress messages as GRUB is
+re-installed to both drives.)
+
 === Setup HTTP Proxy for APT (Optional)
 Should you wish to make APT use an HTTP proxy for downloads,
 create the new file `/etc/apt/apt.conf.d/00proxies` using `vi` containing:
@@ -418,17 +435,19 @@ NOTE: It is also possible to add additional DVDs at this stage using the
 
 === Download the FS Linux 10 package selections
 
+First install git and deselect
+
+    apt install git dselect
 
 . Get the selections by downloading this repository
 +
 TODO: perhaps replace by curl
 +
-    cd /usr2
     git clone https://github.com/nvi-inc/fsl10
+    cd fsl10
 
 . Feed the package selections into "dpkg" using the commands
 +
-   apt install dselect
    dselect update
    dpkg --set-selections < selections/fsl10_amd64.selections
    (or dpkg --set-selections < selections/fsl10_i686.selections)
@@ -448,28 +467,6 @@ access and the exact revision of DVDs used):
    
 Installation runs to completion.
 
-=== Install GRUB secondary disk (if available)
-
-==== EFI
-
-Run the command
-
-    cp /dev/sda1 /dev/sdb1
-
-=== BIOS
-
-// TODO: is this still right?
-
-Install GRUB to the Master Boot Record by running:
-
-   dpkg-reconfigure -plow grub-pc
-
-and after pressing kbd:[Enter] twice to accept the kernel command line extra
-arguments and default command line argruments, use the arrow keys and
-kbd:[Space] to select both /dev/sda and /dev/sdb (but not /dev/md0) and
-press kbd:[Enter] to finalise the reconfiguration.
-(You should then see "Installation finished. No error reported" appear
-twice in the progress messages as GRUB is re-installed to both drives.)
 
 === Clean up the APT download directory
 // TODO: perhaps we can change to `apt-listchanges`
@@ -481,47 +478,19 @@ So that the update mechanism will work correctly, run
 
 == Third Stage Installation (FSADAPT):
 
-=== Download the latest available FSADAPT 9.0.x tarball
-(it is not related in any way to the FS version you want to install):
-
-Eg:
-
-   ftp ftp.hartrao.ac.za
-   user: ftp
-   password: <your@email.address>
-   cd /pub/fs9x
-   get fsadapt-9.0.x.tgz
-   quit
-
-=== Unpack the FSADAPT 9.0.x tarball
-
-using the command
-
-   tar xzf fsadapt-9.0.x.tgz
-
-=== Start up the FSADAPT script
-
-WARNING: The Government warning template in fsadapt needs to be updated. For now, edit the
-script to replace the text with that contained in `govtwarn.txt` distributed with this guide.
-
-as follows:
-
-    cd fsadapt
     ./fsadapt
 
 ==== FS Adaptation: Modifications (Window 1)
 
 Using the arrow keys and kbd:[Space] make your selections and press kbd:[Enter].
 
-*  Do not select `rcsdir` -- this will be covered later using native systemd configurations
 *  For NASA stations select `govt` and `noident`.
 
 ==== FS Adaptation: Setup (Window 2)
 
-All of the steps in Window 2 need to be done once
-with the exception of "sshkeys" which can be used to recover old SSH keys
-from a backup.  So simply press kbd:[Enter] with the *OK* selected to
-continue.
+All of the steps in Window 2 need to be done once with the exception of
+"sshkeys" which can be used to recover old SSH keys from a backup.  So simply
+press kbd:[Enter] with the *OK* selected to continue.
 
 NOTE: The "updates" option relies on email to 'root' being re-directed to some
       mailbox that will be read regularly, so make sure you set that up and
@@ -584,19 +553,6 @@ entering the passwords twice as prompted.
 
 and enter 'y' to confirm installation.
 
-=== Install startup units
-
-// TODO: this should go in fsadapt
-
-In the directory of this guide, copy the unit files to the system
-
-    cp systemd/* /etc/systemd/system
-
-Then enable them on startup:
-
-    systemctl enable fsalloc
-    systemctl enable stalloc
-
 === Make the FS
 
 IMPORTANT: Log-out of the console as root, and log-in again as prog.
@@ -610,7 +566,6 @@ then
     make
 
 to confirm that everything compiled correctly.
-
 
 === Wait for the RAID1 disk mirroring to set up
 
