@@ -252,7 +252,7 @@ optional for non-NASA stations
 . In the LVM configuration window, select *Finish*
 
 . Then for each logical volume in the table except swap, do the following:
-.. Select the free space (eg "#1and press kbd:[Enter]
+.. Select the free space under the label (eg "#1    ") and press kbd:[Enter]
 .. Select *Use as* and press kbd:[Enter] then select *Ext4 journaling file system* 
 .. Select *Mount point*, press kbd:[Enter], then select the appropriate mount point from the list or use *Enter manually* if not there.
 .. Select *Done setting up this partition*
