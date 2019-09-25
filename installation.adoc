@@ -238,24 +238,23 @@ optional for non-NASA stations
 |=======================================
 |  |Mount point    | LV name | Size
 
-|1 |/              | root     | 50 G
+|1 |/var/log/audit | audit*   | 500 M
 |2 |/boot          | boot     | 1 G
-|3 |swap           | swap     | 8 G
-|4 |/tmp           | tmp      | 8 G
-|5 |/var           | var*     | 8 G
-|6 |/var/log       | log*     | 4 G
-|7 |/var/log/audit | audit*   | 500 M
-|8 |/home          | home     | 4 G
-|9 |/usr2          | usr2     | remaining disk space *less about 50 GB* (you don't need to be precise, this is just useful if you need to resize a logical volume later)
+|3 |/home          | home     | 4 G
+|4 |/var/log       | log*     | 4 G
+|5 |/              | root     | 50 G
+|6 |swap           | swap     | 8 G
+|7 |/tmp           | tmp      | 8 G
+|8 |/var           | var*     | 8 G
+|9 |/usr2          | usr2     | remaining disk space *less ~50 GB*
 |=======================================
 
 . In the LVM configuration window, select *Finish*
 
 . Then for each logical volume in the table except swap, do the following:
-.. Select the "free space" and press kbd:[Enter]
+.. Select the free space (eg "#1and press kbd:[Enter]
 .. Select *Use as* and press kbd:[Enter] then select *Ext4 journaling file system* 
-.. Select *Mount point*, press kbd:[Enter], then select the appropriate mount point from the list or 
-.  use *Enter manually* if not there.
+.. Select *Mount point*, press kbd:[Enter], then select the appropriate mount point from the list or use *Enter manually* if not there.
 .. Select *Done setting up this partition*
 
 . For the swap logical volume, select *Use as* then select *swap area*
