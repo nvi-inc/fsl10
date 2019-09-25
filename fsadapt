@@ -301,7 +301,7 @@ fi
 # Determine the absolute path to the directory name where this script resides.
 SRCS=${0%fsadapt}
 if [ x"$SRCS" = x ]; then
-  SRCS="./"
+  SRCS="./gpib"
 fi
 if [ ${SRCS#/} = $SRCS ]; then  # it doesn't start with a '/'
   SRCS=$(pwd)/$SRCS
