@@ -24,9 +24,9 @@ faster, and also necessary if you wish to use UEFI. Directions for creating your
 installation media can be found online. 
 
 NOTE: Don't be confused by the `amd64` name, this architecture is supports both
-AMD and Intel manufactured x86-64 processors. This includes CPU lines
-such as Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel
-had a completing and incompatible 64 bit architecture.
+AMD and Intel manufactured x86-64 processors. This includes CPU lines such as
+Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel had a
+completing and incompatible 64 bit architecture.
 
 You can install a DVD drive, USB device, or over the network. Any revision of
 9.x installation's should work fine, but older revisions will want to download
@@ -45,22 +45,18 @@ https://www.debian.org/releases/stretch/installmanual
 
 == Motherboard setup
 
-// TODO: perhaps we need some general advice on setting motherboards
-NOTE: This is somehting we may change before final release of FSL10. Legacy mode/BIOS emulation
-might be easier, especially with disk rotations.
-
 Modern motherboards offer two forms of booting: native UEFI or BIOS emulation
 ("Legacy"). Either modes of boot are supported by this installation guide, and
 you will be given alternatives when the instructions differ.
 
-Decide which boot mode you wan to use and select it through the motherboard setup menu (typically by
-pressing kbd:[DEL] during POST).
+Decide which boot mode you wan to use and select it through the motherboard
+setup menu (typically by pressing kbd:[DEL] during POST).
 
 Also make sure that the motherboard time is set to the current Universal time, ie.
 UTC, and the motherboard can boot from the installation media.
 
 While you are in the motherboard menu, check that hot-swapping is enabled. This
-will be useful later.
+will be useful for disk rotation.
 
 == First Stage Installation
 
@@ -70,10 +66,12 @@ third disk later, you must make sure that the smallest disk of the three
 disks available is used as the first of this initial RAID pair. Use of a
 single disk (for a test install etc.) is also annotated below.
 
-=== Insert/plug-in your installation media and reboot.
+=== Boot from the installation medium
 
-To boot of the installation media you may need to bring up your motherboards boot menu, which is typically
-accessed by pressing kbd:[F12].
+Insert/plug-in your installation media and reboot.
+
+To boot of the installation media you may need to bring up your motherboards
+boot menu, which is typically accessed by pressing kbd:[F11] or kbd:[F12].
 
 
 === Set boot options and boot installer
@@ -193,7 +191,10 @@ When prompted, select *Manual*
 
 . Now press *Done setting up the partition*.
 
-. Next select the *FREE SPACE* and *Create a new partition* again.
+. Next select the *FREE SPACE* and *Create a new partition* again. 
++
+NOTE: You may see a small 1MB "FREE SPACE" at the start of the disk. This is
+fine, just be sure to choose the large "FREE SPACE" at the end of the disk.
 
 . This time choose the whole amount of free space (the default).
 
@@ -211,7 +212,8 @@ Repeat the process for the second disk
 . Select *Create MD device*, choose *RAID 1* and enter *2* as number
 of devices and *0* as number of spare.
 
-. Select the two raid partitions we just created, (these should be sda2 and sdb2)
+. Select the two raid partitions we just created using space -- these should be sda2 and
+sdb2) -- then presse kbd:[Enter]
 
 . Select *Finish*.
 
@@ -221,8 +223,7 @@ of devices and *0* as number of spare.
 
 ==== Setup Logical Volume Manager (LVM)
 
-. Now choose the 3rd option of the partition manager *Configure the Logical
-Volume Manager* and select "yes" when prompted to write the changes to disk
+. Now choose *Configure the Logical Volume Manager* and select "yes" if prompted to write the changes to disk
 
 . Choose *Create volume group* 
 . Enter a name appropriate for the machine and group, eg *gs-fs1*, and press kbd:[Enter]
@@ -230,32 +231,32 @@ Volume Manager* and select "yes" when prompted to write the changes to disk
 to continue
 
 . For each item in the following table run *Create logical volume*, select the
-your volume group and assign the corresonding label. Those marked with "*" are
+your volume group and assign the corresponding label. Those marked with "*" are
 optional for non-NASA stations
 +
 .Logical volumes
 |=======================================
-| Mount point    | LV label | Size
+|  |Mount point    | LV name | Size
 
-| /              | root     | 50 GB
-| /boot          | boot     | 1 GB
-| swap           | swap     | 4 GB
-| /tmp           | tmp      | 4 GB
-| /var           | var*    | 8 GB
-| /var/log       | log*    | 4 GB
-| /var/log/audit | audit*  | 500 MB
-| /home          | home     | 4 GB
-| /usr2          | usr2     | remaining disk space *less about 50 GB*
+|1 |/              | root     | 50 G
+|2 |/boot          | boot     | 1 G
+|3 |swap           | swap     | 8 G
+|4 |/tmp           | tmp      | 8 G
+|5 |/var           | var*     | 8 G
+|6 |/var/log       | log*     | 4 G
+|7 |/var/log/audit | audit*   | 500 M
+|8 |/home          | home     | 4 G
+|9 |/usr2          | usr2     | remaining disk space *less about 50 GB* (you don't need to be precise, this is just useful if you need to resize a logical volume later)
 |=======================================
 
 . In the LVM configuration window, select *Finish*
 
-. Then  for each logical volume in the table except swap,:
-    . Select the "free space" and press kbd:[Enter]
-    . Select *Use as* and press kbd:[Enter] then select *Ext4 journaling file system* 
-    . Select *Mount point*, press kbd:[Enter], then select the appropriate mount point from the list or 
-      use *Enter manually* if not there.
-    . Select *Done setting up this partition*
+. Then for each logical volume in the table except swap, do the following:
+.. Select the "free space" and press kbd:[Enter]
+.. Select *Use as* and press kbd:[Enter] then select *Ext4 journaling file system* 
+.. Select *Mount point*, press kbd:[Enter], then select the appropriate mount point from the list or 
+.  use *Enter manually* if not there.
+.. Select *Done setting up this partition*
 
 . For the swap logical volume, select *Use as* then select *swap area*
 
@@ -479,7 +480,11 @@ So that the update mechanism will work correctly, run
    apt-get clean
 
 
-== Third Stage Installation (FSADAPT):
+== Third Stage Installation 
+
+=== FSADAPT
+
+In the fs10 directory, start FSADAPT with
 
     ./fsadapt
 
@@ -502,9 +507,8 @@ NOTE: The "updates" option relies on email to 'root' being re-directed to some
 
 ==== GPIB driver configuration
 
-On the "/etc/gpib.conf" screen, use the up/down
-arrow keys to select the required GPIB controller and press kbd:[Enter] on
-*OK* to continue.
+On the "/etc/gpib.conf" screen, use the up/down arrow keys to select the
+required GPIB controller and press kbd:[Enter] on *OK* to continue.
 
 ==== Serial port configuration
 
