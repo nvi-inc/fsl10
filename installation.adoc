@@ -28,18 +28,20 @@ AMD and Intel manufactured x86-64 processors. This includes CPU lines
 such as Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel
 had a completing and incompatible 64 bit architecture.
 
-You can install a DVD drive, USB device or over the network. The details of
-creating your installation media can be found in the Debian installation
-guide available from: https://www.debian.org/releases/stretch/installmanual
+You can install a DVD drive, USB device, or over the network. Any revision of
+9.x installation's should work fine, but older revisions will want to download
+many security patches from the network which may already be included in the
+latest revision. Note also that installing from DVDs as described here is
+recommended mainly for sites with little to poor Internet connectivity (even
+then use of a single DVD may suffice) and the equivalent use of a Debian
+GNU/Linux 9.x "Stretch" - Official i386/amd64 "netinst" CD would suffice for
+installation at most sites with good connectivity. Disk images for the installer
+ca be found at: https://cdimage.debian.org/cdimage/archive/
 
-Any revision of 9.x installation's should work fine, but older revisions
-will want to download many security patches from the network which may
-already be included in the latest revision. Note also that installing from
-DVDs as described here is recommended mainly for sites with little to poor
-Internet connectivity (even then use of a single DVD may suffice) and the
-equivalent use of a Debian GNU/Linux 9.x "Stretch" - Official i386/amd64
-"netinst" CD would suffice for installation at most sites with good
-connectivity.
+The details of creating your installation media can be found in the Debian
+installation guide available from:
+https://www.debian.org/releases/stretch/installmanual
+
 
 == Motherboard setup
 
@@ -47,17 +49,18 @@ connectivity.
 NOTE: This is somehting we may change before final release of FSL10. Legacy mode/BIOS emulation
 might be easier, especially with disk rotations.
 
-Modern motherboards offer two forms of booting: native UEFI or BIOS emulation ("Legacy"). There is no
-particular advantage to UEFI boot other than the ability to enable secure boot, which is not supported by
-Debian at the time of writing anyway. Either are supported by this installation guide, and you will be
-given alternatives when the instructions.
+Modern motherboards offer two forms of booting: native UEFI or BIOS emulation
+("Legacy"). Either modes of boot are supported by this installation guide, and
+you will be given alternatives when the instructions differ.
 
 Decide which boot mode you wan to use and select it through the motherboard setup menu (typically by
-pressing kbd:[DEL] during POST.
+pressing kbd:[DEL] during POST).
 
 Also make sure that the motherboard time is set to the current Universal time, ie.
 UTC, and the motherboard can boot from the installation media.
 
+While you are in the motherboard menu, check that hot-swapping is enabled. This
+will be useful later.
 
 == First Stage Installation
 
