@@ -632,5 +632,5 @@ is not fully synced.
 
 === Additional secruity and CIS Benchmarks
 
-For NASA stations or those who wish to conform to the CIS recommendations, now move on
-to the <<fsl10-cis.adoc#,CIS hardening FSL10>> document.
+For stations that wish to conform to the additional security recommendations of the
+Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
