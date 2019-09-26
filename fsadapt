@@ -1271,19 +1271,16 @@ EOF
   /usr/sbin/invoke-rc.d ntp restart >/dev/null 2>&1
   update-inetd ${VVERBO} --disable ident
 ## 'update-rc.d' will disable any non-existing files...
+  systemctl disable avahi-daemon 
   rm -f /etc/init.d/fs
-  cp -p etc_init.d_fs /etc/init.d/fs
-  update-rc.d avahi-daemon disable
-  rm -f /etc/init.d/fs
-  ln -s /usr2/fs/misc/rc.fs /etc/init.d/fs
 # always make sure these old insecure services are disabled just in case
-  update-inetd ${VVERBO} --disable telnet
-  update-inetd ${VVERBO} --disable shell
-  update-inetd ${VVERBO} --disable login
-  update-inetd ${VVERBO} --disable exec
-  update-inetd ${VVERBO} --disable talk
-  update-inetd ${VVERBO} --disable ntalk
-  update-inetd ${VVERBO} --disable finger
+  systemctl  disable telnet
+  systemctl  disable shell
+  systemctl  disable login
+  systemctl  disable exec
+  systemctl  disable talk
+  systemctl  disable ntalk
+  systemctl  disable finger
 fi
 
   for i in $PHASE4; do
