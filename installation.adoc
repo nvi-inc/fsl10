@@ -260,8 +260,8 @@ optional for non-NASA stations
 . For the swap logical volume, select *Use as* then select *swap area*
 
 . Back in the partition screen, select *Finish partitioning and write changes to
-the disks*. For big disks, it may take some time to create the ext4 file
-systems.
+the disks* and select *Yes* to write the changes. For big disks, it may take
+a little time to create the ext4 file systems.
 
 === Configure the package manager
 
@@ -327,11 +327,12 @@ reached.
 This can take a while, up to one and half hours or more.
 
 
-=== Install the GRUB bootloader
+=== Install the GRUB bootloader (BIOS boot only)
 
-. At *Install GRUB to Master Boot Record* select *yes* then select */dev/sda*
-** UEFI: you will not be presented with this option; GRUB will automatically be
-   installed
+NOTE: With UEFI boot, you will not be presented with this option; GRUB will automatically be
+installed to the first ESP partition.
+
+At *Install GRUB to Master Boot Record* select *yes* then select */dev/sda*
 
 When prompted, press kbd:[Enter] to install to the master boot record of the
 primary disk.
@@ -350,18 +351,19 @@ leaves something nasty in the machine's removable drives by mistake.
 
 You can now boot to your new OS.
 
-TIP: If the login screen is painfully slow, try disabling Wayland in
+NOTE: If the login screen is painfully slow, try disabling Wayland in
 GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
 
 === Login as root 
+
+TIP: Previous versions of Debian ran X11 on virtual console 7. As of
+Debian 9, the desktop environment consoles are virtual console 1 and 2. 
 
 Switch to Virtual Console 3, by pressing kbd:[Ctrl+Alt+F3].
 
 Enter `root` and press kbd:[Enter], then enter the root password you set
 earlier.
 
-NOTE: Previous versions of Debian ran X11 on virtual console 7. As of
-Debian 9, the desktop environment consoles are virtual console 1 and 2. 
 
 === Remove the dummy "Desktop User" (optional)
 
@@ -426,10 +428,10 @@ all these entries (but CD/DVD entries might use "unstable".)
 
 === Update APT's list of packages
 
-Next tell APT to update its internal source list of packages using
-
 TIP: Recent versions of Debian have the `apt` program, which gives a more
      user-friendly interface to the package manager than `apt-get`
+
+Next tell APT to update its internal source list of packages using
 
    apt update 
 
@@ -442,14 +444,13 @@ First install git and deselect
 
     apt install git dselect
 
-. Get the selections by downloading this repository
+. Get the selections by downloading this repository:
 +
-TODO: perhaps replace by curl
-+
+    cd /root
     git clone https://github.com/nvi-inc/fsl10
     cd fsl10
 
-. Feed the package selections into "dpkg" using the commands
+. Feed the package selections into `dpkg` using the commands
 +
    dselect update
    dpkg --set-selections < selections/fsl10_amd64.selections
@@ -457,11 +458,11 @@ TODO: perhaps replace by curl
 
 
 . Start the additional package installation with
-
++
     apt-get dselect-upgrade
 +
-then pressing kbd:[Enter] to confirm any updating of installed packages (where
-you have an Internet connection) and the installation of +-105 new packages
+then press kbd:[Enter] to confirm any updating of installed packages (where
+you have an Internet connection) and the installation of \~300 new packages
 (unless you did not select the Desktop or added other tasks earlier -
 currently downloading at least 95MB from the Internet and/or DVDs).
 
@@ -483,7 +484,7 @@ So that the update mechanism will work correctly, run
 
 === FSADAPT
 
-In the fs10 directory, start FSADAPT with
+In the /root/fs10 directory, start FSADAPT with
 
     ./fsadapt
 
