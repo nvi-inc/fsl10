@@ -484,7 +484,7 @@ So that the update mechanism will work correctly, run
 
 === FSADAPT
 
-In the /root/fs10 directory, start FSADAPT with
+In the /root/fsl10 directory, start FSADAPT with
 
     ./fsadapt
 
