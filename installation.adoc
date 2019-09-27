@@ -606,7 +606,7 @@ shows no resyncing in progress. If there is none, shut down the machine safely.
 
 Next, remove and place on the shelf.
 
-Boot with new secondaary disk keyed off or removed. This will ensure the machine is booted from the good disk.
+Boot with new secondary disk keyed off or removed. This will ensure the machine is booted from the good disk.
 
 With the RAID now missing a disk, you may see 20-30s of "volume group not found", then the machine will boot.
 
@@ -637,7 +637,66 @@ You can check the status of the RAID resync with
 While the operating system can resume syncing the RAID if you reboot, it is best to avoid in case the boot partition
 is not fully synced.
 
-=== Additional secruity and CIS Benchmarks
+=== Additional security and CIS Benchmarks (Optional)
 
 For stations that wish to conform to the additional security recommendations of the
 Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
+
+=== Disabling direct login to oper and prog (Optional)
+
+The model of FSL assumes oper and prog accounts will be used for operations and
+programming respectively. However, some institutes may have security and
+auditing restrictions that mean operators must log-in to their own account.
+As the Field System currently operates, users will then need to switch to
+the oper or prog account after login.
+
+To do this, we suggest suggest create two groups that can sudo to the oper and
+prog accounts.
+
+run `visudo` then add at end:
+
+    %operators      ALL=(oper) NOPASSWD: ALL
+    %programmers    ALL=(prog) NOPASSWD: ALL
+    %programmers    ALL=(oper) NOPASSWD: ALL
+
+Then add each user to these groups ass appropriate, eg:
+
+    adduser dhorsley programmers
+
+or 
+
+    adduser dhorsley operators
+
+Authorized users can then switch to prog or oper with:
+
+    sudo -i -u prog
+
+
+So ensure X authorization works do the following:
+
+1. Add this to the following files
++
+.~/.login
+[source,csh]
+```
+if ( $?XCOOKIE == 1 ) then
+    xauth add $XCOOKIE
+endif
+```
++
+.~/.profile
+[source,bash]
+```
+if [ -z $XCOOKIE ]; then
+    xauth add $XCOOKIE
+fi
+```
++
+2. Make the file `/usr/local/bin/fs` with contents
+
+[source,bash]
+```
+#!/bin/bash
+sudo -u oper XCOOKIE="$(xauth list $DISPLAY)" FS_DISPLAY_SERVER=on -i fs
+```
+

@@ -1,24 +1,26 @@
 = CIS hardening FSL10
 David E Horsley
-Dec 2018
+Sep 2019
 
-These notes detail adding extra security features to Field System Linux 10
-as advised by Center for Internet Security. With exception of the
-<<Partition Configuration>>, are all to be performed post-installation.
-In general, each section can be applied in any particular order or skipped entirely.
+These notes detail adding extra security features to Field System Linux 10 as
+advised by Center for Internet Security. With exception of the partition
+configuration, are all to be performed post-installation. 
+
+In general, each section can be applied in any particular order or skipped
+entirely.
 
 All commands need to be run as `root`
 
 == Partition Configuration
 
-During installation use the supplemental document 
-<<fsl10-cis-partitions.adoc#,CIS recommended partitions for FSL10>> during the partition section.
+During installation, be sure to create the logical volumes marked optional during the partition section.
 
-== Disable Unused file systems (§2.18-2.24)
+== Disable Unused file system modules (§2.18-2.24)
 
 If you don’t need these file systems disabling them will decrease any
-risk they may pose. Add the following to `/etc/modprobe.d/CIS.conf`:
+risk they may pose. Create the following file
 
+./etc/modprobe.d/CIS.conf
 ....
 install cramfs /bin/true
 install freevxfs /bin/true
@@ -39,7 +41,7 @@ vulnerabilities. Disabling them for SUID executables by adding to
 fs.suid_dumpable = 0
 ....
 
-To disable them entirely, add, to /etc/security/limits.conf, the line
+To disable them entirely, add, to `/etc/security/limits.conf`, the line
 
 ....
 * hard core 0
@@ -65,7 +67,7 @@ then add `apparmor=1` and `security=apparmor` to `GRUB_CMDLINE_LINUX` in
 GRUB_CMDLINE_LINUX="apparmor=1 security=apparmor"
 ....
 
-(you may need to merge it with existing parameters there)
+NOTE: you may need to merge it with existing parameters there
 
 Update the boot loader:
 
@@ -212,8 +214,9 @@ GRUB_CMDLINE_LINUX="audit=1"
 note you will need to merge this with existing arguments.
 
 Next you will need to configure more fine-grained auditing. Created the
-file `/etc/audit/rules.d/cis.rules` and add the following
+following file
 
+./etc/audit/rules.d/cis.rules
 ....
 ## time events
 -a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
@@ -309,7 +312,7 @@ setuid and/or setgid bit set on execution) to determine if unprivileged
 users are running these commands.
 
 ....
-find PART -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
+find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
 "-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
 -k privileged" }' > /etc/audit/rules.d/cis-suid.rules
 ....
@@ -531,9 +534,9 @@ Then update existing users with
 chage --maxdays 90 --mindays 7 --warndays 10 <user>
 ....
 
-== Disable System Accounts Section (§10.2)
+For each `<user>`
 
-// TODO: 
+== Disable System Accounts Section (§10.2)
 
 prog and oper are required.
 
@@ -552,7 +555,7 @@ umask 077
 
 == Set Warning Banner for Standard Login Services (§11.1)
 
-*TODO:* needs language
+NOTE: This can be setup with the correct language bu `fsadapt`
 
 ....
 touch /etc/motd
@@ -567,4 +570,4 @@ chown root:root /etc/issue.net
 chmod 644 /etc/issue.net
 ....
 
-The above should not contain any lines containing `\m , \r , \s or \v`.
+The above should not contain any lines containing `\m`, `\r`, `\s`, or `\v`.
