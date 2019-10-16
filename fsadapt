@@ -1,9 +1,12 @@
 #!/bin/bash
-# fsadapt  -- adapt a Debian 7.x installation for FS Linux 9
-# $Id: fsadapt,v 9.0 2014/07/24 12:06:30 jfq Exp $
+# fsadapt  -- adapt a Debian 9.x installation for FS Linux 10
+# $Id: fsadapt,v 10.0 2019/09/26 12:06:30 jfq Exp $
 
 # What          When                  Who
 # $Log: fsadapt,v $
+# Revision 10.0 2019/09/26 12:06:30  deh
+# Preliminary pre-release for FS Linux 10
+#
 # Revision 9.0  2014/07/24 12:06:30  jfhq
 # Initial release for FS Linux 9
 #
@@ -155,14 +158,18 @@
 # 1995-06-07  amn  Selecting target dir/dev, X setup.
 # 1995-06-06  amn  Original version.
 
-readonly DIALOG="dialog --backtitle FS/Debian/Linux-fsadapt-9.0"
+# Ensure dialog is installed or things will go very wrong!
+dialog --version > /dev/null || exit
+
+readonly DIALOG="dialog --backtitle FS/Debian/Linux-fsadapt-10.0"
 readonly PATCHOPTS="-s -p1 --set-utc"
 
 FSMESS="We are about to update a Debian 9.x + Linux 4.9.0 (FS Linux 10)"
 FSLINUX00=$(cut -c1-2 < /etc/debian_version)
-  if [ "${FSLINUX00}" != "9." ]; then
-      echo "WARNING: Could not find Linux revision !!!"
-      echo -n "Did not find an approved FS kernel.";
+FSLINUX01=$(uname -r | cut -c1-5)
+  if [ "${FSLINUX00}" != "9."  -o "${FSLINUX01}" != "4.9.0" ]; then
+      echo -n "WARNING: Could not find Debian version or "
+      echo "did not find an approved FS kernel.";
       echo -n "I will run fsadapt as kernel 4.9.0 FS Linux 10"; read -r ans
   fi
 
@@ -270,14 +277,14 @@ blank_oper=$(grep '^oper::' "${NEW_ROOT}"etc/shadow)
 unset_oper=$(grep '^oper:\*:' "${NEW_ROOT}"etc/shadow)
 blank_prog=$(grep '^prog::' "${NEW_ROOT}"etc/shadow)
 unset_prog=$(grep '^prog:\*:' "${NEW_ROOT}"etc/shadow)
-has_user1=$(grep '^user1:' "${NEW_ROOT}"etc/shadow)
+has_user1=$(grep '^desktop:' "${NEW_ROOT}"etc/shadow)
 if [ "$has_user1" ]; then
-  user1_text=", 'user1'"
+  user1_text=", 'desktop'"
 else
   user1_text=""
 fi
-blank_user1=$(grep '^user1::' "${NEW_ROOT}"etc/shadow)
-unset_user1=$(grep '^user1:\*:' "${NEW_ROOT}"etc/shadow)
+blank_user1=$(grep '^desktop::' "${NEW_ROOT}"etc/shadow)
+unset_user1=$(grep '^desktop:\*:' "${NEW_ROOT}"etc/shadow)
 if [ "$blank_root" -o "$blank_oper" -o "$blank_prog" -o "$blank_user1" ]; then
   if [ "$NODIALOGS" ]; then
     echo "fsadapt: must set passwords for ('root', 'oper', 'prog'${user1_text}) first" >&2
@@ -301,15 +308,15 @@ fi
 # Determine the absolute path to the directory name where this script resides.
 SRCS=${0%fsadapt}
 if [ x"$SRCS" = x ]; then
-  SRCS="./gpib"
+  SRCS="./"
 fi
 if [ ${SRCS#/} = $SRCS ]; then  # it doesn't start with a '/'
   SRCS=$(pwd)/$SRCS
 fi
 
-NEW_ROOT_DEVICE=/dev/sda1
-NEW_SWAP_DEVICE=/dev/sda2
-NEW_USR2_DEVICE=/dev/sda3
+NEW_ROOT_DEVICE=/dev/mapper/vg0-root
+NEW_SWAP_DEVICE=/dev/mapper/vg0-swap
+NEW_USR2_DEVICE=/dev/mapper/vg0-usr2
 
 # Try to get the "true and right" device names from 'mount' output
 # if we are running $NEW_ROOT = /, i.e. a "living" system.
@@ -337,7 +344,7 @@ if [ ! -d "${NEW_ROOT}"var/lib/dpkg ]; then
       --msgbox \
 "\nThe target directory for the new root file system ($NEW_ROOT)\n\
 either doesn't exist\n\
-or it doesn't contain Debian 7.x installed on it.\n\
+or it doesn't contain Debian 9.x installed on it.\n\
 \n\
 Please check the target directory (note the need for trailing '/')\n\
 and possibly supply the correct directory name as the first\n\
@@ -396,15 +403,8 @@ else
 	exit
 fi
 
-# Do we have apt-get cron for weekly security updates.
-if [ -r "${NEW_ROOT}etc/cron.weekly/apt-get" ]; then
-  apt_get_def="off"
-else
-  apt_get_def="on"
-fi
-
 # Linux GPIB driver for various GPIB boards.
-GPIBVER="3.2.20"
+GPIBVER="4.0.3"
 if [ ! -d "${NEW_ROOT}"usr/src/linux-gpib-${GPIBVER} ]; then
   atgpib_def="on"
 else
@@ -412,14 +412,15 @@ else
 fi
 
 # PGPLOT5 and associated perl binding.
-if [ ! -f "${NEW_ROOT}"usr/lib/perl5/PGPLOT.pm ]; then
+if [ ! -f "${NEW_ROOT}"usr/share/man/man3/pgperl.3.gz ]; then
   pgplot_def="on"
 else
   pgplot_def="off"
 fi
 
 # Add FS shared memory setup into init sequence
-if [ ! -L "${NEW_ROOT}"etc/systemd/system/fsalloc.service ]; then
+if [ ! -f "${NEW_ROOT}"etc/systemd/system/fsalloc.service -o \
+     ! -f "${NEW_ROOT}"etc/systemd/system/stalloc.service ]; then
   systemd_def="on"
 else
   systemd_def="off"
@@ -471,7 +472,7 @@ elif [ "$SHOWPHASE1" ]; then
 Missing '*' indicates that this action has already been performed.\n\
 Most of these can only be done _once_, so please don't put an '*' on\n\
 unless you are certain that you want and can to do that item again." \
-21 76 10 \
+22 76 11 \
   skip      "Skip all steps below (regardless of [*] marks)" off \
   verbose   "Show names of files being processed in 'fsadapt'" off \
   atgpib    "Install Linux GPIB driver and library" $atgpib_def \
@@ -514,7 +515,7 @@ rm ${VERBO} -rf nigpib*
 rm ${VERBO} -f "${NEW_ROOT}"usr/local/lib/libgpib.a
 rm ${VERBO} -f "${NEW_ROOT}"usr/local/include/sys/ugpib.h
 # Unpack source code of appropriate package (downloaded from SourceForge)
-tar xvzf "${SRCS}"/linux-gpib-${GPIBVER}.tar.gz
+tar --no-same-owner -xvzf "${SRCS}"gpib/linux-gpib-${GPIBVER}.tar.gz
 popd || exit
 ;;
       pgplot)
@@ -524,8 +525,8 @@ chroot "${NEW_ROOT}" apt-get -y install pgplot5 libpgplot-perl
 ;;
       systemd)
 ##systemd, new in Debian 8
-chroot "${NEW_ROOT}" systemctl disable fsalloc >/dev/null
-chroot "${NEW_ROOT}" systemctl disable stalloc >/dev/null
+chroot "${NEW_ROOT}" systemctl disable fsalloc >/dev/null 2>&1
+chroot "${NEW_ROOT}" systemctl disable stalloc >/dev/null 2>&1
 rm ${VERBO} -f "${NEW_ROOT}"etc/systemd/system/fsalloc.service
 rm ${VERBO} -f "${NEW_ROOT}"etc/systemd/system/stalloc.service
 cp ${VERBO} systemd/fsalloc.service "${NEW_ROOT}"etc/systemd/system
@@ -645,11 +646,11 @@ else
   cp ${VERBO} -p "${SRCS}"usr_bin_lsb_release "${NEW_ROOT}"usr/bin/lsb_release
 fi
 cat >"${NEW_ROOT}"etc/issue <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
-Welcome to FS Linux 9 on \l.
+Welcome to FS Linux 10 on \l.
 
 EOF-marker-with-no-quoted-chars-to-get-var-expansion
 cat >"${NEW_ROOT}"etc/issue.net <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
-Welcome to FS Linux 9
+Welcome to FS Linux 10
 
 EOF-marker-with-no-quoted-chars-to-get-var-expansion
 ;;
@@ -794,21 +795,35 @@ fi
 
 # Selecting defaults for phase 2 of updating.
 
-# Is home directory already a symlink?
-if [ -L /home ]; then
-  link_home="off"
+# 'oper' home directory already a symlink?
+if [ -L /home/oper ]; then
+  prev_oper_def="off"
 else
-  if [ -d /usr2 ]; then
-    link_home="on"
+  if [ -d /usr2/oper ]; then
+    prev_oper_def="on"
   else
-    # Nowhere to move content to yet
-    link_home="off"
+    prev_oper_def="off"
+  fi
+fi
+# 'prog' home directory already a symlink?
+if [ -L /home/prog ]; then
+  prev_prog_def="off"
+else
+  if [ -d /usr2/prog ]; then
+    prev_prog_def="on"
+  else
+    prev_prog_def="off"
   fi
 fi
 if [ -x "/lib/modules/$(uname -r)/gpib" ]; then
   config_gpib_def="off"
 else
   config_gpib_def="on"
+fi
+if [ -f "/etc/gpib.conf" ]; then
+  choose_gpib_def="off"
+else
+  choose_gpib_def="on"
 fi
 if (grep '^disable-user-list=true' /etc/gdm3/greeter.dconf-defaults >/dev/null); then
   greeter_def="off"
@@ -822,10 +837,16 @@ else
   serial_def="on"
 fi
 # Do we have sshd key files?
-if [ -r /etc/ssh/ssh_host_rsa_key ] && [ -r /etc/ssh/ssh_host_dsa_key ]; then
+if [ -r /etc/ssh/ssh_host_rsa_key ] && [ -r /etc/ssh/ssh_host_ecdsa_key ]; then
   sshkeys_def="off"
 else
   sshkeys_def="on"
+fi
+# Do we have apt-get cron for weekly security updates.
+if [ -r "${NEW_ROOT}etc/cron.weekly/apt-get" ]; then
+  apt_get_def="off"
+else
+  apt_get_def="on"
 fi
 
 # Present a checklist which of the following to do.
@@ -838,11 +859,12 @@ ${DIALOG} --title "FS Adaptation: Setup (Window 2)" \
 \n\
 (Recommended options are shown with '*';\n\
 all of these can be safely attempted again and again.)" \
-21 76 12 \
+21 76 10 \
   skip          "Skip all steps below (regardless of [*] marks)" off \
-  link_home     "Turn /home into a symbolic link to /usr2" $link_home \
+  prev_oper     "Use existing '/usr2/oper' home directory" $prev_oper_def \
+  prev_prog     "Use existing '/usr2/prog' home directory" $prev_prog_def \
   config_gpib   "Configure Linux GPIB driver and library" $config_gpib_def \
-  choose_gpib   "Set '/etc/gpib.conf' for available GPIB interface" $config_gpib_def \
+  choose_gpib   "Set '/etc/gpib.conf' for available GPIB interface" $choose_gpib_def \
   set_perms     "Set device permissions (serial, tape)" on \
   greeter       "Set up GDM3 greeter to not show user list" $greeter_def \
   serial        "Set '/etc/default/grub' for VScom cards" $serial_def \
@@ -865,39 +887,55 @@ fi
       skip)
 break
 ;;
-      link_home)
-if [ -L /home ]; then
+      prev_oper)
+if [ -L /home/oper ]; then
   :  # Do nothing if it already is a symlink.
 else
-  if [ -d /home ]; then
-    for DIR in /home/*; do
-       if [ -d /usr2/"${DIR}" ]; then
-         # Existing directory on /usr2, so save as a copy.
-         if [ -d /usr2/"${DIR}".FSCOPY ]; then
-           rm ${VERBO} -rf /usr2/"${DIR}".FSCOPY
-         fi
-         mv ${VERBO} /home/"${DIR}" /usr2/"${DIR}".FSCOPY
-       else
-         # Simply move it across
-         mv ${VERBO} /home/"${DIR}" /usr2/
-       fi
-       # Update user home directory in /etc/passwd to match
-       sed -i -e "s,:/home/${DIR}:,:/usr2/${DIR}:," /etc/passwd
-    done
-    # /home directory should now be empty so remove it
-    rmdir ${VERBO} /home
+  if [ -d /usr2/oper ]; then
+    # Need to have existing stuff on /usr2.
+    rm ${VERBO} -rf ${NEW_ROOT}home/oper.FSCOPY
+    if [ -e ${NEW_ROOT}home/oper ]; then
+      mv ${VERBO} -f ${NEW_ROOT}home/oper ${NEW_ROOT}home/oper.FSCOPY
+    fi
+    ln ${VERBO} -s /usr2/oper ${NEW_ROOT}home/oper
   fi
-  # Add replacement symlink
-  ln ${VERBO} -s usr2 /home
-  # Update /etc/adduser.conf to use /usr2 for home directories in future
-  sed -i -e "s,^DHOME=/home,DHOME=/usr2," /etc/adduser.conf
+fi
+if [ -r /usr2/oper/.fvwmrc ]; then
+  # Convert .fvwmrc settings to .fvwm2rc.
+  su oper -c fvwmrc_convert /usr2/oper/.fvwmrc
+fi
+if [ -r /usr2/oper/.fvwm2rc ]; then
+  sed -e "s,PopUp Window Ops2,PopUp \"Window Ops2\"," /usr2/oper/.fvwm2rc > /tmp/.fvwm2rc_1
+  mv /tmp/.fvwm2rc_1 /usr2/oper/.fvwm2rc
+fi
+;;
+      prev_prog)
+if [ -L /home/prog ]; then
+  :  # Do nothing if it already is a symlink.
+else
+  if [ -d /usr2/prog ]; then
+    # Need to have existing stuff on /usr2.
+    rm ${VERBO} -rf ${NEW_ROOT}home/prog.FSCOPY
+    if [ -e ${NEW_ROOT}home/prog ]; then
+      mv ${VERBO} -f ${NEW_ROOT}home/prog ${NEW_ROOT}home/prog.FSCOPY
+    fi
+    ln ${VERBO} -s /usr2/prog ${NEW_ROOT}home/prog
+  fi
+fi
+if [ -r /usr2/prog/.fvwmrc ]; then
+  # Convert .fvwmrc settings to .fvwm2rc.
+  su prog -c fvwmrc_convert /usr2/prog/.fvwmrc
+fi
+if [ -r /usr2/prog/.fvwm2rc ]; then
+  sed -e "s,PopUp Window Ops2,PopUp \"Window Ops2\"," /usr2/prog/.fvwm2rc > /tmp/.fvwm2rc_1
+  mv /tmp/.fvwm2rc_1 /usr2/prog/.fvwm2rc
 fi
 ;;
       config_gpib)
 # Install the Linux-GPIB firmware collection if not yet installed
 if [ ! -r /var/local/gpib_firmware-2008-08-10 ]; then
 	(cd /var/local/ || exit;
-	 tar xvzf "${SRCS}"/gpib_firmware-2008-08-10.tar.gz;
+	 tar --no-same-owner -xvzf "${SRCS}"gpib/gpib_firmware-2008-08-10.tar.gz;
 	 ln -s gpib_firmware-2008-08-10 gpib_firmware)
 fi
 # Install the requisite firmware loader package
@@ -905,8 +943,8 @@ if [ ! -r /usr/share/doc/fxload ]; then
 	apt-get -y install fxload
 fi
 # Install default /etc/gpib.conf with device names mimicing NI driver
-if [ "${SRCS}"etc_gpib.conf -nt /etc/gpib.conf ]; then
-  cp ${VERBO} -p "${SRCS}"etc_gpib.conf /etc/gpib.conf
+if [ "${SRCS}"gpib/etc_gpib.conf -nt /etc/gpib.conf ]; then
+  cp ${VERBO} -p "${SRCS}"gpib/etc_gpib.conf /etc/gpib.conf
 fi
 # Compile and install Linux-GPIB package
 pushd /usr/src/linux-gpib-${GPIBVER} >/dev/null || exit
@@ -915,19 +953,19 @@ make
 make install
 popd || exit
 # Add a suitable /etc/modprobe.d/gpib.conf that runs 'gpib_config'.
-if [ "${SRCS}"etc_modprobe.d_gpib.conf -nt /etc/modprobe.d/gpib.conf ]; then
-  cp ${VERBO} -p "${SRCS}"etc_modprobe.d_gpib.conf /etc/modprobe.d/gpib.conf
+if [ "${SRCS}"gpib/etc_modprobe.d_gpib.conf -nt /etc/modprobe.d/gpib.conf ]; then
+  cp ${VERBO} -p "${SRCS}"gpib/etc_modprobe.d_gpib.conf /etc/modprobe.d/gpib.conf
 fi
 # Add a wrapper for gpib_config to use with hotpluggable devices via udev.
 mkdir ${VERBO} -p /usr/lib/libgpib0
-if [ "${SRCS}"usr_lib_libgpib0_gpib_config_wrapper -nt /usr/lib/libgpib0/gpib_config_wrapper ]; then
-  cp ${VERBO} -p "${SRCS}"usr_lib_libgpib0_gpib_config_wrapper /usr/lib/libgpib0/gpib_config_wrapper
+if [ "${SRCS}"gpib/usr_lib_libgpib0_gpib_config_wrapper -nt /usr/lib/libgpib0/gpib_config_wrapper ]; then
+  cp ${VERBO} -p "${SRCS}"gpib/usr_lib_libgpib0_gpib_config_wrapper /usr/lib/libgpib0/gpib_config_wrapper
 fi
 # Add a suitable /etc/udev/rules.d/gpib.rules to set permissions on /dev/gpibX
 #  to load firmware into unitialised USB dongles that require that and to run
 #  the gpib_config wrapper on plug-in.
-if [ "${SRCS}"etc_udev_rules.d_gpib.rules -nt /etc/udev/rules.d/gpib.rules ]; then
-  cp ${VERBO} -p "${SRCS}"etc_udev_rules.d_gpib.rules /etc/udev/rules.d/gpib.rules
+if [ "${SRCS}"gpib/etc_udev_rules.d_gpib.rules -nt /etc/udev/rules.d/gpib.rules ]; then
+  cp ${VERBO} -p "${SRCS}"gpib/etc_udev_rules.d_gpib.rules /etc/udev/rules.d/gpib.rules
 fi
 # Wait for return if in verbose mode (to see the messages before
 # 'dialog' is fired up again).
@@ -981,9 +1019,19 @@ for GRP in dialout dip cdrom floppy scanner tape audio video backup lpadmin plug
   adduser ${VERBOQ} oper $GRP
   adduser ${VERBOQ} prog $GRP
 done
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
+fi
 ;;
       greeter)
 sed -i -e "s/^# disable-user-list=true/disable-user-list=true/" /etc/gdm3/greeter.dconf-defaults
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
+fi
 ;; 
       serial)
 # Fix '/etc/default/grub' for VScom 400H/800H.
@@ -1018,9 +1066,14 @@ if [ $? = 0 ]; then
     /usr/sbin/update-grub
   elif [ "$(cat /tmp/reply)" = None ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
-    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=2/" /etc/default/grub
+    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=4/" /etc/default/grub
     /usr/sbin/update-grub
   fi
+fi
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
 fi
 ;;
      updates)
@@ -1029,11 +1082,16 @@ if [ -r /root/fsadapt/etc_cron.weekly_apt-get ]; then
     if [ -r /etc/cron.weekly/apt-get ]; then
 	:
     else
-	cp /root/fsadapt/etc_cron.weekly_apt-get /etc/cron.weekly/apt-get
-	chmod 755 /etc/cron.weekly/apt-get
+	cp ${VERBO} /root/fsadapt/etc_cron.weekly_apt-get /etc/cron.weekly/apt-get
+	chmod ${VERBO} 755 /etc/cron.weekly/apt-get
     fi
 else
     :
+fi
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
 fi
 ;;
       sshkeys)
@@ -1060,6 +1118,11 @@ if [ $? = 0 ]; then
     :
   fi
 fi
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
+fi
 ;;
       *)
         echo "fsadapt: unknown phase 2 operation ($i)" >&2
@@ -1068,11 +1131,6 @@ fi
     esac
   done
 #--
-# Wait for return if in verbose mode (to see the messages before
-# 'dialog' is fired up again).
-if [ $VERBO ]; then
-  echo -n "Please press RETURN to continue. "; read -r ans
-fi
 # Next: phase 3, things that may be done later again.
 
 # Selecting defaults for phase 3 of updating.
