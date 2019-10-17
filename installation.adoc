@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick and D.E. Horsley 
-Draft Sep 2019
+Draft 0.3  Oct 2019
 
 :sectnums:
 :experimental:
@@ -66,6 +66,13 @@ third disk later, you must make sure that the smallest disk of the three
 disks available is used as the first of this initial RAID pair. Use of a
 single disk (for a test install etc.) is also annotated below.
 
+TIP: Installing to a single disk is recommended and has some
+advantages. It is faster and you can control when the syncing for the
+second disk occurs, such as when you leave for the evening.  The
+set-up of the second (and third) disk is covered in the Post Install
+section. As mentioned in the warning above, you should start with the
+samllest disk.
+
 === Boot from the installation medium
 
 Insert/plug-in your installation media and reboot.
@@ -90,8 +97,8 @@ At the 'Installer boot menu':
     * BIOS: kbd:[Enter]
     * UEFI: kbd:[F10] 
 
-// TODO: "locale=C" is begining to be a problem. Not having a UTF-8 locale set does cause
-// some problems. Tmux for example is unhappy about this.
+#TODO: "locale=C" is begining to be a problem. Not having a UTF-8 locale set does cause
+some problems. Tmux for example is unhappy about this.#
 
 NOTE: You may omit the `netcfg/disable_dhcp=true` if you want to use DHCP to
 configure the network settings of this machine, though this is not advised.
@@ -139,7 +146,7 @@ press  kbd:[Enter].
 
 Alternatively, if you are only using the installer to initialize new disks,
 you may want to use kbd:[Go Back] and directly select "Detect disks" from the
-main menu to skip forward to step 10 below.
+main menu to skip forward to step 11 below.
 ====
 
 === Set a hostname
@@ -183,9 +190,9 @@ When prompted, select *Manual*
 . Select the *FREE SPACE* under the first device
 
 NOTE: If some other file system, like *xfs*, or an old setup is
-displayed, you may need to use *Guided partitoning* to create new
-partitions, then delete them. This should get you back to *FREE
-SPACE*.
+displayed, you may need to use *Guided partitioning* to create new
+partitions, then switch back to *Manual* to delete them. This should
+get you back to just *FREE SPACE*.
 
 . Select *Create a new partition*
 
@@ -210,7 +217,7 @@ fine, just be sure to choose the large "FREE SPACE" at the end of the disk.
 
 ==== Setup the second disk
 
-Repeat the process for the second disk
+Repeat the process for the second disk, if present.
 
 ==== Setup RAID
 
@@ -220,8 +227,8 @@ Repeat the process for the second disk
 . Select *Create MD device*, choose *RAID 1* and enter *2* as number
 of devices and *0* as number of spare.
 
-. Select the two raid partitions we just created using space -- these should be sda2 and
-sdb2) -- then presse kbd:[Enter]
+. Select the two raid partitions we just created using space -- these should be sda2 (and
+sdb2) -- then press kbd:[Enter]
 
 . Select *Finish*.
 
@@ -254,7 +261,8 @@ optional for non-NASA stations
 |6 |swap           | swap     | 8 G
 |7 |/tmp           | tmp      | 8 G
 |8 |/var           | var*     | 8 G
-|9 |/usr2          | usr2     | remaining disk space *less ~50 GB*
+|9 |/var/tmp       | vartmp*  | 8 G
+|10|/usr2          | usr2     | remaining disk space *less ~50 GB*
 |=======================================
 
 . In the LVM configuration window, select *Finish*
@@ -481,7 +489,7 @@ Installation runs to completion.
 
 
 === Clean up the APT download directory
-// TODO: perhaps we can change to `apt-listchanges`
+#TODO: perhaps we can change to `apt-listchanges`#
 
 So that the update mechanism will work correctly, run
 
@@ -565,12 +573,24 @@ entering the passwords twice as prompted.
 
 and enter 'y' to confirm installation.
 
+=== Install tools for RAID
+
+   cd /usr2/fs/misc
+   tools_for_RAID
+
+#TODO: BIOS version?#
+
+The rest of this document assumes these tools have been installed. They
+are included in the FS source:
+
+   * 'mdstat' allows all users to check on RAID status
+   * 'refresh_secondary' allows 'root' to refresh a secondary disk
+
 === Make the FS
 
 IMPORTANT: Log-out of the console as root, and log-in again as prog.
 
    cd /usr2/fs
-   mkdir bin
    make >& /dev/null
 
 then
@@ -583,7 +603,7 @@ to confirm that everything compiled correctly.
 
 watching its progress with:
 
-   cat /proc/mdstat
+   mdstat
 
 until the array no-longer shows a recovery in progress.
 
@@ -603,44 +623,73 @@ for more information.
 
 NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
 
+NOTE: This section assumes you have installed the "Tools for RAID"
+above.
+
 Ensure the RAID is syncd by checking 
 
-    cat /proc/mdstat
+    mdstat
 
-shows no resyncing in progress. If there is none, shut down the machine safely.
+shows no resyncing in progress. If there is none, shut down the
+machine safely. If you installed with a second disk, remove and place
+on the shelf.
 
-Next, remove and place on the shelf.
+==== Initialize new disk
 
-Boot with new secondary disk keyed off or removed. This will ensure the machine is booted from the good disk.
+For the first time use of an additional disk with a new install, the
+disk should be initialized to make sure it has no existing structure.
+To be safe in all cases, this should be done even if the disk has been
+used in a different FS computer or a previous install on this
+computer. Two disks can be initialized at the same time.
 
-With the RAID now missing a disk, you may see 20-30s of "volume group not found", then the machine will boot.
+. Start the installation process again with _only_ the disk(s) to be initialized installed.
+. When you get to *Configure the network*, select *Go Back*
+. Select *Detect disks*
+. When you get to disk partitioning, select *Manual*
+. Select the additional disk(s) to be wiped.  *DO NOT SELECT YOUR BOOT DEVICE*
 
-Once booted you, key on the disk. This will ensure the secondary disk is initialized second and is
-available as `/dev/sdb`.
+.. Press kbd:[Enter] on the disk(s) to be wiped.  If you are unable to
+change the area to *FREE SPACE*, please see the NOTE for step 2 in
+section 3.11.1.
 
-Next, login as root and setup the partition table on the secondary disk with
+.. Installer may warn: *You have selected an entire device to partition…*. Select *Yes*
+. Select *Configure software raid*
+. Select *Yes* confirm writing changes to disk
+. Select *Go Back*
+. Select *Go Back*
+. Select *Abort installation*
+. Power down system
 
-    sgdisk -R/dev/sdb /dev/sda
-    sgdisk -G /dev/sdb
+==== Refresh secondary disk
 
-Note, the order is important! 
+Boot with only the primary disk from the install turned on. The new
+secondary disk must be keyed off or removed. This will ensure the
+machine is booted from the good disk.
 
-Now, copy the bootloader partition onto the first partition of the second disk
+With the RAID now missing a disk, you may see 20-30s of "volume group
+not found", then the machine will boot.
 
-    cp /dev/sda1 /dev/sdb1
+Once booted, login as *root*.
 
-and add the second partition
+Key on the disk. This will ensure the secondary disk is initialized
+second and is available as */dev/sdb*.
 
-    mdadm /dev/md0 --add /dev/sdb2
+Wait until *lsblk* shows device *sdb*.
 
+Run the refresh secondary script:
+
+    refresh_secondary
+  
 You can now resume using the computer as usual. 
 
 You can check the status of the RAID resync with
 
-    cat /proc/mdstat
+    mdstat
 
-While the operating system can resume syncing the RAID if you reboot, it is best to avoid in case the boot partition
-is not fully synced.
+While the operating system can resume syncing the RAID if you reboot,
+it is best to avoid in case the boot partition is not fully synced.
+
+When the syncing is complete, you can repeat this process for a third disk.
 
 === Additional security and CIS Benchmarks (Optional)
 
