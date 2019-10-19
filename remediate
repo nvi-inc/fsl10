@@ -1,0 +1,415 @@
+#!/bin/bash
+set -e
+#
+# 1.1.1 Disable unused filesystems
+#
+touch /etc/modprobe.d/CIS.conf
+cat >/etc/modprobe.d/CIS.conf <<EOT
+# 1.1.1
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install udf /bin/true
+EOT
+#
+rmmod freevxfs
+rmmod jffs2
+rmmod hfs
+rmmod hfsplus
+rmmod udf
+#
+# 1.1.3-1.1.5 Ensure nodevi,nosuid,noexec options set on /tmp partition
+#
+sed -i 's/ \/tmp \+ext4 \+defaults/&,nodev,nosuid,noexec/' /etc/fstab
+## cat >/etc/systemd/system/local-fs.target.wants/tmp.mount <<EOT
+## [Mount]
+## What=tmpfs
+## Where=/tmp
+## Type=tmpfs
+## Options=mode=1777,strictatime,noexec,nodev,nosuid
+## EOT
+#
+##systemctl unmask tmp.mount
+##systemctl enable tmp.mount
+#
+mount -o remount,nodev /tmp
+mount -o remount,nosuid /tmp
+mount -o remount,noexec /tmp
+#
+# 1.1.7-9 Ensure nodevi,nosuid,noexec options set on /var/tmp partition
+#
+sed -i 's/ \/var\/tmp \+ext4 \+defaults/&,nodev,nosuid,noexec/' /etc/fstab
+#
+mount -o remount,nodev /var/tmp
+mount -o remount,nosuid /var/tmp
+mount -o remount,noexec /var/tmp
+#
+# 1.1.14 Ensure nodev option set on /home partition
+#
+sed -i 's/ \/home \+ext4 \+defaults/&,nodev/' /etc/fstab
+#
+mount -o remount,nodev /home
+#
+# 1.1.15-17 Ensure nodev,nosuid,noexec  option set on /dev/shm partition
+#
+cat >>/etc/fstab <<EOT
+tmpfs /dev/shm tmpfs defaults,nodev,nosuid,noexec 0 0
+EOT
+#
+mount -o remount,noexec /dev/shm
+#
+# 1.4.1 Ensure permissions on bootloader config are configured
+#
+chown root:root /boot/grub/grub.cfg
+chmod og-rwx /boot/grub/grub.cfg
+#
+# 1.5.1 Ensure core dumps are restricted
+#
+touch /etc/security/limits.d/CIS.conf 
+cat >/etc/security/limits.d/CIS.conf <<EOT
+# 1.5.1
+* hard core 0
+EOT
+touch /etc/sysctl.d/CIS.conf
+cat >/etc/sysctl.d/CIS.conf <<EOT
+fs.suid_dumpable = 0
+EOT
+#
+sysctl -w fs.suid_dumpable=0
+#
+# 1.5.3 Ensure address space layout randomization (ASLR) is enabled
+#
+touch /etc/sysctl.d/CIS.conf
+cat >/etc/sysctl.d/CIS.conf <<EOT
+# 1.5.3
+kernel.randomize_va_space = 2
+EOT
+#
+sysctl -w kernel.randomize_va_space=2
+#
+# 1.6.2.1 Ensure AppArmor is enabled in the bootloader configuration
+#
+apt-get -y install apparmor apparmor-profiles apparmor-utils
+#
+sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& apparmor=1 security=apparmor/' /etc/default/grub
+#
+update-grub
+#
+# 1.7.1.1 Ensure message of the day is configured properly
+#
+sed -i 's/^Debian GNU\/Linux/The system/' /etc/motd
+sed -i 's/ Debian GNU\/Linux//' /etc/motd
+#
+# 2.1.2 Ensure openbsd-inetd is not installed
+#
+apt-get remove openbsd-inetd
+apt-get purge  openbsd-inetd
+#
+# 2.2.1.2 Ensure ntp is configured
+#
+# actually makes it less secure
+#
+sed -i 's/ignore # was: \(.*\)limited/\1/' /etcntp.conf 
+#
+# 2.2.7 Ensure NFS and RPC are not enabled
+#
+## systemctl disable nfs-server
+systemctl disable rpcbind
+#
+# 2.2.16 Ensure rsync service is not enabled
+#
+systemctl disable rsync
+#
+# 2.3.4 Ensure telnet client is not installed
+#
+apt-get remove telnet
+apt-get purge  telnet
+#
+# 3.1 Network Parameters (Host Only)
+#
+touch /etc/sysctl.d/CIS.conf
+cat >/etc/sysctl.d/CIS.conf <<EOT
+# 3.1.1
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+# 3.1.2
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+EOT
+# 3.1.1
+sysctl -w net.ipv4.ip_forward=0
+sysctl -w net.ipv6.conf.all.forwarding=0
+sysctl -w net.ipv4.route.flush=1
+sysctl -w net.ipv6.route.flush=1
+# 3.1.2
+sysctl -w net.ipv4.conf.all.send_redirects=0
+sysctl -w net.ipv4.conf.default.send_redirects=0
+sysctl -w net.ipv4.route.flush=1
+#
+# 3.2 Network Parameters (Host and Router)
+#
+touch /etc/sysctl.d/CIS.conf
+cat >/etc/sysctl.d/CIS.conf <<EOT
+# 3.2.1
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+# 3.2.2
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+# 3.2.3
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
+# 3.2.4
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+# 3.2.5
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+# 3.2.6
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+# 3.2.7
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+# 3.2.8
+net.ipv4.tcp_syncookies = 1
+# 3.2.9
+net.ipv6.conf.all.accept_ra = 0
+net.ipv6.conf.default.accept_ra = 0
+EOT
+# 3.2.1
+sysctl -w net.ipv4.conf.all.accept_source_route=0
+sysctl -w net.ipv4.conf.default.accept_source_route=0
+sysctl -w net.ipv6.conf.all.accept_source_route=0
+sysctl -w net.ipv6.conf.default.accept_source_route=0
+sysctl -w net.ipv4.route.flush=1
+sysctl -w net.ipv6.route.flush=1
+# 3.2.2
+sysctl -w net.ipv4.conf.all.accept_redirects=0
+sysctl -w net.ipv4.conf.default.accept_redirects=0
+sysctl -w net.ipv6.conf.all.accept_redirects=0
+sysctl -w net.ipv6.conf.default.accept_redirects=0
+sysctl -w net.ipv4.route.flush=1
+sysctl -w net.ipv6.route.flush=1
+# 3.2.3
+sysctl -w net.ipv4.conf.all.secure_redirects=0
+sysctl -w net.ipv4.conf.default.secure_redirects=0
+sysctl -w net.ipv4.route.flush=1
+# 3.2.4
+sysctl -w net.ipv4.conf.all.log_martians=1
+sysctl -w net.ipv4.conf.default.log_martians=1
+sysctl -w net.ipv4.route.flush=1
+# 3.2.5
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sysctl -w net.ipv4.route.flush=1
+# 3.2.6
+sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
+sysctl -w net.ipv4.route.flush=13.2.6
+# 3.2.7
+sysctl -w net.ipv4.conf.all.rp_filter=1
+sysctl -w net.ipv4.conf.default.rp_filter=1
+sysctl -w net.ipv4.route.flush=1
+# 3.2.8
+sysctl -w net.ipv4.tcp_syncookies=1
+sysctl -w net.ipv4.route.flush=1
+# 3.2.9
+sysctl -w net.ipv6.conf.all.accept_ra=0
+sysctl -w net.ipv6.conf.default.accept_ra=0
+sysctl -w net.ipv6.route.flush=1
+#
+# 3.5 Firewall Configuration
+#
+apt install ufw
+ufw allow OpenSSH
+ufw logging on
+ufw enable
+#
+# 4.1 Configure System Accounting (auditd)
+#
+apt install auditd
+#
+# 4.1.1.3 Ensure audit logs are not automatically deleted
+#
+sed -i 's/^\(max_log_file_action =\) ROTATE/# CIS 4.1.1.3\n#&\n\1 keep_logs\n#/' /etc/audit/audit.conf
+#
+# 4.1.3 Ensure auditing for processes that start prior to auditd is enabled
+#
+sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& audit=1/' /etc/default/grub
+#
+update-grub
+#
+# 4.1.4-4.1.11
+#
+touch /etc/audit/auditd.rules
+cat >/etc/audit/auditd.rules <<EOT
+# CIS 4.1.4
+-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
+-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change
+-a always,exit -F arch=b64 -S clock_settime -k time-change
+-a always,exit -F arch=b32 -S clock_settime -k time-change
+-w /etc/localtime -p wa -k time-change
+# CIS 4.1.5
+-w /etc/group -p wa -k identity
+-w /etc/passwd -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/security/opasswd -p wa -k identity
+# CIS 4.1.6
+-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale -a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale
+-w /etc/issue -p wa -k system-locale
+-w /etc/issue.net -p wa -k system-locale
+-w /etc/hosts -p wa -k system-locale
+-w /etc/network -p wa -k system-locale
+# CIS 4.1.7
+-w /etc/apparmor/ -p wa -k MAC-policy
+-w /etc/apparmor.d/ -p wa -k MAC-policy
+# CIS 4.1.8
+-w /var/log/faillog -p wa -k logins
+-w /var/log/lastlog -p wa -k logins
+-w /var/log/tallylog -p wa -k logins
+# CIS 4.1.9
+-w /var/run/utmp -p wa -k session
+-w /var/log/wtmp -p wa -k logins
+-w /var/log/btmp -p wa -k logins
+# CIS 4.1.10
+-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+# CIS 4.1.11
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+EOT
+#
+# 4.1.12 Ensure use of privileged commands is collected
+#
+touch /etc/audit/auditd.rules
+cat >/etc/audit/auditd.rules <<EOT
+# CIS 4.1.12
+EOT 
+find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
+	"-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
+	-k privileged" }' > /etc/audit/auditd.rules
+#
+# 4.1.13-4.1.8
+#
+touch /etc/audit/auditd.rules
+cat >/etc/audit/auditd.rules <<EOT
+# CIS 4.1.13
+-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+# CIS 4.1.14
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete
+-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete
+#CIS 4.1.15
+-w /etc/sudoers -p wa -k scope
+-w /etc/sudoers.d/ -p wa -k scope
+# CIS 4.1.16
+-w /var/log/sudo.log -p wa -k actions
+# CIS 4.1.17
+-w /sbin/insmod -p x -k modules
+-w /sbin/rmmod -p x -k modules
+-w /sbin/modprobe -p x -k modules
+-a always,exit -F arch=b64 -S init_module -S delete_module -k modules
+# CIS 4.1.18
+-e 2
+EOT
+# 4.1 Configure System Accounting (auditd)
+#
+# activate rules
+#
+systemctl reload auditd
+#
+# 4.2.4 Ensure permissions on all logfiles are configured
+#
+chmod -R g-wx,o-rwx /var/log/*
+#
+# 5.1.2 Ensure permissions on /etc/crontab are configured
+#
+chown root:root /etc/crontab
+chmod og-rwx /etc/crontab
+#
+# 5.1.3 Ensure permissions on /etc/cron.hourly are configured
+#
+chown root:root /etc/cron.hourly
+chmod og-rwx /etc/cron.hourly
+#
+# 5.1.4 Ensure permissions on /etc/cron.daily are configured
+#
+chown root:root /etc/cron.daily
+chmod og-rwx /etc/cron.daily
+#
+# 5.1.5 Ensure permissions on /etc/cron.weekly are configured
+#
+chown root:root /etc/cron.weekly
+chmod og-rwx /etc/cron.weekly
+#
+# 5.1.6 Ensure permissions on /etc/cron.monthly are configured
+#
+chown root:root /etc/cron.monthly
+chmod og-rwx /etc/cron.monthly
+#
+# 5.1.7 Ensure permissions on /etc/cron.d are configured
+#
+chown root:root /etc/cron.d
+chmod og-rwx /etc/cron.d
+#
+# 5.1.8 Ensure at/cron is restricted to authorized users
+#
+rm /etc/cron.deny
+rm /etc/at.deny
+touch /etc/cron.allow
+touch /etc/at.allow
+chmod og-rwx /etc/cron.allow
+chmod og-rwx /etc/at.allow
+chown root:root /etc/cron.allow
+chown root:root /etc/at.allow
+#
+# 5.2.1 Ensure permissions on /etc/ssh/sshd_config are configured
+#
+chown root:root /etc/ssh/sshd_config
+chmod og-rwx /etc/ssh/sshd_config
+#
+# 5.2.4-5.2.18
+#
+touch /etc/ssh/sshd_config
+cat >/etc/ssh/sshd_config <<EOT
+# CIS 5.2.4
+Protocol 2
+# CIS 5.2.7
+MaxAuthTries 4
+# 5.2.10
+PermitRootLogin no
+# 5.2.13
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+# 5.2.14
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+# 5.2.15
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
+# 5.2.16
+ClientAliveInterval 300
+
+ClientAliveCountMax 0
+# 5.2.17
+LoginGraceTime 60
+# 5.2.18
+DenyGroups rtx
+EOT
+#
+# 5.2.19 Ensure SSH warning banner is configured
+#
+sed -i 's/^\(Banner\).*/# CIS 5.2.19\n#&\n\1 \/etc\/issue.net\n#/' /etc/ssh/sshd_config
+#
+# 5.2 SSH Server Configuration
+#
+# activate changes
+#
+systemctl reload sshd
+
