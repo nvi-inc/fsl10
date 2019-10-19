@@ -189,10 +189,11 @@ When prompted, select *Manual*
 
 . Select the *FREE SPACE* under the first device
 
-NOTE: If some other file system, like *xfs*, or an old setup is
+NOTE: If some other file system, like *xfs*, or other  old setup is
 displayed, you may need to use *Guided partitioning* to create new
-partitions, then switch back to *Manual* to delete them. This should
-get you back to just *FREE SPACE*.
+partitions. You may be prompted to delete RAID andi/or
+LVM, which you must do. Then switch back to *Manual* and select the
+target disk again. That should get you back to just *FREE SPACE*.
 
 . Select *Create a new partition*
 
