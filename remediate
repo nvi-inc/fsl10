@@ -4,7 +4,7 @@ set -e
 # 1.1.1 Disable unused filesystems
 #
 touch /etc/modprobe.d/CIS.conf
-cat >/etc/modprobe.d/CIS.conf <<EOT
+cat >>/etc/modprobe.d/CIS.conf <<EOT
 # 1.1.1
 install freevxfs /bin/true
 install jffs2 /bin/true
@@ -13,16 +13,17 @@ install hfsplus /bin/true
 install udf /bin/true
 EOT
 #
-rmmod freevxfs
-rmmod jffs2
-rmmod hfs
-rmmod hfsplus
-rmmod udf
+#rmmod freevxfs
+#rmmod jffs2
+#rmmod hfs
+#rmmod hfsplus
+#rmmod udf
 #
 # 1.1.3-1.1.5 Ensure nodevi,nosuid,noexec options set on /tmp partition
 #
 sed -i 's/ \/tmp \+ext4 \+defaults/&,nodev,nosuid,noexec/' /etc/fstab
-## cat >/etc/systemd/system/local-fs.target.wants/tmp.mount <<EOT
+## touch /etc/systemd/system/local-fs.target.wants/tmp.mount
+## cat >>/etc/systemd/system/local-fs.target.wants/tmp.mount <<EOT
 ## [Mount]
 ## What=tmpfs
 ## Where=/tmp
@@ -67,12 +68,13 @@ chmod og-rwx /boot/grub/grub.cfg
 # 1.5.1 Ensure core dumps are restricted
 #
 touch /etc/security/limits.d/CIS.conf 
-cat >/etc/security/limits.d/CIS.conf <<EOT
+cat >>/etc/security/limits.d/CIS.conf <<EOT
 # 1.5.1
 * hard core 0
 EOT
 touch /etc/sysctl.d/CIS.conf
-cat >/etc/sysctl.d/CIS.conf <<EOT
+cat >>/etc/sysctl.d/CIS.conf <<EOT
+# 1.5.1
 fs.suid_dumpable = 0
 EOT
 #
@@ -81,7 +83,7 @@ sysctl -w fs.suid_dumpable=0
 # 1.5.3 Ensure address space layout randomization (ASLR) is enabled
 #
 touch /etc/sysctl.d/CIS.conf
-cat >/etc/sysctl.d/CIS.conf <<EOT
+cat >>/etc/sysctl.d/CIS.conf <<EOT
 # 1.5.3
 kernel.randomize_va_space = 2
 EOT
@@ -103,8 +105,8 @@ sed -i 's/ Debian GNU\/Linux//' /etc/motd
 #
 # 2.1.2 Ensure openbsd-inetd is not installed
 #
-apt-get remove openbsd-inetd
-apt-get purge  openbsd-inetd
+apt-get -y remove openbsd-inetd
+apt-get -y purge  openbsd-inetd
 #
 # 2.2.1.2 Ensure ntp is configured
 #
@@ -123,13 +125,13 @@ systemctl disable rsync
 #
 # 2.3.4 Ensure telnet client is not installed
 #
-apt-get remove telnet
-apt-get purge  telnet
+apt-get -y remove telnet
+apt-get -y purge  telnet
 #
 # 3.1 Network Parameters (Host Only)
 #
 touch /etc/sysctl.d/CIS.conf
-cat >/etc/sysctl.d/CIS.conf <<EOT
+cat >>/etc/sysctl.d/CIS.conf <<EOT
 # 3.1.1
 net.ipv4.ip_forward = 0
 net.ipv6.conf.all.forwarding = 0
@@ -150,7 +152,7 @@ sysctl -w net.ipv4.route.flush=1
 # 3.2 Network Parameters (Host and Router)
 #
 touch /etc/sysctl.d/CIS.conf
-cat >/etc/sysctl.d/CIS.conf <<EOT
+cat >>/etc/sysctl.d/CIS.conf <<EOT
 # 3.2.1
 net.ipv4.conf.all.accept_source_route = 0
 net.ipv4.conf.default.accept_source_route = 0
@@ -222,18 +224,23 @@ sysctl -w net.ipv6.route.flush=1
 #
 # 3.5 Firewall Configuration
 #
-apt install ufw
+apt -y install ufw
 ufw allow OpenSSH
 ufw logging on
 ufw enable
 #
 # 4.1 Configure System Accounting (auditd)
 #
-apt install auditd
+apt -y install auditd
+#
+#
+#
+sed -i 's/^\(space_left_action =\).*/# CIS 4.1.1.2\n#&\n\1 email\n#/' /etc/audit/auditd.conf
+sed -i 's/^\(admin_space_left_action =\).*/# CIS 4.1.1.2\n#&\n\1 halt\n#/' /etc/audit/auditd.conf
 #
 # 4.1.1.3 Ensure audit logs are not automatically deleted
 #
-sed -i 's/^\(max_log_file_action =\) ROTATE/# CIS 4.1.1.3\n#&\n\1 keep_logs\n#/' /etc/audit/audit.conf
+sed -i 's/^\(max_log_file_action =\).*/# CIS 4.1.1.3\n#&\n\1 keep_logs\n#/' /etc/audit/auditd.conf
 #
 # 4.1.3 Ensure auditing for processes that start prior to auditd is enabled
 #
@@ -244,7 +251,7 @@ update-grub
 # 4.1.4-4.1.11
 #
 touch /etc/audit/auditd.rules
-cat >/etc/audit/auditd.rules <<EOT
+cat >>/etc/audit/auditd.rules <<EOT
 # CIS 4.1.4
 -a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
 -a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change
@@ -291,17 +298,17 @@ EOT
 # 4.1.12 Ensure use of privileged commands is collected
 #
 touch /etc/audit/auditd.rules
-cat >/etc/audit/auditd.rules <<EOT
+cat >>/etc/audit/auditd.rules <<EOT
 # CIS 4.1.12
 EOT 
 find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
-	"-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
-	-k privileged" }' > /etc/audit/auditd.rules
+"-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
+-k privileged" }' >> /etc/audit/auditd.rules
 #
 # 4.1.13-4.1.8
 #
 touch /etc/audit/auditd.rules
-cat >/etc/audit/auditd.rules <<EOT
+cat >>/etc/audit/auditd.rules <<EOT
 # CIS 4.1.13
 -a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
 -a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
@@ -380,7 +387,7 @@ chmod og-rwx /etc/ssh/sshd_config
 # 5.2.4-5.2.18
 #
 touch /etc/ssh/sshd_config
-cat >/etc/ssh/sshd_config <<EOT
+cat >>/etc/ssh/sshd_config <<EOT
 # CIS 5.2.4
 Protocol 2
 # CIS 5.2.7
@@ -412,4 +419,101 @@ sed -i 's/^\(Banner\).*/# CIS 5.2.19\n#&\n\1 \/etc\/issue.net\n#/' /etc/ssh/sshd
 # activate changes
 #
 systemctl reload sshd
-
+#
+# 5.3.1 Ensure password creation requirements are configured
+#
+apt -y install libpam-cracklib
+touch /etc/pam.d/common-password
+cat >>/etc/pam.d/common-password <<EOT
+password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
+EOT
+#
+# 5.3.2 Ensure lockout for failed password attempts is configured
+#
+touch /etc/pam.d/common-password
+cat >>/etc/pam.d/common-password <<EOT
+auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900
+EOT
+#
+# 5.3.3 Ensure password reuse is limited
+#
+touch /etc/pam.d/common-password
+cat >>/etc/pam.d/common-password <<EOT
+password required pam_pwhistory.so remember=5
+EOT
+#
+# 5.4.1.1 Ensure password expiration is 365 days or less
+#
+sed -i 's/^\(PASS_MAX_DAYS\).*/# CIS 5.4.1.1\n#&\n\1 90\n#/' /etc/login.defs
+# chage --maxdays 90 <user>
+#
+# 5.4.1.2 Ensure minimum days between password changes is 7 or more
+#
+sed -i 's/^\(PASS_MIN_DAYS\).*/# CIS 5.4.1.2\n#&\n\1 7\n#/' /etc/login.defs
+# chage --mindays 7 <user>
+#
+# 5.4.1.3 Ensure password expiration warning days is 7 or more
+#
+# chage --warndays 7 <user>
+#
+# 5.4.1.4 Ensure inactive password lock is 30 days or less
+#
+useradd -D -f 30
+# chage --inactive 30 <user>
+#
+# 5.4.2 Ensure system accounts are non-login
+#
+for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do
+	if [ $user != "root" ]; then
+		usermod -L $user
+		if [ $user != "sync" ] && [ $user != "shutdown" ] && [ $user != "halt" ]; then
+			usermod -s /usr/sbin/nologin $user
+		fi
+	fi
+done
+#
+# 5.4.4 Ensure default user umask is 027 or more restrictive
+#
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/profile
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/bash.bashrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/profile.d/bash_completion.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/profile.d/vte-2.91.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/csh.cshrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/csh.login
+#
+# 5.4.5 Ensure default user shell timeout is 900 seconds or less
+#
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\TMOUT=900\n#\n/' /etc/profile
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\TMOUT=900\n#\n/' /etc/bash.bashrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\TMOUT=900\n#\n/' /etc/profile.d/bash_completion.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\TMOUT=900\n#\n/' /etc/profile.d/vte-2.91.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\set autologout = 15\n#\n/' /etc/csh.cshrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\set autologout = 15\n#\n/' /etc/csh.login
+#
+# 5.6 Ensure access to the su command is restricted
+#
+touch /etc/pam.d/su
+cat >>/etc/pam.d/su <<EOT
+auth required pam_wheel.so
+EOT
+#
+# 6.1.7 Ensure permissions on /etc/shadow- are configured
+#
+chown root:shadow /etc/shadow-
+chmod o-rwx,g-rw /etc/shadow-
+#
+# 6.1.9 Ensure permissions on /etc/gshadow- are configured
+#
+chown root:shadow /etc/gshadow-
+chmod o-rwx,g-rw /etc/gshadow-
+#
+# 6.2.6 Ensure root PATH Integrity
+#
+chmod go-w /usr/local/sbin
+chmod go-w /usr/local/bin
+#
+# 6.2.8 Ensure users' home directories permissions are 750 or more restrictive
+#
+chmod o-rx /home/desktop
+chmod o-rx /usr2/oper
+chmod o-rx /usr2/prog
