@@ -1,0 +1,183 @@
+= CIS hardening FSL10, take 2
+Ed Himwich
+Oct 2019
+
+These notes detail adding extra security features to Field System Linux 10 as
+advised by Center for Internet Security. With exception of the partition
+configuration, are all to be performed post-installation. 
+
+All automated operations are executed by the `remediate` script.
+
+The remaining items are given in this document
+
+In general, each section can be applied in any particular order or skipped
+entirely.
+
+All commands need to be run as `root`
+
+=== Partition Configuration
+
+During installation, be sure to create the logical volumes marked optional during the partition section.
+
+=== Scripted changes
+
+As many changes as possible are implemented by the `remediate` script.
+All others , and all exceptions, are given in this document.
+
+== 1.4.2 Ensure bootloader password is set
+
+TBD
+
+=== 1.6.2.2 Ensure all AppArmor Profiles are enforcing
+
+After scriot finished, reboot and execute:
+
+....
+aa-enforce /etc/apparmor.d/*
+....
+
+=== 2.1.2 Ensure openbsd-inetd is not installed
+
+Remediation solves problem, but does not make test pass. To do the
+latter required 'purge'.
+
+=== 2.2.1.2 Ensure ntp is configured
+
+Remediation makes it less secure.
+
+=== 2.2.2 Ensure X Window System is not installed
+
+X Window system is required.
+
+=== 2.2.4 Ensure CUPS is not enabled
+
+CUPS is required.
+
+=== 2.2.11 Ensure IMAP and POP3 server is not enabled
+
+Exim4 is required, it never accepts remote connections.
+
+=== 2.3.4 Ensure telnet client is not installed
+
+Would prefer to keep telnet client, it is useful for debugging ASCII
+device protocol devices, which we have.  The security weakness is
+telnetd, which is not installed, and not tested for.
+
+Remediation does not make test pass. That required 'purge'.
+
+=== 3.5 Firewall Configuration
+
+The firewall is configured with `ufw` instead of `iptables` and
+`ip6tables`. The configuration is set deny for incoming connections,
+enables incoming SSH connections and sets logging for all connections.
+
+Setup:
+
+....
+apt install ufw
+ufw allow OpenSSH
+ufw logging on
+ufw enable
+....
+
+=== 3.5.1.1 Ensure default deny firewall policy
+
+Configured with `ufw`, only incoming `ssh` is allowed.
+
+=== 3.5.1.2 Ensure loopback traffic is configured
+
+Configured with `ufw`.
+
+=== 3.5.1.2 Ensure loopback traffic is configured
+
+Configured with `ufw`.
+
+=== 3.5.1.2 Ensure loopback traffic is configured
+
+Configured with `ufw`.
+
+=== 3.5.1.4 Ensure firewall rules exist for all open ports
+
+Configured with `ufw`.
+
+=== 3.5.2.1 Ensure IPv6 default deny firewall policy
+
+Configured with `ufw`, only incoming `ssh` is allowed.
+
+=== 3.5.2.2 Ensure IPv6 loopback traffic is configured
+
+Configured with `ufw`.
+
+=== 4.1.1.2 Ensure system is disabled when audit logs are full
+
+This not appropriate for this system.
+
+=== 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host
+
+We need central logging host.
+
+=== 5.2.6 Ensure SSH X11 forwarding is disabled
+
+We require `ssh` X11 forwarding.
+
+=== 5.2.13 Ensure only strong ciphers are used
+
+What ciphers should we use?
+
+=== 5.2.14 Ensure only strong MAC algorithms are used
+
+What MAC alogorithms should we use?
+
+=== 5.2.15 Ensure only strong Key Exchange algorithms are used
+
+=== 5.2.16 Ensure SSH Idle Timeout Interval is configured
+
+Five minutes is too short.
+
+=== 5.3.1 Ensure password creation requirements are configured
+
+We use NASA 12 character minimum.
+
+Setup:
+
+....
+apt install libpam-cracklib
+touch /etc/pam.d/common-password
+cat >/etc/pam.d/common-password <<EOT
+password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
+EOT
+....
+
+=== 5.4.1.1 Ensure password expiration is 365 days or less
+
+Execute additional command for each existing user:
+
+....
+chage --maxdays 90 <user>
+....
+
+=== 5.4.1.2 Ensure minimum days between password changes is 7 or more
+
+Execute additional command for each existing user:
+
+....
+chage --mindays 7 <user>
+....
+
+=== 5.4.1.4 Ensure inactive password lock is 30 days or less
+
+This is too short for developers/troubleshooters
+
+Execute additional command for each existing user:
+
+....
+chage --inactive 30 <user>
+....
+
+=== 5.6 Ensure access to the su command is restricted
+
+Also add users who can sudo to `/etc/group` on line:
+
+````
+sudo:x:10:root,<user list>
+````
