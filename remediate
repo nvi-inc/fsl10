@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 #
+if ! [ $(id -u) = 0 ]; then
+   echo "This script must be run as root."
+   exit 1
+fi
+#
 # 1.1.1 Disable unused filesystems
 #
 touch /etc/modprobe.d/CIS.conf
@@ -112,7 +117,7 @@ apt-get -y purge  openbsd-inetd
 #
 # actually makes it less secure
 #
-sed -i 's/ignore # was: \(.*\)limited/\1/' /etcntp.conf 
+sed -i 's/ignore # was: \(.*\)limited/\1/' /etc/ntp.conf 
 #
 # 2.2.7 Ensure NFS and RPC are not enabled
 #
@@ -250,8 +255,8 @@ update-grub
 #
 # 4.1.4-4.1.11
 #
-touch /etc/audit/auditd.rules
-cat >>/etc/audit/auditd.rules <<EOT
+touch /etc/audit/rules.d/CIS.rules
+cat >>/etc/audit/rules.d/CIS.rules <<EOT
 # CIS 4.1.4
 -a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
 -a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change
@@ -265,7 +270,8 @@ cat >>/etc/audit/auditd.rules <<EOT
 -w /etc/shadow -p wa -k identity
 -w /etc/security/opasswd -p wa -k identity
 # CIS 4.1.6
--a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale -a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale
+-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale
+-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale
 -w /etc/issue -p wa -k system-locale
 -w /etc/issue.net -p wa -k system-locale
 -w /etc/hosts -p wa -k system-locale
@@ -297,18 +303,18 @@ EOT
 #
 # 4.1.12 Ensure use of privileged commands is collected
 #
-touch /etc/audit/auditd.rules
-cat >>/etc/audit/auditd.rules <<EOT
+touch /etc/audit/rules.d/CIS-suid.rules
+cat >>/etc/audit/rules.d/CIS-suid.rules <<EOT
 # CIS 4.1.12
 EOT 
 find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
 "-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
--k privileged" }' >> /etc/audit/auditd.rules
+-k privileged" }' >> /etc/audit/rules.d/CIS-suid.rules
 #
 # 4.1.13-4.1.8
 #
-touch /etc/audit/auditd.rules
-cat >>/etc/audit/auditd.rules <<EOT
+touch /etc/audit/rules.d/CIS.rules
+cat >>/etc/audit/rules.d/CIS.rules <<EOT
 # CIS 4.1.13
 -a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
 -a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
@@ -325,6 +331,7 @@ cat >>/etc/audit/auditd.rules <<EOT
 -w /sbin/rmmod -p x -k modules
 -w /sbin/modprobe -p x -k modules
 -a always,exit -F arch=b64 -S init_module -S delete_module -k modules
+-a always,exit -F arch=b32 -S init_module -S delete_module -k modules
 # CIS 4.1.18
 -e 2
 EOT
@@ -370,7 +377,7 @@ chmod og-rwx /etc/cron.d
 #
 # 5.1.8 Ensure at/cron is restricted to authorized users
 #
-rm /etc/cron.deny
+rm -f /etc/cron.deny
 rm /etc/at.deny
 touch /etc/cron.allow
 touch /etc/at.allow
@@ -399,10 +406,10 @@ Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.
 # 5.2.14
 MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
 # 5.2.15
-KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
+#KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
 # 5.2.16
 ClientAliveInterval 300
-
 ClientAliveCountMax 0
 # 5.2.17
 LoginGraceTime 60
@@ -425,13 +432,13 @@ systemctl reload sshd
 apt -y install libpam-cracklib
 touch /etc/pam.d/common-password
 cat >>/etc/pam.d/common-password <<EOT
-password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
+password required pam_cracklib.so retry=3 minlen=14 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
 EOT
 #
 # 5.3.2 Ensure lockout for failed password attempts is configured
 #
-touch /etc/pam.d/common-password
-cat >>/etc/pam.d/common-password <<EOT
+touch /etc/pam.d/common-auth
+cat >>/etc/pam.d/common-auth <<EOT
 auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900
 EOT
 #
@@ -483,12 +490,12 @@ sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/csh.login
 #
 # 5.4.5 Ensure default user shell timeout is 900 seconds or less
 #
-sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\TMOUT=900\n#\n/' /etc/profile
-sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\TMOUT=900\n#\n/' /etc/bash.bashrc
-sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\TMOUT=900\n#\n/' /etc/profile.d/bash_completion.sh
-sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\TMOUT=900\n#\n/' /etc/profile.d/vte-2.91.sh
-sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\set autologout = 15\n#\n/' /etc/csh.cshrc
-sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\set autologout = 15\n#\n/' /etc/csh.login
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nTMOUT=900\n#\n/' /etc/profile
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nTMOUT=900\n#\n/' /etc/bash.bashrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nTMOUT=900\n#\n/' /etc/profile.d/bash_completion.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nTMOUT=900\n#\n/' /etc/profile.d/vte-2.91.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nset autologout = 15\n#\n/' /etc/csh.cshrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nset autologout = 15\n#\n/' /etc/csh.login
 #
 # 5.6 Ensure access to the su command is restricted
 #
