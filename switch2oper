@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+if echo $DISPLAY |grep -q localhost; then
+  sudo -u oper XCOOKIE="$(xauth list $DISPLAY)" -i 
+else
+  if ! [ -z $DISPLAY ]; then
+    if ! xhost|grep -q 'SI:localuser:oper'; then
+      xhost +SI:localuser:oper >/dev/null
+    fi
+    sudo -u oper -i
+    xhost -SI:localuser:oper >/dev/null
+  else 
+    sudo -u oper -i
+  fi
+fi
