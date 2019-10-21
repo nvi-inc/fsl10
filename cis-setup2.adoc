@@ -2,48 +2,173 @@
 Ed Himwich
 Oct 2019
 
-These notes detail adding extra security features to Field System Linux 10 as
-advised by Center for Internet Security. With exception of the partition
-configuration, are all to be performed post-installation. 
+These notes detail adding extra security features to Field System
+Linux 10 as advised by Center for Internet Security (CIS). With the
+exception of the partition configuration, all actions are to be
+performed post-installation. All tests that failied, topics that need
+to be discussed, and errors in the benchmark remediations are provided
+in separate sections at the end of this document.
 
-All automated operations are executed by the `remediate` script.
+A useful minimum set of features to apply would be the `ufw` section
+from the `remediate` script and to implement the `/etc/hosts.deny` and
+`/etc/hosts.allow` policies given below.
 
-The remaining items are given in this document
+This document  is based on the results for the CIS Debian Linux 9
+Benchmark v1.0.0 - Level 2 - Server.
 
-In general, each section can be applied in any particular order or skipped
-entirely.
+== Partition Configuration
+
+During installation, be sure to create the logical volumes marked
+optional during the partition section.
+
+== Post-installation changes
 
 All commands need to be run as `root`
 
-=== Partition Configuration
-
-During installation, be sure to create the logical volumes marked optional during the partition section.
-
 === Scripted changes
 
-As many changes as possible are implemented by the `remediate` script.
-All others , and all exceptions, are given in this document.
+As many changes as possible are implemented by the `remediate` script:
 
-== 1.4.2 Ensure bootloader password is set
+....
+script /tmp/remediate.txt
+./remediate
+exit
+....
+
+NOTE: This script should not be run more than once on a system.
+
+=== Manual changes
+
+After running the script, execute this commands for each existing
+<user> (usually just `desktop` and `root`):
+
+....
+chage --maxdays 90 --mindays 7 --warndays 7 <user>
+....
+
+Excute this command for each existing user (usually just `desktop`):
+
+....
+chage --inactive 30 <user>
+....
+
+Create a comma separated list of users (usally `desktop,oper,prog`) in
+the `sudo` statement in the `/etc/group` file.
+
+````
+sudo:x:10:root,<user list>
+````
+
+Reboot and execute:
+
+....
+aa-enforce /etc/apparmor.d/*:
+....
+
+At this point, all the CIS remediations that can implemented have been
+completed. The next section describes some other policies that can be
+considered.
+
+=== Other polices:
+
+This section describes other policies that may be desirable. Some
+are beyond the CIS benchmark.
+
+==== /etc/hosts.deny
+
+Add:
+
+....
+ALL:ALL
+....
+
+==== /etc/hosts.allow
+
+Add:
+
+....
+sshd:ALL
+....
+
+You may wish to further restrict `sshd` to specific hosts or sub-domains.
+
+==== Password policies
+
+You may ewish to set minimum password lengh to 12.
+
+You may ewish to set password reuse remember to 24.
+
+==== Set remote log host or retention to a minimum of one yeat
+
+You may wish to configure a remote log host and/or set log retention
+period to at least one year.
+
+To set a remote log host, edit the `/etc/rsyslog.conf` and
+`/etc/rsyslog.d/*.conf` files and add the following line (where
+`loghost.example.com` is the name of your central log host).
+
+....
+*.* @@loghost.example.com
+....
+
+Run the following command to reload the rsyslogd configuration:
+
+....
+kill -HUP rsyslogd
+....
+
+Set the retention period of system logs by editing
+`/etc/logrotate.d/rsyslog`. This should be configured to store logs
+for at least a minimum of a year (366 for daily 53 for weekly)..
+
+==== Bootloader password
+
+You may wish to create an encrypted password with grub-mkpasswd-pbkdf2:
+
+....
+grub-mkpasswd-pbkdf2
+Enter password: <password>
+Reenter password: <password>
+Your PBKDF2 is <encrypted-password>
+....
+
+Add the following into `/etc/grub.d/00_header` or a custom
+`/etc/grub.d` configuration file:
+
+....
+cat <<EOF
+set superusers="<username>"
+password_pbkdf2 <username> <encrypted-password>
+EOF
+....
+
+If there is a requirement to be able to boot/reboot without entering
+the password, edit `/etc/grub.d/10_linux` and add `--unrestricted` to the
+line `CLASS=`
+
+Example:
+
+....
+CLASS="--class gnu-linux --class gnu --class os --unrestricted"
+....
+
+Run the following command to update the grub2 configuration:
+
+....
+update-grub
+....
+
+== CIS Exceptions
+
+This section addresses the tests that failed in the CIS benchmark.
+
+=== 1.4.1 Ensure permissions on bootloader config are configured
+
+They switch back to `r--r--r--` on reboot.
+
+=== 1.4.2 Ensure bootloader password is set
 
 TBD
-
-=== 1.6.2.2 Ensure all AppArmor Profiles are enforcing
-
-After scriot finished, reboot and execute:
-
-....
-aa-enforce /etc/apparmor.d/*
-....
-
-=== 2.1.2 Ensure openbsd-inetd is not installed
-
-Remediation solves problem, but does not make test pass. To do the
-latter required 'purge'.
-
-=== 2.2.1.2 Ensure ntp is configured
-
-Remediation makes it less secure.
 
 === 2.2.2 Ensure X Window System is not installed
 
@@ -55,23 +180,31 @@ CUPS is required.
 
 === 2.2.11 Ensure IMAP and POP3 server is not enabled
 
-Exim4 is required, it never accepts remote connections.
+Exim4 is required, it never accepts incoming remote connections.
 
-=== 2.3.4 Ensure telnet client is not installed
+=== 3.2.4 Ensure suspicious packets are logged
 
-Would prefer to keep telnet client, it is useful for debugging ASCII
-device protocol devices, which we have.  The security weakness is
-telnetd, which is not installed, and not tested for.
+The parameters:
 
-Remediation does not make test pass. That required 'purge'.
+....
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+....
+
+are not respected in `/etc/sysctl.conf` or in `/etc/systctl.d/*` on
+reboot.  However, then a:
+
+....
+sysctl --system
+....
+
+will respect them.
 
 === 3.5 Firewall Configuration
 
 The firewall is configured with `ufw` instead of `iptables` and
 `ip6tables`. The configuration is set deny for incoming connections,
-enables incoming SSH connections and sets logging for all connections.
-
-Setup:
+enables incoming SSH connections and sets logging for all connections. Setup:
 
 ....
 apt install ufw
@@ -83,14 +216,6 @@ ufw enable
 === 3.5.1.1 Ensure default deny firewall policy
 
 Configured with `ufw`, only incoming `ssh` is allowed.
-
-=== 3.5.1.2 Ensure loopback traffic is configured
-
-Configured with `ufw`.
-
-=== 3.5.1.2 Ensure loopback traffic is configured
-
-Configured with `ufw`.
 
 === 3.5.1.2 Ensure loopback traffic is configured
 
@@ -108,17 +233,50 @@ Configured with `ufw`, only incoming `ssh` is allowed.
 
 Configured with `ufw`.
 
-=== 4.1.1.2 Ensure system is disabled when audit logs are full
-
-This not appropriate for this system.
-
 === 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host
 
 We need central logging host.
 
+=== 4.2.4 Ensure permissions on all logfiles are configured
+
+All files except `/var/log/wtmp` have the requested permissions. That
+file changes on a reboot to `rw-rw-r--', owned by `root.wtmp`.
+
 === 5.2.6 Ensure SSH X11 forwarding is disabled
 
 We require `ssh` X11 forwarding.
+
+=== 5.3.1 Ensure password creation requirements are configured
+
+We use `cracklib` instead of `pwquality`:
+
+....
+apt install libpam-cracklib
+touch /etc/pam.d/common-password
+cat >/etc/pam.d/common-password <<EOT
+password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
+EOT
+....
+
+== CIS issues that need to be addressed
+
+This section lists further topics related to benchmark that need to be
+addressed.
+
+=== 2.2.1.2 Ensure ntp is configured
+
+Need FS ntp configuration.
+
+=== 2.3.4 Ensure `telnet` client is not installed
+
+Would prefer to keep the `telnet` client, it is useful for debugging
+ASCII device protocol devices, which we have.  The security weakness
+is `telnetd`, which is not installed, nor does the benchmark test
+for it.
+
+=== 4.1.1.2 Ensure system is disabled when audit logs are full
+
+This may not be appropriate for an operational system.
 
 === 5.2.13 Ensure only strong ciphers are used
 
@@ -130,54 +288,49 @@ What MAC alogorithms should we use?
 
 === 5.2.15 Ensure only strong Key Exchange algorithms are used
 
+What Key Exchange alogorithms should we use?
+
 === 5.2.16 Ensure SSH Idle Timeout Interval is configured
 
 Five minutes is too short.
 
 === 5.3.1 Ensure password creation requirements are configured
 
-We use NASA 12 character minimum.
-
-Setup:
-
-....
-apt install libpam-cracklib
-touch /etc/pam.d/common-password
-cat >/etc/pam.d/common-password <<EOT
-password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
-EOT
-....
-
-=== 5.4.1.1 Ensure password expiration is 365 days or less
-
-Execute additional command for each existing user:
-
-....
-chage --maxdays 90 <user>
-....
-
-=== 5.4.1.2 Ensure minimum days between password changes is 7 or more
-
-Execute additional command for each existing user:
-
-....
-chage --mindays 7 <user>
-....
+Should we use the NASA 12 character minimum?
 
 === 5.4.1.4 Ensure inactive password lock is 30 days or less
 
 This is too short for developers/troubleshooters
 
-Execute additional command for each existing user:
+== CIS Issues
 
-....
-chage --inactive 30 <user>
-....
+This section details problems with the recommended remediations.
 
-=== 5.6 Ensure access to the su command is restricted
+=== 2.1.2 Ensure openbsd-inetd is not installed
 
-Also add users who can sudo to `/etc/group` on line:
+Remediation solves problem, but does not make the test pass. To do the
+latter required 'purge'.
 
-````
-sudo:x:10:root,<user list>
-````
+=== 2.2.1.2 Ensure ntp is configured
+
+Remediation makes it less secure.
+
+=== 2.3.4 Ensure `telnet` client is not installed
+
+The remediation does not make the test pass, that required 'purge'.
+
+=== 4.1 Configure System Accounting (auditd)
+
+Many of the remedations are described in terms of the contents of
+`/etc/audit/audit.rules`. However, the contents of that file are
+auto-generated from the files in `/etc/audit/rules.d`, which is where
+these remediations must go.
+
+=== 4.1.6 Ensure events that modify the system's network environment are collected
+
+64-bit remediation had b64 and b32 rules concatenated on one line..
+
+=== 4.1.17 Ensure kernel module loading and unloading is collected
+
+64-bit remediation was missing b32 rule.
+

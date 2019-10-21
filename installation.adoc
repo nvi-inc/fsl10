@@ -574,18 +574,19 @@ entering the passwords twice as prompted.
 
 and enter 'y' to confirm installation.
 
-=== Install tools for RAID
+=== Install tools for RAID (Optional)
 
-   cd /usr2/fs/misc
-   tools_for_RAID
+You can install some useful tools for working with the RAID with:
+
+   ~/fsl10/tools_for_RAID
 
 #TODO: BIOS version?#
 
 The rest of this document assumes these tools have been installed. They
-are included in the FS source:
+are:
 
-   * 'mdstat' allows all users to check on RAID status
-   * 'refresh_secondary' allows 'root' to refresh a secondary disk
+   * `mdstat` allows all users to check on RAID status
+   * `refresh_secondary` allows `root` to refresh a secondary disk
 
 === Make the FS
 
@@ -627,11 +628,11 @@ NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
 NOTE: This section assumes you have installed the "Tools for RAID"
 above.
 
-Ensure the RAID is syncd by checking 
+Ensure the RAID is synced by checking that
 
     mdstat
 
-shows no resyncing in progress. If there is none, shut down the
+shows no recovery in progress. If there is none, shut down the
 machine safely. If you installed with a second disk, remove and place
 on the shelf.
 
@@ -705,8 +706,8 @@ auditing restrictions that mean operators must log-in to their own account.
 As the Field System currently operates, users will then need to switch to
 the oper or prog account after login.
 
-To do this, we suggest suggest create two groups that can sudo to the oper and
-prog accounts.
+To do this, we suggest creating two groups that can `sudo` to the
+`oper` and `prog` accounts.
 
 run `visudo` then add at end:
 
@@ -714,20 +715,35 @@ run `visudo` then add at end:
     %programmers    ALL=(prog) NOPASSWD: ALL
     %programmers    ALL=(oper) NOPASSWD: ALL
 
-Then add each user to these groups ass appropriate, eg:
+Then add each user to these groups as appropriate, eg:
 
+    addgroup programmers
     adduser dhorsley programmers
-
-or 
-
     adduser dhorsley operators
 
-Authorized users can then switch to prog or oper with:
+If they don't already, make sure `oper` and `prog` have usable shells:
 
-    sudo -i -u prog
+    chsh -s /bin/bash oper
+    chsh -s /bin/bash prog
 
+If the accounts haven't been disable for login already, do so:
 
-So ensure X authorization works do the following:
+    usermod -L oper
+    usermod -L prog
+
+Create (or add to an existing) `DenyUser` line in
+`/etc/ssh/sshd_config`:
+
+....
+DenyUser oper prog
+....
+
+Authorized users can then switch to `oper` and `prog` with:
+
+    sudo -i -u oper
+
+To ensure X authorization works do the following (this example is for
+user `oper` but it works analogously for `prog`):
 
 1. Add this to the following files
 +
@@ -742,16 +758,41 @@ endif
 .~/.profile
 [source,bash]
 ```
-if [ -z $XCOOKIE ]; then
+if ! [ -z "$XCOOKIE" ]; then
     xauth add $XCOOKIE
 fi
 ```
 +
-2. Make the file `/usr/local/bin/fs` with contents
-
+2. Create the following file
++
+./usr/local/bin/switch2oper`
 [source,bash]
 ```
 #!/bin/bash
-sudo -u oper XCOOKIE="$(xauth list $DISPLAY)" FS_DISPLAY_SERVER=on -i fs
+set -e
+if echo $DISPLAY |grep -q localhost; then
+ sudo -u oper XCOOKIE="$(xauth list $DISPLAY)" -i
+else
+ if ! xhost|grep -q 'SI:localuser:oper'; then
+   xhost +SI:localuser:oper >/dev/null
+ fi
+ sudo -u oper -i
+ xhost -SI:localuser:oper >/dev/null
+fi
 ```
 
+Execute:
+
+    chmod a+rx /usr/local/bin/switch2oper
+
+=== Enabling a user to promote to `root` (Optional)
+
+run `visudo` then add at end:
+
+    dhorsley      ALL=(root) ALL
+
+No X authority manipulation is required.
+
+Authorized users can then switch to `root` with:
+
+    su -i -u root
