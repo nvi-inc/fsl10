@@ -696,7 +696,7 @@ When the syncing is complete, you can repeat this process for a third disk.
 === Additional security and CIS Benchmarks (Optional)
 
 For stations that wish to conform to the additional security recommendations of the
-Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
+Center for Internet Security (CIS), move on to the <<cis-setup2.adoc#,CIS hardening FSL10>> document.
 
 === Disabling direct login to oper and prog (Optional)
 
