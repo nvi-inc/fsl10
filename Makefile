@@ -1,4 +1,4 @@
-all: installation.html cis-setup.html
+all: installation.html cis-setup.html cis-setup2.html
 
 installation.html: installation.adoc
 cis-setup.html: cis-setup.adoc
