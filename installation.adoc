@@ -69,11 +69,14 @@ single disk (for a test install etc.) is also annotated below.
 TIP: Installing to a single disk is recommended and has some
 advantages. It is faster and you can control when the syncing for the
 second disk occurs, such as when you leave for the evening.  The
-set-up of the second (and third) disk is covered in the Post Install
+set-up of the second (and third) disk is covered in the "Post Install"
 section. As mentioned in the warning above, you should start with the
 samllest disk.
 
 === Boot from the installation medium
+
+Connect an active network cable to your lowest numbered interface
+(only). Usually it is on the left if there are two.
 
 Insert/plug-in your installation media and reboot.
 
@@ -91,14 +94,11 @@ At the 'Installer boot menu':
     * UEFI: kbd:[e], kbd:[{downarrow}] three times (vmlinuz), then kbd:[End]
 . To the end of the displayed command, add the additional options:
 
-   locale=C netcfg/disable_dhcp=true time/zone=UTC
+   locale=en_US.UTF8 netcfg/disable_dhcp=true time/zone=UTC
 
 . Press:
     * BIOS: kbd:[Enter]
     * UEFI: kbd:[F10] 
-
-#TODO: "locale=C" is begining to be a problem. Not having a UTF-8 locale set does cause
-some problems. Tmux for example is unhappy about this.#
 
 NOTE: You may omit the `netcfg/disable_dhcp=true` if you want to use DHCP to
 configure the network settings of this machine, though this is not advised.
@@ -130,7 +130,7 @@ kbd:[Enter] to continue.
 === If you are presented with a dialog asking which interface to use 
 Typically only shown if two or more network interfaces are
 found, which might include a virtual firewire interface in some cases.
-Select the interface you require (usually 'eth0') and press  kbd:[Enter].
+Select the interface you require (usually 'eno1') and press  kbd:[Enter].
 
 ====
 Unless you are using DHCP (which is not advisable) you will be prompted to:
@@ -190,10 +190,14 @@ When prompted, select *Manual*
 . Select the *FREE SPACE* under the first device
 
 NOTE: If some other file system, like *xfs*, or other  old setup is
-displayed, you may need to use *Guided partitioning* to create new
-partitions. You may be prompted to delete RAID andi/or
-LVM, which you must do. Then switch back to *Manual* and select the
-target disk again. That should get you back to just *FREE SPACE*.
+displayed, you may need to use *Guided partitioning* to temporarily
+create new partitions. Then select *Guided - use entire disk*. Then
+select your disk, such as listed above, do not select a RAID or your
+boot decice.  Then select *All files in one partition (recommended for
+    new users)*.  You may be prompted to confirm deleting RAID and/or
+LVM, which you must do to continue. Then switch back to *Manual* and
+select the target disk again.  That should get you back to a disk
+partition layout that you can delete using the instructions above.
 
 . Select *Create a new partition*
 
@@ -242,7 +246,7 @@ sdb2) -- then press kbd:[Enter]
 . Now choose *Configure the Logical Volume Manager* and select "yes" if prompted to write the changes to disk
 
 . Choose *Create volume group* 
-. Enter a name appropriate for the machine and group, eg *gs-fs1*, and press kbd:[Enter]
+. Enter a name appropriate for the machine and group, eg *lv*, and press kbd:[Enter]
 . Select the raid device *md0* by pressing kbd:[Space], then press kbd:[Enter]
 to continue
 
@@ -374,9 +378,11 @@ GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
 === Login as root 
 
 TIP: Previous versions of Debian ran X11 on virtual console 7. As of
-Debian 9, the desktop environment consoles are virtual console 1 and 2. 
+Debian 9, the graphical environment login is on virtual console 1.
+Each login there for a different user creates a session on the next
+unused virtual console.
 
-Switch to Virtual Console 3, by pressing kbd:[Ctrl+Alt+F3].
+Switce to Virtual Console 2, by pressing kbd:[Ctrl+Alt+F2].
 
 Enter `root` and press kbd:[Enter], then enter the root password you set
 earlier.
@@ -621,6 +627,8 @@ for more information.
 
 == Post Install
 
+All commands (except checking the RAID status) in this section need to be run as `root`.
+
 === Setup additional disk
 
 NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
@@ -651,8 +659,9 @@ computer. Two disks can be initialized at the same time.
 . Select the additional disk(s) to be wiped.  *DO NOT SELECT YOUR BOOT DEVICE*
 
 .. Press kbd:[Enter] on the disk(s) to be wiped.  If you are unable to
-change the area to *FREE SPACE*, please see the NOTE for step 2 in
-section 3.11.1.
+change the area to *FREE SPACE*, please see the NOTE for step 2 in the
+sub-section "Setup the first disk" in section "First Stage
+Installation" above.
 
 .. Installer may warn: *You have selected an entire device to partition…*. Select *Yes*
 . Select *Configure software raid*
@@ -696,7 +705,7 @@ When the syncing is complete, you can repeat this process for a third disk.
 === Additional security and CIS Benchmarks (Optional)
 
 For stations that wish to conform to the additional security recommendations of the
-Center for Internet Security (CIS), move on to the <<cis-setup2.adoc#,CIS hardening FSL10>> document.
+Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
 
 === Disabling direct login to oper and prog (Optional)
 
@@ -715,11 +724,15 @@ run `visudo` then add at end:
     %programmers    ALL=(prog) NOPASSWD: ALL
     %programmers    ALL=(oper) NOPASSWD: ALL
 
+Create these groups if they don't exist:
+
+    addgroup operators
+    addgroup programmers
+
 Then add each user to these groups as appropriate, eg:
 
-    addgroup programmers
-    adduser dhorsley programmers
     adduser dhorsley operators
+    adduser dhorsley programmers
 
 If they don't already, make sure `oper` and `prog` have usable shells:
 
@@ -731,16 +744,19 @@ If the accounts haven't been disable for login already, do so:
     usermod -L oper
     usermod -L prog
 
-Create (or add to an existing) `DenyUser` line in
-`/etc/ssh/sshd_config`:
+To prevent connecting with `ssh` using a key, create (or add to an
+existing) `DenyUser` line in `/etc/ssh/sshd_config`:
 
 ....
 DenyUser oper prog
 ....
 
-Authorized users can then switch to `oper` and `prog` with:
+Authorized users can then switch to `oper` with (similarly for
+`prog`):
 
     sudo -i -u oper
+
+No password will be required.
 
 To ensure X authorization works do the following (this example is for
 user `oper` but it works analogously for `prog`):
@@ -762,7 +778,7 @@ if ! [ -z "$XCOOKIE" ]; then
     xauth add $XCOOKIE
 fi
 ```
-+
+
 2. Create the following file
 +
 ./usr/local/bin/switch2oper`
@@ -791,8 +807,112 @@ run `visudo` then add at end:
 
     dhorsley      ALL=(root) ALL
 
-No X authority manipulation is required.
+A password will still be required for promotion.
 
 Authorized users can then switch to `root` with:
 
     su -i -u root
+
+No X authority manipulation is required.
+
+=== Network configuration changes (Optional)
+
+This section requires using `nm-connection-editor` on a graphic
+display (`nmtui` may be an option on a text terminal, but it has not
+been fully verified). You will probably need to be `root` or
+`desktop` to do this. When you run this program and select a
+connection, e.g., `Wired Connecton 1` under `Ethernet`, the `Edit`
+button should become active.  If it stays greyed out, you don't have
+sufficent permission. All the sub-sections below assume you are in
+program and have sufficent permision,
+
+==== Make the connection always appear on the same interface regardless of the MAC address.
+
+This is useful both to make the connection appear on only one
+interface and/or make it the same interface if the computer (or NIC)
+is changed.
+
+1. Select your connection snd click `Edit`.
+
+2. Select the `Ethernet` tab.
+
+3. Change the `Device` field to just list the name of the interface (typically `eno1`) by removing the MAC address in parentheses.
+
+4. Click `Save`.
+
+5. Click `Close`.
+
+==== Disable the second Ethernet port
+
+This may be useful if your second port has a IPMI interface and the
+kernel detected a connection there and it is interferring with the
+normal or the IPMI connection.
+
+1. If there is no `Wired Connection 2`, click `Add`. Otherwise select
+that connection, click `Edit`, and skip to step 4.  It _may_ be benign
+to `Delete` any other connections *except* `Wired Connection 1`.
+
+2. Make sure `Ethernet` is selected in the drop down box and click `Create...`.
+
+3. Change the `Connection name:` to `Wired Connection 2`.
+
+4. Select the `Ethernet` tab.
+
+5. Make sure the `Device` field just lists the second ethernet
+device, typically `eno2`, with no MAC address in parentheses.
+
+6. Select the `IPv4 Settings` tab.
+
+7. For `Method` select `Disabled`.
+
+8. Select the `IPv6 Settings` tab.
+
+9. For `Method` select `Ignore`.
+
+10. Click `Save`.
+
+11. Click `Close`.
+
+==== Update IP address, hostname, FQDN, and other network information
+
+This is useful if the computer is physically moved to a different
+site or its network information needs to be be updated for a different
+reason. This is typically not needed if you use DHCP, which may still
+require some of the changes in step 6 (please let us know if you gain
+experience).
+
+1. Select your connection and click `Edit`.
+
+2. Select the `IPv4 Settings` (or `IPv6 Settings` if you are using IPv6) tab.
+
+3. Adjust your `Manual` Method configuration: `Addresses`, `DNS Servers` (comma separated), and `Search domains`.
+
+4. Click `Save`.
+
+5. Click `Close`.
+
+6. Modify other system files
+
++
+Update the information as appropriate. The system may have initially
+been installed with the default hostname `debian` and no domain name.
++
+./etc/hostname
++
+Change your hostname
++
+./etc/hosts
++
+Update your IP address, FQDN, and alias (typically the hostname, multiple aliases are allowed).
++
+./etc/networks
++
+Use your local subnet (class A, B, or C) for the `localnet` line.
++
+./etc/mailname
++
+Use fully qualified node name
++
+./etc/exim4/update-exim4.conf.conf
++
+Look for `hostnames=`, use fully qualified name.

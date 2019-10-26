@@ -1,6 +1,8 @@
 = CIS hardening FSL10, take 2
-Ed Himwich
+Dave Horsley and Ed Himwich
 Oct 2019
+
+:experimental:
 
 These notes detail adding extra security features to Field System
 Linux 10 as advised by Center for Internet Security (CIS). With the
@@ -27,10 +29,15 @@ All commands need to be run as `root`
 
 === Scripted changes
 
-As many changes as possible are implemented by the `remediate` script:
+As many changes as possible are implemented by the `remediate` script.
+The script is intended to be run after the "Third Stage Installation"
+steps in the FSL10 instructions, before any further changes have been
+made to the system (however initializing and adding other disks to the
+RAID can intervene).
 
 ....
-script /tmp/remediate.txt
+cd /root/fsl10
+script remediate.txt
 ./remediate
 exit
 ....
@@ -39,33 +46,15 @@ NOTE: This script should not be run more than once on a system.
 
 === Manual changes
 
-After running the script, execute this commands for each existing
-<user> (usually just `desktop` and `root`):
+This section covers manual operations after running the script.
 
+1. Reboot and execute:
++
 ....
-chage --maxdays 90 --mindays 7 --warndays 7 <user>
-....
-
-Excute this command for each existing user (usually just `desktop`):
-
-....
-chage --inactive 30 <user>
+aa-enforce /etc/apparmor.d/*
 ....
 
-Create a comma separated list of users (usally `desktop,oper,prog`) in
-the `sudo` statement in the `/etc/group` file.
-
-````
-sudo:x:10:root,<user list>
-````
-
-Reboot and execute:
-
-....
-aa-enforce /etc/apparmor.d/*:
-....
-
-At this point, all the CIS remediations that can implemented have been
+All the CIS remediations that can applied at this point have been
 completed. The next section describes some other policies that can be
 considered.
 
@@ -94,11 +83,11 @@ You may wish to further restrict `sshd` to specific hosts or sub-domains.
 
 ==== Password policies
 
-You may ewish to set minimum password lengh to 12.
+You may wish to set minimum password lengh to 12.
 
-You may ewish to set password reuse remember to 24.
+You may wish to set password reuse remember to 24.
 
-==== Set remote log host or retention to a minimum of one yeat
+==== Set remote log host and/or retention to a minimum of one year
 
 You may wish to configure a remote log host and/or set log retention
 period to at least one year.
@@ -152,23 +141,21 @@ Example:
 CLASS="--class gnu-linux --class gnu --class os --unrestricted"
 ....
 
-Run the following command to update the grub2 configuration:
+Run the following commands to update the grub2 configuration:
 
 ....
 update-grub
+chmod go-rwx /boot/grub/grub.cfg
 ....
 
 == CIS Exceptions
 
-This section addresses the tests that failed in the CIS benchmark.
-
-=== 1.4.1 Ensure permissions on bootloader config are configured
-
-They switch back to `r--r--r--` on reboot.
+This section addresses the tests that failed in the CIS benchmark
+after all the remediations in this document were applied.
 
 === 1.4.2 Ensure bootloader password is set
 
-TBD
+Must be set later.
 
 === 2.2.2 Ensure X Window System is not installed
 
@@ -180,37 +167,20 @@ CUPS is required.
 
 === 2.2.11 Ensure IMAP and POP3 server is not enabled
 
-Exim4 is required, it never accepts incoming remote connections.
-
-=== 3.2.4 Ensure suspicious packets are logged
-
-The parameters:
-
-....
-net.ipv4.conf.all.log_martians = 1
-net.ipv4.conf.default.log_martians = 1
-....
-
-are not respected in `/etc/sysctl.conf` or in `/etc/systctl.d/*` on
-reboot.  However, then a:
-
-....
-sysctl --system
-....
-
-will respect them.
+Exim4 is required as MTA; it never accepts incoming remote connections.
 
 === 3.5 Firewall Configuration
 
 The firewall is configured with `ufw` instead of `iptables` and
-`ip6tables`. The configuration is set deny for incoming connections,
-enables incoming SSH connections and sets logging for all connections. Setup:
+`ip6tables`. The configuration is set to by default deny for incoming
+connections, enable incoming SSH connections, and sets logging for all
+connections. Setup:
 
 ....
-apt install ufw
+apt -y install ufw
 ufw allow OpenSSH
 ufw logging on
-ufw enable
+ufw --force enable
 ....
 
 === 3.5.1.1 Ensure default deny firewall policy
@@ -235,37 +205,32 @@ Configured with `ufw`.
 
 === 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host
 
-We need central logging host.
+Central logging host must be set later.
 
 === 4.2.4 Ensure permissions on all logfiles are configured
 
 All files except `/var/log/wtmp` have the requested permissions. That
-file changes on a reboot to `rw-rw-r--', owned by `root.wtmp`.
+file changes on a reboot to `rw-rw-r--`, owned by `root.wtmp`.
 
 === 5.2.6 Ensure SSH X11 forwarding is disabled
 
 We require `ssh` X11 forwarding.
 
-=== 5.3.1 Ensure password creation requirements are configured
+=== 5.4.2 Ensure system accounts are non-login
 
-We use `cracklib` instead of `pwquality`:
-
-....
-apt install libpam-cracklib
-touch /etc/pam.d/common-password
-cat >/etc/pam.d/common-password <<EOT
-password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
-EOT
-....
+System accounts (i.e., accounts with user ID less than 1000) `oper`
+and `prog` are needed for compatabilty with the wider VLBI community
+and are only used as service accounts from AUID accounts.
 
 == CIS issues that need to be addressed
 
-This section lists further topics related to benchmark that need to be
-addressed.
+This section lists further topics related to the benchmark that should be
+discussed.
 
 === 2.2.1.2 Ensure ntp is configured
 
-Need FS ntp configuration.
+Need FS NTP configuration. That is more secure than the benchmark since
+it uses `ignore` by default.
 
 === 2.3.4 Ensure `telnet` client is not installed
 
@@ -302,7 +267,7 @@ Should we use the NASA 12 character minimum?
 
 This is too short for developers/troubleshooters
 
-== CIS Issues
+== CIS Remediation problems
 
 This section details problems with the recommended remediations.
 
@@ -313,22 +278,34 @@ latter required 'purge'.
 
 === 2.2.1.2 Ensure ntp is configured
 
-Remediation makes it less secure.
+Remediation makes it less secure. A default policy of `ignore` is better.
 
 === 2.3.4 Ensure `telnet` client is not installed
 
 The remediation does not make the test pass, that required 'purge'.
 
+=== 3.2.4 Ensure suspicious packets are logged
+
+The remediation lines added in `/etc/sysctl.d/*` are not respected at
+boot (unlike all others). To overcome this, the following lines were
+added to `/etc/rc.local.
+
+....
+sysctl -w net.ipv4.conf.all.log_martians=1
+sysctl -w net.ipv4.conf.default.log_martians=1
+sysctl -w net.ipv4.route.flush=1
+....
+
 === 4.1 Configure System Accounting (auditd)
 
 Many of the remedations are described in terms of the contents of
 `/etc/audit/audit.rules`. However, the contents of that file are
-auto-generated from the files in `/etc/audit/rules.d`, which is where
-these remediations must go.
+auto-generated at boot from the files in `/etc/audit/rules.d`, which
+is where these remediations must go.
 
 === 4.1.6 Ensure events that modify the system's network environment are collected
 
-64-bit remediation had b64 and b32 rules concatenated on one line..
+64-bit remediation had b64 and b32 rules concatenated on one line.
 
 === 4.1.17 Ensure kernel module loading and unloading is collected
 
