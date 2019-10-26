@@ -566,20 +566,6 @@ Set passwords for the 'oper' and 'prog' accounts with:
 
 entering the passwords twice as prompted.
 
-=== Download the Field System
-
-    cd /usr2
-    git clone https://github.com/nvi-inc/fs fs-git
-    ln -s fs-git fs
-    chown -R prog:rtx fs-git
-
-=== Install default copies of all the FS related directories
-
-   cd /usr2/fs
-   make install
-
-and enter 'y' to confirm installation.
-
 === Install tools for RAID (Optional)
 
 You can install some useful tools for working with the RAID with:
@@ -593,6 +579,20 @@ are:
 
    * `mdstat` allows all users to check on RAID status
    * `refresh_secondary` allows `root` to refresh a secondary disk
+
+=== Download the Field System
+
+    cd /usr2
+    git clone https://github.com/nvi-inc/fs fs-git
+    ln -s fs-git fs
+    chown -R prog:rtx fs-git
+
+=== Install default copies of all the FS related directories
+
+   cd /usr2/fs
+   make install
+
+and enter 'y' to confirm installation.
 
 === Make the FS
 
