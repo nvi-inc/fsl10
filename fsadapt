@@ -1,9 +1,12 @@
 #!/bin/bash
-# fsadapt  -- adapt a Debian 7.x installation for FS Linux 9
-# $Id: fsadapt,v 9.0 2014/07/24 12:06:30 jfq Exp $
+# fsadapt  -- adapt a Debian 9.x installation for FS Linux 10
+# $Id: fsadapt,v 10.0 2019/10/25 12:41:30 jfq Exp $
 
 # What          When                  Who
 # $Log: fsadapt,v $
+# Revision 10.0 2019/10/25 12:41:30  jfhq
+# Initial release for FS Linux 10
+#
 # Revision 9.0  2014/07/24 12:06:30  jfhq
 # Initial release for FS Linux 9
 #
@@ -155,16 +158,25 @@
 # 1995-06-07  amn  Selecting target dir/dev, X setup.
 # 1995-06-06  amn  Original version.
 
-readonly DIALOG="dialog --backtitle FS/Debian/Linux-fsadapt-9.0"
+# Ensure dialog is installed or things will go very wrong!
+dialog --version > /dev/null || exit
+
+readonly DIALOG="dialog --backtitle FS/Debian/Linux-fsadapt-10.0"
 readonly PATCHOPTS="-s -p1 --set-utc"
 
 FSMESS="We are about to update a Debian 9.x + Linux 4.9.0 (FS Linux 10)"
 FSLINUX00=$(cut -c1-2 < /etc/debian_version)
-  if [ "${FSLINUX00}" != "9." ]; then
-      echo "WARNING: Could not find Linux revision !!!"
-      echo -n "Did not find an approved FS kernel.";
+FSLINUX01=$(uname -r | cut -c1-5)
+  if [ "${FSLINUX00}" != "9."  -o "${FSLINUX01}" != "4.9.0" ]; then
+      echo -n "WARNING: Could not find Debian version or "
+      echo "did not find an approved FS kernel.";
       echo -n "I will run fsadapt as kernel 4.9.0 FS Linux 10"; read -r ans
   fi
+
+# Default verbosity (none).
+VERBO=''
+VVERBO=''
+VERBOQ='--quiet'
 
 # Process command line arguments.
 NODIALOGS=""
@@ -180,6 +192,12 @@ while [ "$1" != "" ]; do
   case $1 in
     "-n")
       NODIALOGS=1
+      shift
+      ;;
+    "-v")
+      VERBO='-v'
+      VVERBO='--verbose'
+      VERBOQ=''
       shift
       ;;
     "-1")
@@ -243,7 +261,7 @@ while [ "$1" != "" ]; do
       done
       ;;
     *)
-      echo "fsadapt: usage: fsadapt [-n] [-1 opt1...] [-2 opt2...] [-3 opt3...] [-4 opt4...]" >&2
+      echo "fsadapt: usage: fsadapt [-n] [-v] [-1 opt1...] [-2 opt2...] [-3 opt3...] [-4 opt4...]" >&2
       exit
       ;;
   esac
@@ -270,14 +288,14 @@ blank_oper=$(grep '^oper::' "${NEW_ROOT}"etc/shadow)
 unset_oper=$(grep '^oper:\*:' "${NEW_ROOT}"etc/shadow)
 blank_prog=$(grep '^prog::' "${NEW_ROOT}"etc/shadow)
 unset_prog=$(grep '^prog:\*:' "${NEW_ROOT}"etc/shadow)
-has_user1=$(grep '^user1:' "${NEW_ROOT}"etc/shadow)
+has_user1=$(grep '^desktop:' "${NEW_ROOT}"etc/shadow)
 if [ "$has_user1" ]; then
-  user1_text=", 'user1'"
+  user1_text=", 'desktop'"
 else
   user1_text=""
 fi
-blank_user1=$(grep '^user1::' "${NEW_ROOT}"etc/shadow)
-unset_user1=$(grep '^user1:\*:' "${NEW_ROOT}"etc/shadow)
+blank_user1=$(grep '^desktop::' "${NEW_ROOT}"etc/shadow)
+unset_user1=$(grep '^desktop:\*:' "${NEW_ROOT}"etc/shadow)
 if [ "$blank_root" -o "$blank_oper" -o "$blank_prog" -o "$blank_user1" ]; then
   if [ "$NODIALOGS" ]; then
     echo "fsadapt: must set passwords for ('root', 'oper', 'prog'${user1_text}) first" >&2
@@ -301,15 +319,15 @@ fi
 # Determine the absolute path to the directory name where this script resides.
 SRCS=${0%fsadapt}
 if [ x"$SRCS" = x ]; then
-  SRCS="./gpib"
+  SRCS="./"
 fi
 if [ ${SRCS#/} = $SRCS ]; then  # it doesn't start with a '/'
   SRCS=$(pwd)/$SRCS
 fi
 
-NEW_ROOT_DEVICE=/dev/sda1
-NEW_SWAP_DEVICE=/dev/sda2
-NEW_USR2_DEVICE=/dev/sda3
+NEW_ROOT_DEVICE=/dev/mapper/vg0-root
+NEW_SWAP_DEVICE=/dev/mapper/vg0-swap
+NEW_USR2_DEVICE=/dev/mapper/vg0-usr2
 
 # Try to get the "true and right" device names from 'mount' output
 # if we are running $NEW_ROOT = /, i.e. a "living" system.
@@ -337,7 +355,7 @@ if [ ! -d "${NEW_ROOT}"var/lib/dpkg ]; then
       --msgbox \
 "\nThe target directory for the new root file system ($NEW_ROOT)\n\
 either doesn't exist\n\
-or it doesn't contain Debian 7.x installed on it.\n\
+or it doesn't contain Debian 9.x installed on it.\n\
 \n\
 Please check the target directory (note the need for trailing '/')\n\
 and possibly supply the correct directory name as the first\n\
@@ -378,11 +396,6 @@ fi
 
 # Determine if the various kernel and conf file patches have been applied.
 
-# Default verbosity (none).
-VERBO=''
-VVERBO=''
-VERBOQ='--quiet'
-
 if [ ! -r "${NEW_ROOT}usr/src/linux-headers-$(uname -r)" ]; then
 	chroot "${NEW_ROOT}" apt-get -y install "linux-headers-$(uname -r)"
 fi
@@ -396,15 +409,14 @@ else
 	exit
 fi
 
-# Do we have apt-get cron for weekly security updates.
-if [ -r "${NEW_ROOT}etc/cron.weekly/apt-get" ]; then
-  apt_get_def="off"
+if [ ! -z $VERBO ]; then
+  verb_def="on"
 else
-  apt_get_def="on"
+  verb_def="off"
 fi
 
 # Linux GPIB driver for various GPIB boards.
-GPIBVER="3.2.20"
+GPIBVER="4.0.3"
 if [ ! -d "${NEW_ROOT}"usr/src/linux-gpib-${GPIBVER} ]; then
   atgpib_def="on"
 else
@@ -412,14 +424,15 @@ else
 fi
 
 # PGPLOT5 and associated perl binding.
-if [ ! -f "${NEW_ROOT}"usr/lib/perl5/PGPLOT.pm ]; then
+if [ ! -f "${NEW_ROOT}"usr/share/man/man3/pgperl.3.gz ]; then
   pgplot_def="on"
 else
   pgplot_def="off"
 fi
 
 # Add FS shared memory setup into init sequence
-if [ ! -L "${NEW_ROOT}"etc/systemd/system/fsalloc.service ]; then
+if [ ! -f "${NEW_ROOT}"etc/systemd/system/fsalloc.service -o \
+     ! -f "${NEW_ROOT}"etc/systemd/system/stalloc.service ]; then
   systemd_def="on"
 else
   systemd_def="off"
@@ -441,16 +454,10 @@ else
     stdaccts_def="on"
 fi
 
-# Has telnet '-h'?
+# Is lsb_release wrapped?
 noident_def="off"
-if [ -x /usr/bin/lsb_release.real ]; then
+if [ -x "${NEW_ROOT}"usr/bin/lsb_release.real ]; then
   noident_def="on"
-fi
-
-# Has wu-ftpd '-l'?
-ftpdlog_def="off"
-if (grep -F '/usr/sbin/ftpd -l' "${NEW_ROOT}"etc/inetd.conf >/dev/null); then
-  ftpdlog_def="on"
 fi
 
 # Do we have 'GOVERNMENT' prompts?
@@ -471,9 +478,9 @@ elif [ "$SHOWPHASE1" ]; then
 Missing '*' indicates that this action has already been performed.\n\
 Most of these can only be done _once_, so please don't put an '*' on\n\
 unless you are certain that you want and can to do that item again." \
-21 76 10 \
+22 76 10 \
   skip      "Skip all steps below (regardless of [*] marks)" off \
-  verbose   "Show names of files being processed in 'fsadapt'" off \
+  verbose   "Show names of files being processed in 'fsadapt'" $verb_def \
   atgpib    "Install Linux GPIB driver and library" $atgpib_def \
   pgplot    "Install PGPLOT5 and associated perl binding" $pgplot_def \
   systemd   "Adjust systemd to run FS-specific programs in boot" $systemd_def \
@@ -481,7 +488,6 @@ unless you are certain that you want and can to do that item again." \
   stdaccts  "Add 'oper' and 'prog' to '/etc/passwd and /etc/shadow'" $stdaccts_def \
   fstab     "Make sure that '/etc/fstab' includes '/usr2' etc" "on" \
   noident   "Remove host and op.sys info from login prompts" $noident_def \
-  ftpdlog   "Enable additional logging of FTP sessions served" $ftpdlog_def \
   govt      "Add 'U.S. Government' warnings to login prompts" $govt_def \
   2>/tmp/reply
   # Cancel?
@@ -514,7 +520,7 @@ rm ${VERBO} -rf nigpib*
 rm ${VERBO} -f "${NEW_ROOT}"usr/local/lib/libgpib.a
 rm ${VERBO} -f "${NEW_ROOT}"usr/local/include/sys/ugpib.h
 # Unpack source code of appropriate package (downloaded from SourceForge)
-tar xvzf "${SRCS}"/linux-gpib-${GPIBVER}.tar.gz
+tar --no-same-owner -xvzf "${SRCS}"gpib/linux-gpib-${GPIBVER}.tar.gz
 popd || exit
 ;;
       pgplot)
@@ -524,8 +530,8 @@ chroot "${NEW_ROOT}" apt-get -y install pgplot5 libpgplot-perl
 ;;
       systemd)
 ##systemd, new in Debian 8
-chroot "${NEW_ROOT}" systemctl disable fsalloc >/dev/null
-chroot "${NEW_ROOT}" systemctl disable stalloc >/dev/null
+chroot "${NEW_ROOT}" systemctl disable fsalloc >/dev/null 2>&1
+chroot "${NEW_ROOT}" systemctl disable stalloc >/dev/null 2>&1
 rm ${VERBO} -f "${NEW_ROOT}"etc/systemd/system/fsalloc.service
 rm ${VERBO} -f "${NEW_ROOT}"etc/systemd/system/stalloc.service
 cp ${VERBO} systemd/fsalloc.service "${NEW_ROOT}"etc/systemd/system
@@ -638,28 +644,20 @@ else
 fi
 ;;
       noident)
-if [ -x /usr/bin/lsb_release.real ]; then
+if [ -x "${NEW_ROOT}"usr/bin/lsb_release.real ]; then
   :
 else
   mv ${VERBO} -f "${NEW_ROOT}"usr/bin/lsb_release "${NEW_ROOT}"usr/bin/lsb_release.real
   cp ${VERBO} -p "${SRCS}"usr_bin_lsb_release "${NEW_ROOT}"usr/bin/lsb_release
 fi
 cat >"${NEW_ROOT}"etc/issue <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
-Welcome to FS Linux 9 on \l.
+Welcome to FS Linux 10 on \l.
 
 EOF-marker-with-no-quoted-chars-to-get-var-expansion
 cat >"${NEW_ROOT}"etc/issue.net <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
-Welcome to FS Linux 9
+Welcome to FS Linux 10
 
 EOF-marker-with-no-quoted-chars-to-get-var-expansion
-;;
-      ftpdlog)
-if (grep -F '/usr/sbin/ftpd -l' "${NEW_ROOT}"etc/inetd.conf >/dev/null); then
-  :
-else
-  sed -e "s,/usr/sbin/ftpd,/usr/sbin/ftpd -l," "${NEW_ROOT}"etc/inetd.conf >"${NEW_ROOT}"etc/inetd.conf.new
-  mv ${VERBO} -f "${NEW_ROOT}"etc/inetd.conf.new "${NEW_ROOT}"etc/inetd.conf
-fi
 ;;
       govt)
 cat >/tmp/govt.$$ <<EOF-marker-with-no-quoted-chars-to-get-var-expansion
@@ -697,14 +695,6 @@ if (grep -F -i 'government' "${NEW_ROOT}"etc/issue.net >/dev/null); then
 else
   cat /tmp/govt.$$ >>"${NEW_ROOT}"etc/issue.net
 fi
-# FTP server:
-if (grep -F -i 'government' "${NEW_ROOT}"etc/wu-ftpd/welcome.msg >/dev/null); then
-  :
-else
-  if [ -e "${NEW_ROOT}"etc/wu-ftpd/welcome.msg ]; then
-     cat /tmp/govt.$$ >>"${NEW_ROOT}"etc/wu-ftpd/welcome.msg
-  fi
-fi
 # Normal login screens after login (incl. xterm).
 if (grep -F -i 'government' "${NEW_ROOT}"etc/govtwarn.txt >/dev/null 2>&1); then
   :
@@ -726,7 +716,7 @@ rm -f /tmp/govt.$$
 if (grep -F '#Banner' "${NEW_ROOT}"etc/ssh/sshd_config >/dev/null); then
   sed -e "s,#Banner,Banner," "${NEW_ROOT}"etc/ssh/sshd_config >"${NEW_ROOT}"etc/ssh/sshd_config.new
   mv ${VERBO} -f "${NEW_ROOT}"etc/ssh/sshd_config.new "${NEW_ROOT}"etc/ssh/sshd_config
-  /usr/sbin/invoke-rc.d ssh reload
+  systemctl reload ssh
 fi
 # GDM3 login window
 if (grep -F -i 'government' "${NEW_ROOT}"etc/gdm3/greeter.dconf-defaults >/dev/null 2>&1); then
@@ -794,21 +784,35 @@ fi
 
 # Selecting defaults for phase 2 of updating.
 
-# Is home directory already a symlink?
-if [ -L /home ]; then
-  link_home="off"
+# 'oper' home directory already a symlink?
+if [ -L /home/oper ]; then
+  prev_oper_def="off"
 else
-  if [ -d /usr2 ]; then
-    link_home="on"
+  if [ -d /usr2/oper ]; then
+    prev_oper_def="on"
   else
-    # Nowhere to move content to yet
-    link_home="off"
+    prev_oper_def="off"
+  fi
+fi
+# 'prog' home directory already a symlink?
+if [ -L /home/prog ]; then
+  prev_prog_def="off"
+else
+  if [ -d /usr2/prog ]; then
+    prev_prog_def="on"
+  else
+    prev_prog_def="off"
   fi
 fi
 if [ -x "/lib/modules/$(uname -r)/gpib" ]; then
   config_gpib_def="off"
 else
   config_gpib_def="on"
+fi
+if [ -f "/etc/gpib.conf" ]; then
+  choose_gpib_def="off"
+else
+  choose_gpib_def="on"
 fi
 if (grep '^disable-user-list=true' /etc/gdm3/greeter.dconf-defaults >/dev/null); then
   greeter_def="off"
@@ -822,10 +826,16 @@ else
   serial_def="on"
 fi
 # Do we have sshd key files?
-if [ -r /etc/ssh/ssh_host_rsa_key ] && [ -r /etc/ssh/ssh_host_dsa_key ]; then
+if [ -r /etc/ssh/ssh_host_rsa_key ] && [ -r /etc/ssh/ssh_host_ecdsa_key ]; then
   sshkeys_def="off"
 else
   sshkeys_def="on"
+fi
+# Do we have apt-get cron for weekly security updates.
+if [ -r "${NEW_ROOT}etc/cron.weekly/apt-get" ]; then
+  apt_get_def="off"
+else
+  apt_get_def="on"
 fi
 
 # Present a checklist which of the following to do.
@@ -838,12 +848,13 @@ ${DIALOG} --title "FS Adaptation: Setup (Window 2)" \
 \n\
 (Recommended options are shown with '*';\n\
 all of these can be safely attempted again and again.)" \
-21 76 12 \
+21 76 10 \
   skip          "Skip all steps below (regardless of [*] marks)" off \
-  link_home     "Turn /home into a symbolic link to /usr2" $link_home \
+  prev_oper     "Use existing '/usr2/oper' home directory" $prev_oper_def \
+  prev_prog     "Use existing '/usr2/prog' home directory" $prev_prog_def \
   config_gpib   "Configure Linux GPIB driver and library" $config_gpib_def \
-  choose_gpib   "Set '/etc/gpib.conf' for available GPIB interface" $config_gpib_def \
-  set_perms     "Set device permissions (serial, tape)" on \
+  choose_gpib   "Set '/etc/gpib.conf' for available GPIB interface" $choose_gpib_def \
+  set_perms     "Set device permissions (serial, gpib)" on \
   greeter       "Set up GDM3 greeter to not show user list" $greeter_def \
   serial        "Set '/etc/default/grub' for VScom cards" $serial_def \
   sshkeys       "'sshd' private/public keys (computer identity)" $sshkeys_def \
@@ -865,39 +876,55 @@ fi
       skip)
 break
 ;;
-      link_home)
-if [ -L /home ]; then
+      prev_oper)
+if [ -L /home/oper ]; then
   :  # Do nothing if it already is a symlink.
 else
-  if [ -d /home ]; then
-    for DIR in /home/*; do
-       if [ -d /usr2/"${DIR}" ]; then
-         # Existing directory on /usr2, so save as a copy.
-         if [ -d /usr2/"${DIR}".FSCOPY ]; then
-           rm ${VERBO} -rf /usr2/"${DIR}".FSCOPY
-         fi
-         mv ${VERBO} /home/"${DIR}" /usr2/"${DIR}".FSCOPY
-       else
-         # Simply move it across
-         mv ${VERBO} /home/"${DIR}" /usr2/
-       fi
-       # Update user home directory in /etc/passwd to match
-       sed -i -e "s,:/home/${DIR}:,:/usr2/${DIR}:," /etc/passwd
-    done
-    # /home directory should now be empty so remove it
-    rmdir ${VERBO} /home
+  if [ -d /usr2/oper ]; then
+    # Need to have existing stuff on /usr2.
+    rm ${VERBO} -rf ${NEW_ROOT}home/oper.FSCOPY
+    if [ -e ${NEW_ROOT}home/oper ]; then
+      mv ${VERBO} -f ${NEW_ROOT}home/oper ${NEW_ROOT}home/oper.FSCOPY
+    fi
+    ln ${VERBO} -s /usr2/oper ${NEW_ROOT}home/oper
   fi
-  # Add replacement symlink
-  ln ${VERBO} -s usr2 /home
-  # Update /etc/adduser.conf to use /usr2 for home directories in future
-  sed -i -e "s,^DHOME=/home,DHOME=/usr2," /etc/adduser.conf
+fi
+if [ -r /usr2/oper/.fvwmrc ]; then
+  # Convert .fvwmrc settings to .fvwm2rc.
+  su oper -c fvwmrc_convert /usr2/oper/.fvwmrc
+fi
+if [ -r /usr2/oper/.fvwm2rc ]; then
+  sed -e "s,PopUp Window Ops2,PopUp \"Window Ops2\"," /usr2/oper/.fvwm2rc > /tmp/.fvwm2rc_1
+  mv /tmp/.fvwm2rc_1 /usr2/oper/.fvwm2rc
+fi
+;;
+      prev_prog)
+if [ -L /home/prog ]; then
+  :  # Do nothing if it already is a symlink.
+else
+  if [ -d /usr2/prog ]; then
+    # Need to have existing stuff on /usr2.
+    rm ${VERBO} -rf ${NEW_ROOT}home/prog.FSCOPY
+    if [ -e ${NEW_ROOT}home/prog ]; then
+      mv ${VERBO} -f ${NEW_ROOT}home/prog ${NEW_ROOT}home/prog.FSCOPY
+    fi
+    ln ${VERBO} -s /usr2/prog ${NEW_ROOT}home/prog
+  fi
+fi
+if [ -r /usr2/prog/.fvwmrc ]; then
+  # Convert .fvwmrc settings to .fvwm2rc.
+  su prog -c fvwmrc_convert /usr2/prog/.fvwmrc
+fi
+if [ -r /usr2/prog/.fvwm2rc ]; then
+  sed -e "s,PopUp Window Ops2,PopUp \"Window Ops2\"," /usr2/prog/.fvwm2rc > /tmp/.fvwm2rc_1
+  mv /tmp/.fvwm2rc_1 /usr2/prog/.fvwm2rc
 fi
 ;;
       config_gpib)
 # Install the Linux-GPIB firmware collection if not yet installed
 if [ ! -r /var/local/gpib_firmware-2008-08-10 ]; then
 	(cd /var/local/ || exit;
-	 tar xvzf "${SRCS}"/gpib_firmware-2008-08-10.tar.gz;
+	 tar --no-same-owner -xvzf "${SRCS}"gpib/gpib_firmware-2008-08-10.tar.gz;
 	 ln -s gpib_firmware-2008-08-10 gpib_firmware)
 fi
 # Install the requisite firmware loader package
@@ -905,8 +932,8 @@ if [ ! -r /usr/share/doc/fxload ]; then
 	apt-get -y install fxload
 fi
 # Install default /etc/gpib.conf with device names mimicing NI driver
-if [ "${SRCS}"etc_gpib.conf -nt /etc/gpib.conf ]; then
-  cp ${VERBO} -p "${SRCS}"etc_gpib.conf /etc/gpib.conf
+if [ "${SRCS}"gpib/etc_gpib.conf -nt /etc/gpib.conf ]; then
+  cp ${VERBO} -p "${SRCS}"gpib/etc_gpib.conf /etc/gpib.conf
 fi
 # Compile and install Linux-GPIB package
 pushd /usr/src/linux-gpib-${GPIBVER} >/dev/null || exit
@@ -915,19 +942,19 @@ make
 make install
 popd || exit
 # Add a suitable /etc/modprobe.d/gpib.conf that runs 'gpib_config'.
-if [ "${SRCS}"etc_modprobe.d_gpib.conf -nt /etc/modprobe.d/gpib.conf ]; then
-  cp ${VERBO} -p "${SRCS}"etc_modprobe.d_gpib.conf /etc/modprobe.d/gpib.conf
+if [ "${SRCS}"gpib/etc_modprobe.d_gpib.conf -nt /etc/modprobe.d/gpib.conf ]; then
+  cp ${VERBO} -p "${SRCS}"gpib/etc_modprobe.d_gpib.conf /etc/modprobe.d/gpib.conf
 fi
 # Add a wrapper for gpib_config to use with hotpluggable devices via udev.
 mkdir ${VERBO} -p /usr/lib/libgpib0
-if [ "${SRCS}"usr_lib_libgpib0_gpib_config_wrapper -nt /usr/lib/libgpib0/gpib_config_wrapper ]; then
-  cp ${VERBO} -p "${SRCS}"usr_lib_libgpib0_gpib_config_wrapper /usr/lib/libgpib0/gpib_config_wrapper
+if [ "${SRCS}"gpib/usr_lib_libgpib0_gpib_config_wrapper -nt /usr/lib/libgpib0/gpib_config_wrapper ]; then
+  cp ${VERBO} -p "${SRCS}"gpib/usr_lib_libgpib0_gpib_config_wrapper /usr/lib/libgpib0/gpib_config_wrapper
 fi
 # Add a suitable /etc/udev/rules.d/gpib.rules to set permissions on /dev/gpibX
 #  to load firmware into unitialised USB dongles that require that and to run
 #  the gpib_config wrapper on plug-in.
-if [ "${SRCS}"etc_udev_rules.d_gpib.rules -nt /etc/udev/rules.d/gpib.rules ]; then
-  cp ${VERBO} -p "${SRCS}"etc_udev_rules.d_gpib.rules /etc/udev/rules.d/gpib.rules
+if [ "${SRCS}"gpib/etc_udev_rules.d_gpib.rules -nt /etc/udev/rules.d/gpib.rules ]; then
+  cp ${VERBO} -p "${SRCS}"gpib/etc_udev_rules.d_gpib.rules /etc/udev/rules.d/gpib.rules
 fi
 # Wait for return if in verbose mode (to see the messages before
 # 'dialog' is fired up again).
@@ -977,13 +1004,23 @@ fi
       set_perms)
 # Enable 'oper', 'prog' access to floppy, serial, and other devices.
 #for GRP in dialout cdrom floppy tape audio backup dos; do  # no dos in Hamm
-for GRP in dialout dip cdrom floppy scanner tape audio video backup lpadmin plugdev netdev gpib; do
+for GRP in dialout dip cdrom floppy scanner audio video bluetooth lpadmin plugdev netdev gpib; do
   adduser ${VERBOQ} oper $GRP
   adduser ${VERBOQ} prog $GRP
 done
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
+fi
 ;;
       greeter)
 sed -i -e "s/^# disable-user-list=true/disable-user-list=true/" /etc/gdm3/greeter.dconf-defaults
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
+fi
 ;; 
       serial)
 # Fix '/etc/default/grub' for VScom 400H/800H.
@@ -1004,36 +1041,46 @@ if [ $? = 0 ]; then
 ############ Generic 2-port card ##############################
   if [ "$(cat /tmp/reply)" = 2-port ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
-    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=6/" /etc/default/grub
+    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=8/" /etc/default/grub
     /usr/sbin/update-grub
 ############ VScom 400H #######################################
   elif [ "$(cat /tmp/reply)" = 4-port ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
-    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=8/" /etc/default/grub
+    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=10/" /etc/default/grub
     /usr/sbin/update-grub
 ############ VScom 800H #######################################
   elif [ "$(cat /tmp/reply)" = 8-port ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
-    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=12/" /etc/default/grub
+    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=14/" /etc/default/grub
     /usr/sbin/update-grub
   elif [ "$(cat /tmp/reply)" = None ]; then
     sed -i -e "s/8250.nr_uarts=[0-9 ]*//" /etc/default/grub
-    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=2/" /etc/default/grub
+    sed -i -e "s/^GRUB_CMDLINE_LINUX=\"/&8250.nr_uarts=6/" /etc/default/grub
     /usr/sbin/update-grub
   fi
+fi
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
 fi
 ;;
      updates)
 # Setup cron for weekly security updates.
-if [ -r /root/fsadapt/etc_cron.weekly_apt-get ]; then
+if [ -r "${SRCS}"etc_cron.weekly_apt-get ]; then
     if [ -r /etc/cron.weekly/apt-get ]; then
 	:
     else
-	cp /root/fsadapt/etc_cron.weekly_apt-get /etc/cron.weekly/apt-get
-	chmod 755 /etc/cron.weekly/apt-get
+	cp ${VERBO} "${SRCS}"etc_cron.weekly_apt-get /etc/cron.weekly/apt-get
+	chmod ${VERBO} 755 /etc/cron.weekly/apt-get
     fi
 else
     :
+fi
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
 fi
 ;;
       sshkeys)
@@ -1060,6 +1107,11 @@ if [ $? = 0 ]; then
     :
   fi
 fi
+# Wait for return if in verbose mode (to see the messages before
+# 'dialog' is fired up again).
+if [ $VERBO ]; then
+  echo -n "Please press RETURN to continue. "; read -r ans
+fi
 ;;
       *)
         echo "fsadapt: unknown phase 2 operation ($i)" >&2
@@ -1068,11 +1120,6 @@ fi
     esac
   done
 #--
-# Wait for return if in verbose mode (to see the messages before
-# 'dialog' is fired up again).
-if [ $VERBO ]; then
-  echo -n "Please press RETURN to continue. "; read -r ans
-fi
 # Next: phase 3, things that may be done later again.
 
 # Selecting defaults for phase 3 of updating.
@@ -1091,6 +1138,7 @@ all of these can be safely attempted again and again.)" \
 20 76 10 \
   skip          "Skip all steps below (regardless of [*] marks)" off \
   eximconfig    "Change configuration of 'exim4' email system" off \
+  nmtui         "Change configuration of 'NetworkManager'" off \
   2>/tmp/reply
   # Cancel?
   if [ $? != 0 ]; then
@@ -1110,6 +1158,9 @@ break
       eximconfig)
 dpkg-reconfigure exim4-config
 ;;
+      nmtui)
+nmtui
+;;
       *)
         echo "fsadapt: unknown phase 3 operation ($i)" >&2
         exit
@@ -1119,47 +1170,27 @@ dpkg-reconfigure exim4-config
 #--
 
 # Check network service status:
-if [ ! -e /etc/ssh/sshd_not_to_be_run ]; then    #is a daemon, not a line in inetd.conf
+if systemctl is-enabled ssh; then    #is a daemon, not a line in inetd.conf
   netssh_def="on"
 else
   netssh_def="off"
-fi
-if (grep '^ftp' /etc/inetd.conf >/dev/null); then
-  netftp_def="on"
-else
-  netftp_def="off"
 fi
 if (egrep "^QUEUERUNNER='combined'|^QUEUERUNNER='no'|^QUEUERUNNER='separate'|^QUEUERUNNER='ppp'" /etc/default/exim4 >/dev/null); then             #is a daemon, not a line in inetd.conf
   netsmtp_def="on"
 else
   netsmtp_def="off"
 fi
-if (grep '^discard' /etc/inetd.conf >/dev/null); then
-  netdiscard_def="on"
-else
-  netdiscard_def="off"
-fi
-if (grep '^daytime' /etc/inetd.conf >/dev/null); then
-  netdaytime_def="on"
-else
-  netdaytime_def="off"
-fi
-if (grep '^time' /etc/inetd.conf >/dev/null); then
-  nettime_def="on"
-else
-  nettime_def="off"
-fi
 if (grep '^restrict [-46]* default ignore' /etc/ntp.conf >/dev/null); then    #is a daemon, not a line in inetd.conf
   netntp_def="off"
 else
   netntp_def="on"
 fi
-if (grep '^ident' /etc/inetd.conf >/dev/null); then
-  netident_def="on"
+if systemctl is-enabled cups; then    #is a daemon, not a line in inetd.conf
+  netipp_def="on"
 else
-  netident_def="off"
+  netipp_def="off"
 fi
-if [ -e /etc/rc2.d/S*avahi-daemon ]; then    #is a daemon, not a line in inetd.conf
+if systemctl is-enabled avahi-daemon; then    #is a daemon, not a line in inetd.conf
   netmdns_def="on"
 else
   netmdns_def="off"
@@ -1175,17 +1206,13 @@ ${DIALOG} --title "FS Adaptation: Network Services (Window 4)" \
 \n\
 You can toggle [*] checkboxes to enable/disable\n\
 network services according to your local security policy." \
-21 76 12 \
+21 76 7 \
   skip          "Skip all steps below (regardless of [*] marks)" off \
   secure        "Secure system" off \
   netssh        "'sshd' net service" $netssh_def \
-  netftp        "'ftpd' net service" $netftp_def \
   netsmtp       "'smtp' receiving email from the network" $netsmtp_def \
-  netdiscard    "Internal 'discard' net service" $netdiscard_def \
-  netdaytime    "Internal 'daytime' net service" $netdaytime_def \
-  nettime       "Internal 'time' net service" $nettime_def \
   netntp        "'ntpd' network time server" $netntp_def \
-  netident      "'ident' net service" $netident_def \
+  netipp        "'cups' internet print server" $netipp_def \
   netmdns       "'mDNS/DNS-SD' net service" $netmdns_def \
   2>/tmp/reply
   # Cancel?
@@ -1200,13 +1227,9 @@ fi
 fphase4=$(echo $PHASE4 | cut -d' ' -f1)
 #-- Check to see if the secure item was chosen.
 if [ "$fphase4" = "secure" ]; then
-    netftp_def="off"
     netsmtp_def="off"
-    netdiscard_def="off"
-    netdaytime_def="off"
-    nettime_def="off"
     netntp_def="off"
-    netident_def="off"
+    netipp_def="off"
     netmdns_def="off"
 # Present a checklist which of the following to do.
 ${DIALOG} --title "FS Adaptation: Secure Network Service (Window 4a)" \
@@ -1217,16 +1240,12 @@ If later: login as root, cd fsadapt, ./fsadapt -4\n\
 \n\
 You can toggle [X] checkboxes to enable/disable\n\
 network services according to your local security policy." \
-23 76 12 \
+23 76 7 \
   skip          "Skip all steps below (regardless of [*] marks)" off \
   netssh        "'sshd' net service" $netssh_def \
-  netftp        "'ftpd' net service" $netftp_def \
   netsmtp       "'smtp' receiving email from the network" $netsmtp_def \
-  netdiscard    "Internal 'discard' net service" $netdiscard_def \
-  netdaytime    "Internal 'daytime' net service" $netdaytime_def \
-  nettime       "Internal 'time' net service" $nettime_def \
   netntp        "'ntpd' network time server" $netntp_def \
-  netident      "'ident' net service" $netident_def \
+  netipp        "'cups' internet print server" $netipp_def \
   netmdns       "'mDNS/DNS-SD' net service" $netmdns_def \
   2>/tmp/reply
 # Cancel?
@@ -1243,18 +1262,12 @@ fi
 fphase4=$(echo "$PHASE4" | cut -d' ' -f1)
 if [ "$fphase4" != "skip" ]; then
   # Disable all network daemons; they need to be explicitly enabled.
-  /usr/sbin/invoke-rc.d ssh stop >/dev/null 2>&1
-  touch /etc/ssh/sshd_not_to_be_run
-  update-inetd ${VVERBO} --disable telnet
-  update-inetd ${VVERBO} --disable ftp
+  systemctl --now mask ssh
   sed -i -e "s/^QUEUERUNNER='combined'/QUEUERUNNER='queueonly' # was 'combined'/" /etc/default/exim4
   sed -i -e "s/^QUEUERUNNER='no'/QUEUERUNNER='nodaemon' # was 'no'/" /etc/default/exim4
   sed -i -e "s/^QUEUERUNNER='separate'/QUEUERUNNER='queueonly' # was 'separate'/" /etc/default/exim4
   sed -i -e "s/^QUEUERUNNER='ppp'/QUEUERUNNER='nodaemon' # was 'ppp'/" /etc/default/exim4
-  /usr/sbin/invoke-rc.d exim4 restart >/dev/null 2>&1
-  update-inetd ${VVERBO} --multi --disable discard
-  update-inetd ${VVERBO} --multi --disable daytime
-  update-inetd ${VVERBO} --multi --disable time
+  systemctl restart exim4
   if (! grep '^restrict [-46]* default' /etc/ntp.conf >/dev/null); then
     cat >> /etc/ntp.conf << EOF
 
@@ -1268,19 +1281,18 @@ EOF
     sed -i -e "s/default, exchange time with everybody, but don't allow configuration/default, ignore everybody completely (add a 'restrict' for each server)/" /etc/ntp.conf
     sed -i -e "s/^restrict [-46]* default/& ignore # was:/" /etc/ntp.conf
   fi
-  /usr/sbin/invoke-rc.d ntp restart >/dev/null 2>&1
-  update-inetd ${VVERBO} --disable ident
-## 'update-rc.d' will disable any non-existing files...
-  systemctl disable avahi-daemon 
-  rm -f /etc/init.d/fs
+  systemctl restart ntp
+  systemctl --now mask cups-browsed; systemctl --now mask cups
+  systemctl --now mask avahi-daemon
 # always make sure these old insecure services are disabled just in case
-  systemctl  disable telnet
-  systemctl  disable shell
-  systemctl  disable login
-  systemctl  disable exec
-  systemctl  disable talk
-  systemctl  disable ntalk
-  systemctl  disable finger
+  systemctl --now mask ftp > /dev/null 2>&1
+  systemctl --now mask telnet > /dev/null 2>&1
+  systemctl --now mask shell > /dev/null 2>&1
+  systemctl --now mask login > /dev/null 2>&1
+  systemctl --now mask exec > /dev/null 2>&1
+  systemctl --now mask talk > /dev/null 2>&1
+  systemctl --now mask ntalk > /dev/null 2>&1
+  systemctl --now mask finger > /dev/null 2>&1
 fi
 
   for i in $PHASE4; do
@@ -1290,45 +1302,28 @@ break
 ;;
       netssh)
 # sshd is a real daemon...
-rm ${VERBO} -f /etc/ssh/sshd_not_to_be_run
-/usr/sbin/invoke-rc.d ssh start >/dev/null 2>&1
-;;
-      netftp)
-update-inetd ${VVERBO} --enable ftp
+systemctl unmask ssh; systemctl start ssh
 ;;
       netsmtp)
 sed -i -e "s/^QUEUERUNNER='queueonly' # was /QUEUERUNNER=/" /etc/default/exim4
 sed -i -e "s/^QUEUERUNNER='queueonly'/QUEUERUNNER='combined'/" /etc/default/exim4
 sed -i -e "s/^QUEUERUNNER='nodaemon' # was /QUEUERUNNER=/" /etc/default/exim4
 sed -i -e "s/^QUEUERUNNER='nodaemon' /QUEUERUNNER='no'/" /etc/default/exim4
-/usr/sbin/invoke-rc.d exim4 restart >/dev/null 2>&1
-;;
-      netdiscard)
-update-inetd ${VVERBO} --multi --enable discard
-;;
-      netdaytime)
-update-inetd ${VVERBO} --multi --enable daytime
-;;
-      nettime)
-update-inetd ${VVERBO} --multi --enable time
+systemctl restart exim4
 ;;
       netntp)
 if (grep '^restrict [-46]* default ignore' /etc/ntp.conf >/dev/null); then
   sed -i -e "s/default, ignore everybody completely (add a 'restrict' for each server)/default, exchange time with everybody, but don't allow configuration/" /etc/ntp.conf
   sed -i -e "s/default ignore # was:/default/" /etc/ntp.conf
 fi
-/usr/sbin/invoke-rc.d ntp restart >/dev/null 2>&1
+systemctl restart ntp
 ;;
-      netident)
-update-inetd ${VVERBO} --enable ident
+      netipp)
+systemctl unmask cups; systemctl start cups
+systemctl unmask cups-browsed; systemctl start cups-browsed
 ;;
       netmdns)
-## 'update-rc.d' will disable any non-existing files...
-rm -f /etc/init.d/fs
-cp -p etc_init.d_fs /etc/init.d/fs
-update-rc.d avahi-daemon enable
-rm -f /etc/init.d/fs
-ln -s /usr2/fs/misc/rc.fs /etc/init.d/fs
+systemctl unmask avahi-daemon; systemctl start avahi-daemon
 ;;
     esac
   done

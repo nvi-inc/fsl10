@@ -13,7 +13,7 @@ apt-get -qq update
 if [ "`cat /etc/debian_version`" = "2.2" ]; then
 	apt-get -qq $DOWNLOAD_ONLY upgrade
 else
-	apt-get -qq -t `cat /etc/debian_version | cut -c1-2`* $DOWNLOAD_ONLY upgrade
+	apt-get -qq -t `cat /etc/debian_version | cut -c1`* $DOWNLOAD_ONLY upgrade
 fi
 
 if [ -z $DOWNLOAD_ONLY ]; then
@@ -40,8 +40,13 @@ else
 			fi
 			if [ -e $changelog ]; then
 				basepkg=`zcat $changelog | head -1 | mawk '{ print $1 }'`
+			elif [ -n `echo $pkg | grep "-base$"` ]; then
+				basepkg=`echo $pkg | sed -e "s/-base$//"`
 			else
 				basepkg=$pkg
+			fi
+			if [ -d /usr/share/doc/$basepkg-base ]; then
+				basepkg=$basepkg-base
 			fi
 			if [ -e /usr/share/doc/$basepkg/changelog.Debian.gz ]; then
 				changelog=/usr/share/doc/$basepkg/changelog.Debian.gz
@@ -67,7 +72,7 @@ else
 			if [ -e /tmp$changelog ]; then
 				zdiff -u $changelog /tmp$changelog | grep ^+ | grep -v ^++ | sed -e 's/^+/    /' > /tmp/usr/$basepkg.changes
 			fi
-			echo "$i: ($i_ver installed)" >> /tmp/usr/$basepkg.packages
+			echo "$i: ($i_ver installed)" | sed -e 's/%3a/:/' >> /tmp/usr/$basepkg.packages
 		fi
 	done
 
