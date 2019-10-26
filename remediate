@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 set -e
 #
 if ! [ $(id -u) = 0 ]; then
@@ -27,6 +27,7 @@ EOT
 # 1.1.3-1.1.5 Ensure nodevi,nosuid,noexec options set on /tmp partition
 #
 sed -i 's/ \/tmp \+ext4 \+defaults/&,nodev,nosuid,noexec/' /etc/fstab
+#Doesn't work
 ## touch /etc/systemd/system/local-fs.target.wants/tmp.mount
 ## cat >>/etc/systemd/system/local-fs.target.wants/tmp.mount <<EOT
 ## [Mount]
@@ -67,8 +68,9 @@ mount -o remount,noexec /dev/shm
 #
 # 1.4.1 Ensure permissions on bootloader config are configured
 #
-chown root:root /boot/grub/grub.cfg
-chmod og-rwx /boot/grub/grub.cfg
+#move to end so not overriden by update-grub's
+#chown root:root /boot/grub/grub.cfg
+#chmod og-rwx /boot/grub/grub.cfg
 #
 # 1.5.1 Ensure core dumps are restricted
 #
@@ -100,7 +102,6 @@ sysctl -w kernel.randomize_va_space=2
 apt-get -y install apparmor apparmor-profiles apparmor-utils
 #
 sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& apparmor=1 security=apparmor/' /etc/default/grub
-#
 update-grub
 #
 # 1.7.1.1 Ensure message of the day is configured properly
@@ -187,6 +188,11 @@ net.ipv4.tcp_syncookies = 1
 net.ipv6.conf.all.accept_ra = 0
 net.ipv6.conf.default.accept_ra = 0
 EOT
+#
+# 3.2.4
+# needed because above doesn't work after boot for some reason
+sed -i '0,/^ *$/s/^ *$/\n# CIS 3.2.4\nsysctl -w net.ipv4.conf.all.log_martians=1\nsysctl -w net.ipv4.conf.default.log_martians=1\nsysctl -w net.ipv4.route.flush=1\n#\n/' /etc/rc.local
+#
 # 3.2.1
 sysctl -w net.ipv4.conf.all.accept_source_route=0
 sysctl -w net.ipv4.conf.default.accept_source_route=0
@@ -232,7 +238,13 @@ sysctl -w net.ipv6.route.flush=1
 apt -y install ufw
 ufw allow OpenSSH
 ufw logging on
-ufw enable
+ufw --force enable
+#
+# 3.5.2 Configure IPv6 ip6tables
+# disable ipv6
+#breaks 3.1 ipv6 checks
+#sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& ipv6.disable=1/' /etc/default/grub
+#update-grub
 #
 # 4.1 Configure System Accounting (auditd)
 #
@@ -250,7 +262,6 @@ sed -i 's/^\(max_log_file_action =\).*/# CIS 4.1.1.3\n#&\n\1 keep_logs\n#/' /etc
 # 4.1.3 Ensure auditing for processes that start prior to auditd is enabled
 #
 sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& audit=1/' /etc/default/grub
-#
 update-grub
 #
 # 4.1.4-4.1.11
@@ -306,7 +317,7 @@ EOT
 touch /etc/audit/rules.d/CIS-suid.rules
 cat >>/etc/audit/rules.d/CIS-suid.rules <<EOT
 # CIS 4.1.12
-EOT 
+EOT
 find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
 "-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
 -k privileged" }' >> /etc/audit/rules.d/CIS-suid.rules
@@ -429,10 +440,29 @@ systemctl reload sshd
 #
 # 5.3.1 Ensure password creation requirements are configured
 #
-apt -y install libpam-cracklib
-touch /etc/pam.d/common-password
-cat >>/etc/pam.d/common-password <<EOT
-password required pam_cracklib.so retry=3 minlen=14 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
+apt -y remove libpam-cracklib
+apt -y purge libpam-cracklib
+apt -y install libpam-pwquality
+#
+#already present
+##apt -y install libpam-cracklib
+##touch /etc/pam.d/common-password
+##cat >>/etc/pam.d/common-password <<EOT
+###
+### CIS 5.3.1
+##password requisite pam_pwquality.so retry=3
+##EOT
+#
+touch /etc/security/pwquality.conf 
+cat >>/etc/security/pwquality.conf <<EOT
+#
+# CIS 5.3.1
+minlen = 14
+dcredit = -1
+ucredit = -1
+ocredit = -1
+lcredit = -1
+#
 EOT
 #
 # 5.3.2 Ensure lockout for failed password attempts is configured
@@ -452,28 +482,34 @@ EOT
 # 5.4.1.1 Ensure password expiration is 365 days or less
 #
 sed -i 's/^\(PASS_MAX_DAYS\).*/# CIS 5.4.1.1\n#&\n\1 90\n#/' /etc/login.defs
-# chage --maxdays 90 <user>
+chage --maxdays 90 desktop
+chage --maxdays 90 root
 #
 # 5.4.1.2 Ensure minimum days between password changes is 7 or more
 #
 sed -i 's/^\(PASS_MIN_DAYS\).*/# CIS 5.4.1.2\n#&\n\1 7\n#/' /etc/login.defs
-# chage --mindays 7 <user>
+chage --mindays 7 desktop
+chage --mindays 7 root
 #
 # 5.4.1.3 Ensure password expiration warning days is 7 or more
 #
-# chage --warndays 7 <user>
+#already there
+#sed -i 's/^\(PASS_WARN_DAYS\).*/# CIS 5.4.1.3\n#&\n\1 7\n#/' /etc/login.defs
+chage --warndays 7 desktop
+chage --warndays 7 root
 #
 # 5.4.1.4 Ensure inactive password lock is 30 days or less
 #
 useradd -D -f 30
-# chage --inactive 30 <user>
+chage --inactive 30 desktop
+# don't know if can do this root, but it seems like a bad idea
 #
 # 5.4.2 Ensure system accounts are non-login
 #
 for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do
 	if [ $user != "root" ]; then
 		usermod -L $user
-		if [ $user != "sync" ] && [ $user != "shutdown" ] && [ $user != "halt" ]; then
+		if [ $user != "sync" ] && [ $user != "shutdown" ] && [ $user != "halt" ] && [ $user != "oper" ] && [ $user != "prog" ] ; then
 			usermod -s /usr/sbin/nologin $user
 		fi
 	fi
@@ -524,3 +560,10 @@ chmod go-w /usr/local/bin
 chmod o-rx /home/desktop
 chmod o-rx /usr2/oper
 chmod o-rx /usr2/prog
+#
+# 1.4.1 Ensure permissions on bootloader config are configured
+#
+# must be after all grub-update usage
+#
+chown root:root /boot/grub/grub.cfg
+chmod og-rwx /boot/grub/grub.cfg
