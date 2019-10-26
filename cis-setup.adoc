@@ -1,170 +1,210 @@
-= CIS hardening FSL10
-David E Horsley
-Sep 2019
+= CIS hardening FSL10, take 2
+Ed Himwich
+Oct 2019
 
-These notes detail adding extra security features to Field System Linux 10 as
-advised by Center for Internet Security. With exception of the partition
-configuration, are all to be performed post-installation. 
+These notes detail adding extra security features to Field System
+Linux 10 as advised by Center for Internet Security (CIS). With the
+exception of the partition configuration, all actions are to be
+performed post-installation. All tests that failied, topics that need
+to be discussed, and errors in the benchmark remediations are provided
+in separate sections at the end of this document.
 
-In general, each section can be applied in any particular order or skipped
-entirely.
+A useful minimum set of features to apply would be the `ufw` section
+from the `remediate` script and to implement the `/etc/hosts.deny` and
+`/etc/hosts.allow` policies given below.
 
-All commands need to be run as `root`
+This document  is based on the results for the CIS Debian Linux 9
+Benchmark v1.0.0 - Level 2 - Server.
 
 == Partition Configuration
 
-During installation, be sure to create the logical volumes marked optional during the partition section.
+During installation, be sure to create the logical volumes marked
+optional during the partition section.
 
-== Disable Unused file system modules (§2.18-2.24)
+== Post-installation changes
 
-If you don’t need these file systems disabling them will decrease any
-risk they may pose. Create the following file
+All commands need to be run as `root`
 
-./etc/modprobe.d/CIS.conf
-....
-install cramfs /bin/true
-install freevxfs /bin/true
-install jffs2 /bin/true
-install hfs /bin/true
-install hfsplus /bin/true
-install squashfs /bin/true
-install udf /bin/true
-....
+=== Scripted changes
 
-== Restrict Core Dumps (§4.1)
-
-Core dumps can leak sensitive information and yield information on
-vulnerabilities. Disabling them for SUID executables by adding to
-`/etc/sysctl.conf` the line
+As many changes as possible are implemented by the `remediate` script:
 
 ....
-fs.suid_dumpable = 0
+script /tmp/remediate.txt
+./remediate
+exit
 ....
 
-To disable them entirely, add, to `/etc/security/limits.conf`, the line
+NOTE: This script should not be run more than once on a system.
+
+=== Manual changes
+
+After running the script, execute this commands for each existing
+<user> (usually just `desktop` and `root`):
 
 ....
-* hard core 0
+chage --maxdays 90 --mindays 7 --warndays 7 <user>
 ....
 
-For more fine grained restrictions, see the examples therein.
-
-== Active AppArmor (§4.5)
-
-AppArmor provides a Mandatory Access Control (MAC) system that greatly
-augments the default Discretionary Access Control (DAC) model.
-
-Install with
+Excute this command for each existing user (usually just `desktop`):
 
 ....
-apt-get install apparmor apparmor-profiles apparmor-utils
+chage --inactive 30 <user>
 ....
 
-then add `apparmor=1` and `security=apparmor` to `GRUB_CMDLINE_LINUX` in
-/etc/default/grub, eg:
+Create a comma separated list of users (usally `desktop,oper,prog`) in
+the `sudo` statement in the `/etc/group` file.
+
+````
+sudo:x:10:root,<user list>
+````
+
+Reboot and execute:
 
 ....
-GRUB_CMDLINE_LINUX="apparmor=1 security=apparmor"
+aa-enforce /etc/apparmor.d/*:
 ....
 
-NOTE: you may need to merge it with existing parameters there
+At this point, all the CIS remediations that can implemented have been
+completed. The next section describes some other policies that can be
+considered.
 
-Update the boot loader:
+=== Other polices:
+
+This section describes other policies that may be desirable. Some
+are beyond the CIS benchmark.
+
+==== /etc/hosts.deny
+
+Add:
+
+....
+ALL:ALL
+....
+
+==== /etc/hosts.allow
+
+Add:
+
+....
+sshd:ALL
+....
+
+You may wish to further restrict `sshd` to specific hosts or sub-domains.
+
+==== Password policies
+
+You may ewish to set minimum password lengh to 12.
+
+You may ewish to set password reuse remember to 24.
+
+==== Set remote log host or retention to a minimum of one yeat
+
+You may wish to configure a remote log host and/or set log retention
+period to at least one year.
+
+To set a remote log host, edit the `/etc/rsyslog.conf` and
+`/etc/rsyslog.d/*.conf` files and add the following line (where
+`loghost.example.com` is the name of your central log host).
+
+....
+*.* @@loghost.example.com
+....
+
+Run the following command to reload the rsyslogd configuration:
+
+....
+kill -HUP rsyslogd
+....
+
+Set the retention period of system logs by editing
+`/etc/logrotate.d/rsyslog`. This should be configured to store logs
+for at least a minimum of a year (366 for daily 53 for weekly)..
+
+==== Bootloader password
+
+You may wish to create an encrypted password with grub-mkpasswd-pbkdf2:
+
+....
+grub-mkpasswd-pbkdf2
+Enter password: <password>
+Reenter password: <password>
+Your PBKDF2 is <encrypted-password>
+....
+
+Add the following into `/etc/grub.d/00_header` or a custom
+`/etc/grub.d` configuration file:
+
+....
+cat <<EOF
+set superusers="<username>"
+password_pbkdf2 <username> <encrypted-password>
+EOF
+....
+
+If there is a requirement to be able to boot/reboot without entering
+the password, edit `/etc/grub.d/10_linux` and add `--unrestricted` to the
+line `CLASS=`
+
+Example:
+
+....
+CLASS="--class gnu-linux --class gnu --class os --unrestricted"
+....
+
+Run the following command to update the grub2 configuration:
 
 ....
 update-grub
 ....
 
-Reboot, then enforce the profiles with:
+== CIS Exceptions
+
+This section addresses the tests that failed in the CIS benchmark.
+
+=== 1.4.1 Ensure permissions on bootloader config are configured
+
+They switch back to `r--r--r--` on reboot.
+
+=== 1.4.2 Ensure bootloader password is set
+
+TBD
+
+=== 2.2.2 Ensure X Window System is not installed
+
+X Window system is required.
+
+=== 2.2.4 Ensure CUPS is not enabled
+
+CUPS is required.
+
+=== 2.2.11 Ensure IMAP and POP3 server is not enabled
+
+Exim4 is required, it never accepts incoming remote connections.
+
+=== 3.2.4 Ensure suspicious packets are logged
+
+The parameters:
 
 ....
-aa-enforce /etc/apparmor.d/*
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
 ....
 
-// TODO: we may need some FS profiles. This looks like a good guide:
-// https://medium.com/information-and-technology/so-what-is-apparmor-64d7ae211ed
-
-== Disable Unused services (§ 6.2 6.3 6.7)
-
-Avahi advertises and discovers services on the network. It enable
-zero-config services, though increases the remote attack surface of the
-server. If you do not need it, disable it by running
+are not respected in `/etc/sysctl.conf` or in `/etc/systctl.d/*` on
+reboot.  However, then a:
 
 ....
-systemctl disable avahi-daemon
+sysctl --system
 ....
 
-CUPS is used for print services. If you do not need to print, disable
-the service with:
+will respect them.
 
-....
-systemctl disable cups
-....
+=== 3.5 Firewall Configuration
 
-If you do not need NFS, then you do not need RPC bind. Disable it with
-
-....
-update-rc.d rpcbind disable
-....
-
-== Disable Packet Redirects and Log suspicious Packets (§ 7.1.2, 7.2.2, 7.2.4)
-
-ICMP Redirects are used to send routing information to other hosts. As a
-host itself does not act as a router (in a host only configuration),
-there is no need to send redirects.
-
-Enabling logging un-routable packets allows an administrator to
-investigate the possibility that an attacker is sending spoofed packets
-to their server.
-
-In `/etc/sysctl.conf` set
-
-....
-net.ipv4.conf.all.send_redirects=0
-net.ipv4.conf.default.send_redirects=0
-net.ipv4.conf.all.secure_redirects=0
-net.ipv4.conf.default.secure_redirects=0
-net.ipv4.conf.all.log_martians=1
-net.ipv4.conf.default.log_martians=1
-   
-....
-
-== Setup TCP wrappers (§7.4)
-
-TCP Wrappers provides a simple access list and standardized logging
-method for services capable of supporting it.
-
-Install with
-
-....
-apt install tcpd
-....
-
-Set default to deny with
-
-....
-echo "ALL: ALL" > /etc/hosts.deny
-....
-
-Then edit `/etc/hosts.allow` to allow specific hosts to access services.
-
-== Disable Uncommon Network Protocols (§7.5)
-
-DCCP, SCTP, RDS, and TIPC are uncommon and can likely be disabled to
-reduce the remote attack surface. Add the following to
-`/etc/modprobe.d/CIS.conf` to disable support of these protocols in the
-kernel
-
-....
-install dccp /bin/true
-install sctp /bin/true
-install rds /bin/true
-install tipc /bin/true
-....
-
-== Setup a Firewall (§7.7)
-
-Install UFW (uncomplicated firewall)
+The firewall is configured with `ufw` instead of `iptables` and
+`ip6tables`. The configuration is set deny for incoming connections,
+enables incoming SSH connections and sets logging for all connections. Setup:
 
 ....
 apt install ufw
@@ -173,401 +213,124 @@ ufw logging on
 ufw enable
 ....
 
-This sets up a default deny firewall for incoming connections, enables
-incoming SSH connections and sets logging for all connections.
-
-== Install and Configure `auditd` (§8.1)
-
-System auditing, through `auditd`, allows system administrators to
-monitor their systems such that they can detect unauthorized access or
-modification of data. By default, auditd will audit SELinux AVC denials,
-system logins, account modifications, and authentication events. Events
-will be logged to `/var/log/audit/audit.log`.
-
-Install `auditd` with
-
-....
-apt install auditd
-....
-
-The default configuration on Debian sets `auditd` to keep 5 logs of 8MB
-each. These this behaviour can be changed by editing
-`/etc/audit/auditd.conf`. CIS benchmarks recommend keeping all audit
-logs, this can be achieved by setting
-
-....
-max_log_file_action = keep_logs
-....
-
-Beware that this may eventually take substantial amount of space on your
-log partition.
-
-Next, configure `grub` to instruct the kernel to begin auditing at boot.
-This allows auditing of processes that startup before `auditd`. Edit
-`/etc/default/grub` to include `audit=1` as part of
-`GRUB_CMDLINE_LINUX`, eg
-
-....
-GRUB_CMDLINE_LINUX="audit=1"
-....
-
-note you will need to merge this with existing arguments.
-
-Next you will need to configure more fine-grained auditing. Created the
-following file
-
-./etc/audit/rules.d/cis.rules
-....
-## time events
--a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
--a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change
--a always,exit -F arch=b64 -S clock_settime -k time-change
--a always,exit -F arch=b32 -S clock_settime -k time-change
--w /etc/localtime -p wa -k time-change
-
-## user config events
--w /etc/group -p wa -k identity
--w /etc/passwd -p wa -k identity
--w /etc/gshadow -p wa -k identity
--w /etc/shadow -p wa -k identity
--w /etc/security/opasswd -p wa -k identity
-
-## network events
--a exit,always -F arch=b64 -S sethostname -S setdomainname -k system-locale
--a exit,always -F arch=b32 -S sethostname -S setdomainname -k system-locale
--w /etc/issue -p wa -k system-locale
--w /etc/issue.net -p wa -k system-locale
--w /etc/hosts -p wa -k system-locale
--w /etc/network -p wa -k system-locale
-
-## MAC permission modification
--w /etc/selinux/ -p wa -k MAC-policy
-
-## Login/Logout
--w /var/log/faillog -p wa -k logins
--w /var/log/lastlog -p wa -k logins
--w /var/log/tallylog -p wa -k logins
-
-## Sessions
-
--w /var/run/utmp -p wa -k session
--w /var/log/wtmp -p wa -k session
--w /var/log/btmp -p wa -k session
-
-## DAC permission modification
--a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 \
-    -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 \
-    -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 \
-    -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 \
-    -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S \
-    lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
--a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S \
-    lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
-
-## Unauthorized access attemps to files
--a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate \
-    -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate \
-    -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
--a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate \
-    -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
--a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate \
-    -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
-
-## mount events
--a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
--a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
-
-## file deletion
--a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 \
-    -F auid!=4294967295 -k delete
--a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 \ 
-    -F auid!=4294967295 -k delete
-
-## log changes to sudoers
--w /etc/sudoers -p wa -k scope
-
-## log sysadmin actions
--w /var/log/sudo.log -p wa -k actions
+=== 3.5.1.1 Ensure default deny firewall policy
 
-## kernel modules
--w /sbin/insmod -p x -k modules
--w /sbin/rmmod -p x -k modules
--w /sbin/modprobe -p x -k modules
-## For 32 bit systems
-##-a always,exit -F arch=b32 -S init_module -S delete_module -k modules
-## For 64 bit systems
--a always,exit -F arch=b64 -S init_module -S delete_module -k modules
-
-## make rules immutable
--e 2
-....
+Configured with `ufw`, only incoming `ssh` is allowed.
 
-Next, make a rule to monitor privileged programs (those that have the
-setuid and/or setgid bit set on execution) to determine if unprivileged
-users are running these commands.
+=== 3.5.1.2 Ensure loopback traffic is configured
 
-....
-find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
-"-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
--k privileged" }' > /etc/audit/rules.d/cis-suid.rules
-....
+Configured with `ufw`.
 
-Lastly generate the file combined rules file `/etc/audit/audit.rules` by
-running
+=== 3.5.1.4 Ensure firewall rules exist for all open ports
 
-....
-augenrules
-....
+Configured with `ufw`.
 
-To instruct `auditd` to reload the configuration now, run
+=== 3.5.2.1 Ensure IPv6 default deny firewall policy
 
-....
-pkill -HUP -P 1 auditd
-....
+Configured with `ufw`, only incoming `ssh` is allowed.
 
-== Install and configure `rsyslog` (§8.2)
+=== 3.5.2.2 Ensure IPv6 loopback traffic is configured
 
-The `rsyslog` software is recommended as a replacement for the default
-`syslogd` daemon and provides improvements over `syslogd`, such as
-connection-oriented (i.e. TCP) transmission of logs, the option to log
-to database formats, and the encryption of log data en route to a
-central logging server.
+Configured with `ufw`.
 
-Install with
+=== 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host
 
-....
-apt install rsyslog
-....
-
-On Debian, it may already be installed.
-
-Next create and set permissions on rsyslog log files. For each
-`<logfile>` in `/etc/rsyslog.conf` and in `/etc/rsyslog.d/*` files
-perform the following
-
-....
-touch <logfile>
-chown root:root <logfile>
-chmod og-rwx <logfile>
-....
-
-Storing log data on a remote host protects log integrity from local
-attacks. If an attacker gains root access on the local system, they
-could tamper with or remove log data that is stored on the local system.
-It is advised to configure `rsyslog` to send logs to a central logging
-server.
-
-If your log host is `loghost.example.com`, add the following to
-/etc/rsyslog.conf
-
-....
-*.* @@loghost.example.com
-....
-
-== Install Advanced Intrusion Detection Environment (AIDE) (§8.3)
-
-AIDE is a file integrity checking tool, similar in nature to Tripwire.
-While it cannot prevent intrusions, it can detect unauthorized changes
-to configuration files by alerting when the files are changed. When
-setting up AIDE, decide internally what the site policy will be
-concerning integrity checking. Review the AIDE quick start guide and
-AIDE documentation before proceeding.
-
-To install AIDE run
-
-....
-apt install aide
-....
-
-then initialize with
-
-....
-aideinit
-cp /var/lib/aide/aide.db.new /var/lib/aide/aide.db
-....
-
-configure a cron job to run AIDE periodically
-
-....
-crontab -u root -e
-....
-
-then add
-
-....
-0 5 * * * /usr/sbin/aide --check
-....
-
-== Configure `logrotate` (§8.4)
-
-
-NOTE: Logs need to be retained on the system for 53 weeks, we will adjust this
-when it’s reporting to a central system and at that point the logs will have to
-be retained for 3 months
-
-Increase the retention period of system logs by editing
-`/etc/logrotate.d/rsyslog`. This should be configured to store logs for
-at least 1 year.
-
-== Configure cron (§9.1)
-
-Cron should be installed by default.
-
-Permissions of the crontab files should be changed to prevent
-circumvention of auditing controls. Run the following to ensure only the
-system administrator can schedule and edit jobs:
-
-....
-chown root:root /etc/crontab
-chmod og-rwx /etc/crontab
-chown root:root /etc/cron.hourly
-chmod og-rwx /etc/cron.hourly
-chown root:root /etc/cron.daily
-chmod og-rwx /etc/cron.daily
-chown root:root /etc/cron.weekly
-chmod og-rwx /etc/cron.weekly
-chown root:root /etc/cron.monthly
-chmod og-rwx /etc/cron.monthly
-chown root:root /etc/cron.d
-chmod og-rwx /etc/cron.d
-....
-
-Next, set `cron` and `at` to default deny and use a whitelist instead
-
-....
-rm /etc/cron.deny
-rm /etc/at.deny
-touch /etc/cron.allow
-touch /etc/at.allow
-chmod og-rwx /etc/cron.allow
-chmod og-rwx /etc/at.allow
-chown root:root /etc/cron.allow
-chown root:root /etc/at.allow
-....
-
-== Set Password Creation Requirement Parameters (§9.2)
-
-Instal the password strength evaluator PAM extension:
+We need central logging host.
+
+=== 4.2.4 Ensure permissions on all logfiles are configured
+
+All files except `/var/log/wtmp` have the requested permissions. That
+file changes on a reboot to `rw-rw-r--', owned by `root.wtmp`.
+
+=== 5.2.6 Ensure SSH X11 forwarding is disabled
+
+We require `ssh` X11 forwarding.
+
+=== 5.3.1 Ensure password creation requirements are configured
+
+We use `cracklib` instead of `pwquality`:
 
 ....
 apt install libpam-cracklib
-....
-
-Then add the following in `/etc/pam.d/common-password`
-
-....
+touch /etc/pam.d/common-password
+cat >/etc/pam.d/common-password <<EOT
 password required pam_cracklib.so retry=3 minlen=12 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1
+EOT
 ....
 
-// TODO: need the NASA params here.
+== CIS issues that need to be addressed
 
-== Configure SSH (§9.3)
+This section lists further topics related to benchmark that need to be
+addressed.
 
-To improve security and auditing of SSH, edit `/etc/ssh/sshd_config` so
-that the parameters match
+=== 2.2.1.2 Ensure ntp is configured
 
-....
-Protocol 2
-LogLevel INFO
-MaxAuthTries 4
-IgnoreRhosts yes
-HostbasedAuthentication no
-PermitRootLogin no
-PermitEmptyPasswords no
-PermitUserEnvironment no
-Ciphers aes128-ctr,aes192-ctr,aes256-ctr
-ClientAliveInterval 300 # NB this may need to be tweaked
-ClientAliveCountMax 0
+Need FS ntp configuration.
 
-# Set one or more of these
-AllowUsers <userlist>
-AllowGroups <grouplist>
-DenyUsers <userlist>
-DenyGroups <grouplist>
+=== 2.3.4 Ensure `telnet` client is not installed
 
-Banner /etc/issue.net
-....
+Would prefer to keep the `telnet` client, it is useful for debugging
+ASCII device protocol devices, which we have.  The security weakness
+is `telnetd`, which is not installed, nor does the benchmark test
+for it.
 
-The `/etc/ssh/sshd_config` file needs to be protected from unauthorized
-changes by non-privileged users,
+=== 4.1.1.2 Ensure system is disabled when audit logs are full
 
-....
-chown root:root /etc/ssh/sshd_config
-chmod 600 /etc/ssh/sshd_config
-....
+This may not be appropriate for an operational system.
 
-== Restrict root Login to System Console (§9.4)
+=== 5.2.13 Ensure only strong ciphers are used
 
-From `/etc/securetty`, remove entries for any consoles that are not in a
-physically secure location.
+What ciphers should we use?
 
-== Restrict Access to the su Command (§9.5)
+=== 5.2.14 Ensure only strong MAC algorithms are used
 
-Add users that can access to `wheel` group then edit `/etc/pam.d/su`
+What MAC alogorithms should we use?
 
-....
-auth required pam_wheel.so use_uid
-....
+=== 5.2.15 Ensure only strong Key Exchange algorithms are used
 
-Note, using `sudo` in place of `su`, provides system administrators
-better control of the escalation of user privileges to execute
-privileged commands.
+What Key Exchange alogorithms should we use?
 
-== Set password parameters (§10.1)
+=== 5.2.16 Ensure SSH Idle Timeout Interval is configured
 
-Edit `/etc/login.defs` to contain
+Five minutes is too short.
 
-....
-PASS_MAX_DAYS 90
-PASS_MIN_DAYS 7
-PASS_WARN_DAYS 10
-....
+=== 5.3.1 Ensure password creation requirements are configured
 
-Then update existing users with
+Should we use the NASA 12 character minimum?
 
-....
-chage --maxdays 90 --mindays 7 --warndays 10 <user>
-....
+=== 5.4.1.4 Ensure inactive password lock is 30 days or less
 
-For each `<user>`
+This is too short for developers/troubleshooters
 
-== Disable System Accounts Section (§10.2)
+== CIS Issues
 
-prog and oper are required.
+This section details problems with the recommended remediations.
 
-== Set Default `umask` for Users (§10.4)
+=== 2.1.2 Ensure openbsd-inetd is not installed
 
-Edit `/etc/bash.bashrc` and any other appropriate files for other shells
-to have
+Remediation solves problem, but does not make the test pass. To do the
+latter required 'purge'.
 
-....
-umask 077
-....
+=== 2.2.1.2 Ensure ntp is configured
 
-== Lock Inactive User Accounts (§10.5)
+Remediation makes it less secure.
 
-*TODO:* needs evaluation for FS systems
+=== 2.3.4 Ensure `telnet` client is not installed
 
-== Set Warning Banner for Standard Login Services (§11.1)
+The remediation does not make the test pass, that required 'purge'.
 
-NOTE: This can be setup with the correct language bu `fsadapt`
+=== 4.1 Configure System Accounting (auditd)
 
-....
-touch /etc/motd
-# EG
-echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue
-echo "Authorized uses only. All activity may be monitored and reported." > /etc/issue.net
-chown root:root /etc/motd
-chmod 644 /etc/motd
-chown root:root /etc/issue
-chmod 644 /etc/issue
-chown root:root /etc/issue.net
-chmod 644 /etc/issue.net
-....
+Many of the remedations are described in terms of the contents of
+`/etc/audit/audit.rules`. However, the contents of that file are
+auto-generated from the files in `/etc/audit/rules.d`, which is where
+these remediations must go.
 
-The above should not contain any lines containing `\m`, `\r`, `\s`, or `\v`.
+=== 4.1.6 Ensure events that modify the system's network environment are collected
+
+64-bit remediation had b64 and b32 rules concatenated on one line..
+
+=== 4.1.17 Ensure kernel module loading and unloading is collected
+
+64-bit remediation was missing b32 rule.
+
