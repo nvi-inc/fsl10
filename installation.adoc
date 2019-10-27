@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
-J.F.H. Quick and D.E. Horsley 
-Draft 0.3  Oct 2019
+J.F.H. Quick, D.E. Horsley, and W.E. Himwich
+Draft 0.4  Oct 2019
 
 :sectnums:
 :experimental:
@@ -105,13 +105,7 @@ configure the network settings of this machine, though this is not advised.
 
 The installer will now boot.
 
-=== Select your continent or region
-
-Find your region from the available list and press kbd:[Enter],
-then select your country, territory or area and press  kbd:[Enter] again.
-(These notes were produced by selecting "North America" and then
-"United States" - you may experience small differences if you select
-another location)
+NOTE: If you do not select a locale, you will be prompted to select your language and your country.
 
 === Select a keyboard layout
 
@@ -194,10 +188,9 @@ displayed, you may need to use *Guided partitioning* to temporarily
 create new partitions. Then select *Guided - use entire disk*. Then
 select your disk, such as listed above, do not select a RAID or your
 boot decice.  Then select *All files in one partition (recommended for
-    new users)*.  You may be prompted to confirm deleting RAID and/or
-LVM, which you must do to continue. Then switch back to *Manual* and
-select the target disk again.  That should get you back to a disk
-partition layout that you can delete using the instructions above.
+new users)*.  You may be prompted to confirm deleting RAID and/or
+LVM, which you must do to continue. Then you should be able to select
+your diak, as above, and get *FREE SPACE*.
 
 . Select *Create a new partition*
 
@@ -232,8 +225,8 @@ Repeat the process for the second disk, if present.
 . Select *Create MD device*, choose *RAID 1* and enter *2* as number
 of devices and *0* as number of spare.
 
-. Select the two raid partitions we just created using space -- these should be sda2 (and
-sdb2) -- then press kbd:[Enter]
+. Select the RAID partitions we just created using space -- these should be sda2 and
+sdb2, if just have one disk, just pick sda2 -- then press kbd:[Enter]
 
 . Select *Finish*.
 
@@ -246,13 +239,13 @@ sdb2) -- then press kbd:[Enter]
 . Now choose *Configure the Logical Volume Manager* and select "yes" if prompted to write the changes to disk
 
 . Choose *Create volume group* 
-. Enter a name appropriate for the machine and group, eg *lv*, and press kbd:[Enter]
+. Enter a name appropriate for the machine and group, e.g,. *lv*, and press kbd:[Enter]
 . Select the raid device *md0* by pressing kbd:[Space], then press kbd:[Enter]
 to continue
 
 . For each item in the following table run *Create logical volume*, select the
 your volume group and assign the corresponding label. Those marked with "*" are
-optional for non-NASA stations
+optional unless you are applying CIS hardening.
 +
 .Logical volumes
 |=======================================
