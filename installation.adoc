@@ -105,7 +105,8 @@ configure the network settings of this machine, though this is not advised.
 
 The installer will now boot.
 
-NOTE: If you do not select a locale, you will be prompted to select your language and your country.
+NOTE: If you do not set a locale or set `locale=C`, you will be prompted
+to select your language and your country.
 
 === Select a keyboard layout
 
@@ -366,7 +367,9 @@ leaves something nasty in the machine's removable drives by mistake.
 You can now boot to your new OS.
 
 NOTE: If the login screen is painfully slow, try disabling Wayland in
-GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
+GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line
+`WaylandEnable=false`. Then `gdm3` will need to be restarted either by
+rebooting or entering `systemctl restart gdm3`.
 
 === Login as root 
 
@@ -909,3 +912,15 @@ Use fully qualified node name
 ./etc/exim4/update-exim4.conf.conf
 +
 Look for `hostnames=`, use fully qualified name.
+
+=== Disable Desktop User (Optional)
+
+#TODO#
+
+=== Set /usr2 owned by prog (Optional)
+
+#TODO: Should any (all?) systems have this#
+
+=== Remove ModemManager (Optional)
+
+#TODO#
