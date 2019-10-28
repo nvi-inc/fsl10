@@ -204,7 +204,7 @@ EOT
 # 3.2.4
 # needed because above doesn't work after boot for some reason
 # create a startup to fix this
-systemctl disable CISfix
+systemctl disable CISfix || :
 rm -f /etc/systemd/system/CISfix.service
 touch /etc/systemd/system/CISfix.service
 cat >>/etc/systemd/system/CISfix.service <<EOT
