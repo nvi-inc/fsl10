@@ -1,10 +1,10 @@
 #!/bin/bash
 # fsadapt  -- adapt a Debian 9.x installation for FS Linux 10
-# $Id: fsadapt,v 10.0 2019/10/25 12:41:30 jfq Exp $
+# $Id: fsadapt,v 10.0 2019/10/30 16:05:30 jfq Exp $
 
 # What          When                  Who
 # $Log: fsadapt,v $
-# Revision 10.0 2019/10/25 12:41:30  jfhq
+# Revision 10.0 2019/10/30 16:05:30  jfhq
 # Initial release for FS Linux 10
 #
 # Revision 9.0  2014/07/24 12:06:30  jfhq
@@ -1004,6 +1004,7 @@ fi
       set_perms)
 # Enable 'oper', 'prog' access to floppy, serial, and other devices.
 #for GRP in dialout cdrom floppy tape audio backup dos; do  # no dos in Hamm
+addgroup --quiet gpib
 for GRP in dialout dip cdrom floppy scanner audio video bluetooth lpadmin plugdev netdev gpib; do
   adduser ${VERBOQ} oper $GRP
   adduser ${VERBOQ} prog $GRP
@@ -1090,10 +1091,6 @@ ${DIALOG} --title "/etc/ssh/ssh_host_key*: computer identity (keys)" \
 "\nPlease select how to get/create the 'sshd' private/public key pair.\n\
 It uniquely defines the 'identity' of your FS computer.\n\
 \n\
-If you have an 'etc' backup floppy of a previous FS Linux installation,\n\
-put the backup floppy into drive A: and select the 'Floppy' alternative\n\
-to restore the existing key files.
-\n\
 If this is a new 'sshd' installation, please select 'Create'.\n" \
       19 74 3 \
   Create "Create a new unique private/public key pair" \
@@ -1102,7 +1099,7 @@ If this is a new 'sshd' installation, please select 'Create'.\n" \
 if [ $? = 0 ]; then
   if [ "$(cat /tmp/reply)" = Create ]; then
     # Create new keys.
-    /var/lib/dpkg/info/ssh.postinst configure
+    dpkg-reconfigure openssh-server
   elif [ "$(cat /tmp/reply)" = Defer ]; then
     :
   fi
