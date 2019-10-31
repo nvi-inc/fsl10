@@ -15,16 +15,10 @@ if mdadm --detail /dev/md0 | grep -q /dev/sdb; then
         exit 1
 fi
 
-if grep -q /dev/sdb /proc/mounts; then
+if grep -q ^/dev/sdb /proc/mounts; then
         echo "ERROR: \"Secondary\" disk /dev/sdb is mounted!!"
         exit 1
 fi
-
-echo "Stopping any inactive RAID arrays using \"Secondary\" disk /dev/sdb ... "
-for raid in $(grep inactive /proc/mdstat | grep ' sdb' | cut -d' ' -f1); do
-	mdadm -S /dev/$raid;
-done
-echo "done."
 
 if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/sdb/size) ]; then
         echo "ERROR: \"Secondary\" device sdb is smaller than sda"
@@ -35,6 +29,10 @@ echo 'Partitioning "Secondary" disk...'
 sgdisk -R/dev/sdb /dev/sda
 sgdisk -G /dev/sdb
 echo "done."
+
+# Make sure the primary disk is mounted on /boot/efi
+umount /boot/efi
+mount /dev/sda1 /boot/efi
 
 echo "Installing GRUB bootloader on \"Secondary\" disk /dev/sdb ... "
 # Note Debian 9 `grub-install` essentially ignores the second argument and
@@ -47,9 +45,17 @@ cp /dev/sda1 /dev/sdb1
 echo "done."
 mount /dev/sda1 /boot/efi
 
+echo "Stopping any stray RAID arrays using \"Secondary\" disk /dev/sdb ... "
+for raid in $(grep active /proc/mdstat | grep ' sdb' | grep -v ' sda' | cut -d' ' -f1); do
+	mdadm -S /dev/$raid;
+done
+echo "done."
+
+
 echo "Adding \"Secondary\" disk /dev/sdb to RAID array /dev/md0 ... "
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
-mdadm /dev/md0 -a /dev/sdb2
+mdadm --zero-superblock /dev/sdb2
+mdadm /dev/md0 --add-spare /dev/sdb2
 while ! grep -q recovery /proc/mdstat; do 
 	echo "Waiting for recovery ..."
 	sleep 1;
