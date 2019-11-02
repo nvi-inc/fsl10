@@ -105,8 +105,9 @@ configure the network settings of this machine, though this is not advised.
 
 The installer will now boot.
 
-NOTE: If you do not set a locale or set `locale=C`, you will be prompted
-to select your language and your country.
+NOTE: If you do not set a locale or set `locale=C`, you will be
+prompted to select your language and your country. However some
+applications may have problems if a UTF8 locale is not used.
 
 === Select a keyboard layout
 
@@ -240,7 +241,7 @@ sdb2, if just have one disk, just pick sda2 -- then press kbd:[Enter]
 . Now choose *Configure the Logical Volume Manager* and select "yes" if prompted to write the changes to disk
 
 . Choose *Create volume group* 
-. Enter a name appropriate for the machine and group, e.g,. *lv*, and press kbd:[Enter]
+. Enter a name appropriate for the machine and group, e.g., *lv*, and press kbd:[Enter]
 . Select the raid device *md0* by pressing kbd:[Space], then press kbd:[Enter]
 to continue
 
@@ -369,7 +370,9 @@ You can now boot to your new OS.
 NOTE: If the login screen is painfully slow, try disabling Wayland in
 GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line
 `WaylandEnable=false`. Then `gdm3` will need to be restarted either by
-rebooting or entering `systemctl restart gdm3`.
+rebooting or entering `systemctl restart gdm3`. You can restart
+an individual virtual console getty with `systemctl restart getty@ttyN`
+where 'N' is the number of the virtual console.
 
 === Login as root 
 
@@ -512,12 +515,15 @@ In the /root/fsl10 directory, start FSADAPT with
 Using the arrow keys and kbd:[Space] make your selections and press kbd:[Enter].
 
 *  For NASA stations select `govt` and `noident`.
+*  If you are not using a GPIB board os USB, you can deselect the GPIB option.
 
 ==== FS Adaptation: Setup (Window 2)
 
-All of the steps in Window 2 need to be done once with the exception of
-"sshkeys" which can be used to recover old SSH keys from a backup.  So simply
-press kbd:[Enter] with the *OK* selected to continue.
+All of the steps in Window 2 need to be done once with the exception
+of "sshkeys" which can be used to recover old SSH keys from a backup.
+If you did not select the GPIB option in the previous page deselec the
+two related options on this page. Otherwise, simply press kbd:[Enter]
+with the *OK* selected to continue.
 
 NOTE: The "updates" option relies on email to 'root' being re-directed to some
       mailbox that will be read regularly, so make sure you set that up and
@@ -537,18 +543,19 @@ kbd:[Enter] on *OK* to continue.
 
 ==== FS Adaptation: Settings (Window 3)
 
-On Window 3 modify the email settings as required.  Simply press kbd:[Enter] on
-*OK* to continue.
+On Window 3 modify the email settings or network settings as required.
+Simply press kbd:[Enter] on *OK* to continue.
 
 ==== FS Adaptation: Network Services (Window 4)
 
-The Window 4 will show what services are enabled.  Use the up/down arrows
-and kbd:[Space] to select "secure" and press kbd:[Enter] on *OK*.  Thereafter
-use the up/down arrows and kbd:[Space] to select those services you actually
-need and press kbd:[Enter] on *OK* to set them up and finish with
-FSADAPT.  (This will complain about the current start and stop runlevels of
-the avahi-daemon if you have disabled it as recommended for a secure
-system.) 
+The Window 4 will show what services are enabled.  Use the up/down
+arrows and kbd:[Space] to select "secure" and press kbd:[Enter] on
+*OK*.  Thereafter use the up/down arrows and kbd:[Space] to select
+those services you actually need and press kbd:[Enter] on *OK* to set
+them up and finish with FSADAPT. If you need printing, you will need
+to select "netipp". However remote  access to this can be blocked by
+configuring `ufw` and either not explicitly allowing or deny the CUPS
+service.
 
 Note that the FSADAPT script can be re-run at a later date should you need to
 change the adaptations.
@@ -566,7 +573,7 @@ entering the passwords twice as prompted.
 
 You can install some useful tools for working with the RAID with:
 
-   ~/fsl10/tools_for_RAID
+   ~/fsl10/RAID/install_tools
 
 #TODO: BIOS version?#
 
@@ -703,16 +710,20 @@ When the syncing is complete, you can repeat this process for a third disk.
 For stations that wish to conform to the additional security recommendations of the
 Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
 
-=== Disabling direct login to oper and prog (Optional)
+=== Enabling user promotion to `oper`, `prog` and `root` (Optional)
 
-The model of FSL assumes oper and prog accounts will be used for operations and
-programming respectively. However, some institutes may have security and
-auditing restrictions that mean operators must log-in to their own account.
-As the Field System currently operates, users will then need to switch to
-the oper or prog account after login.
+The model of FSL assumes `oper` and `prog` accounts will be used for
+operations and programming respectively. However, some institutes may
+have security and auditing restrictions that mean operators must
+log-in to their own account (possibly named with their Agency User ID,
+    AUID).  As the Field System currently operates, users will then
+need to switch to the `oper` or `prog` account after login. Likewise,
+     if a user is allowed to elevate to root, they will need to do so
+     after log-in to their own account. (The following method uses
+         `dhorsley` as an example user.)
 
-To do this, we suggest creating two groups that can `sudo` to the
-`oper` and `prog` accounts.
+For `oper` and `prog`, we suggest creating two groups that can `sudo`
+to the accounts.
 
 run `visudo` then add at end:
 
@@ -720,14 +731,31 @@ run `visudo` then add at end:
     %programmers    ALL=(prog) NOPASSWD: ALL
     %programmers    ALL=(oper) NOPASSWD: ALL
 
-Create these groups if they don't exist:
+If a user can elevate to `root`, also add:
+
+    dhorsley       ALL=(root) ALL
+
+Add any needed user accounts as appropriate, e.g.:
+
+    adduser dhorsley
+
+Move an existing `/home/dhorsley` to `/home/dhorsley.FSCOPY` and
+create a new `/home/dhorsley` with a useful skeleton for use with the
+FS, by executing (you will be prompted for the user name):
+
+    /usr2/fs/misc/auid_update
+
+Create the groups if they don't exist:
 
     addgroup operators
     addgroup programmers
 
-Then add each user to these groups as appropriate, eg:
+Then add each user to these groups as appropriate, e.g.:
 
     adduser dhorsley operators
+
+and/or:
+
     adduser dhorsley programmers
 
 If they don't already, make sure `oper` and `prog` have usable shells:
@@ -735,27 +763,36 @@ If they don't already, make sure `oper` and `prog` have usable shells:
     chsh -s /bin/bash oper
     chsh -s /bin/bash prog
 
-If the accounts haven't been disable for login already, do so:
+If the accounts haven't been disabled for login already, do so:
 
     usermod -L oper
     usermod -L prog
 
-To prevent connecting with `ssh` using a key, create (or add to an
-existing) `DenyUser` line in `/etc/ssh/sshd_config`:
+To prevent connecting with `ssh` using a key, create (or add `oper`
+and `prog` to an existing) `DenyUsers` line in `/etc/ssh/sshd_config`:
+
+NOTE: If you used the CIS `remediate` script, you should comment out
+the line: `DenyGroup rtx` as well.
 
 ....
-DenyUser oper prog
+DenyUsers: oper prog
+....
+
+And restart `sshd` with:
+
+....
+systemctl restart sshd
 ....
 
 Authorized users can then switch to `oper` with (similarly for
-`prog`):
+`prog` and `root`):
 
     sudo -i -u oper
 
-No password will be required.
+No password will be required (except for `root`).
 
 To ensure X authorization works do the following (this example is for
-user `oper` but it works analogously for `prog`):
+user `oper` but it works analogously for `prog` and `root`):
 
 1. Add this to the following files
 +
@@ -777,7 +814,7 @@ fi
 
 2. Create the following file
 +
-./usr/local/bin/switch2oper`
+./usr/local/bin/oper_account`
 [source,bash]
 ```
 #!/bin/bash
@@ -793,23 +830,16 @@ else
 fi
 ```
 
-Execute:
+3. Execute:
++
+    chmod a+rx /usr/local/bin/oper_account
 
-    chmod a+rx /usr/local/bin/switch2oper
+The three numbered steps above (without updating `~./.login`) can be executed
+for `oper`, `prog`, and `root` with:
 
-=== Enabling a user to promote to `root` (Optional)
-
-run `visudo` then add at end:
-
-    dhorsley      ALL=(root) ALL
-
-A password will still be required for promotion.
-
-Authorized users can then switch to `root` with:
-
-    su -i -u root
-
-No X authority manipulation is required.
+....
+~/fsl10/AUID/install_AUID
+....
 
 === Network configuration changes (Optional)
 
@@ -834,9 +864,11 @@ is changed.
 
 3. Change the `Device` field to just list the name of the interface (typically `eno1`) by removing the MAC address in parentheses.
 
-4. Click `Save`.
+4. You may want to also set the `IPv6 Settings` to use `Method: Ignore`.
 
-5. Click `Close`.
+5. Click `Save`.
+
+6. Click `Close`.
 
 ==== Disable the second Ethernet port
 
@@ -915,12 +947,49 @@ Look for `hostnames=`, use fully qualified name.
 
 === Disable Desktop User (Optional)
 
-#TODO#
+If you do not need the functionality available in the Desktop
+environment, you can disable the `desktop` account. You can re-enanle
+the account later if you need it. To disable it, execute:
+
+....
+usermod -L desktop
+....
+
+You can undo this by using the `-U` option instead.
+
+To prevent connecting with `ssh` using a key, create (or add `desktop`
+to an existing) `DenyUsers` line in `/etc/ssh/sshd_config`:
+
+....
+DenyUsers: desktop
+....
+
+And restart `sshd` with:
+
+....
+systemctl restart sshd
+....
+
+You can undo the `ssh` block  be removing the line (if it only has
+`desktop`) or removing `desktop` from the line and then restarting
+`sshd`.
 
 === Set /usr2 owned by prog (Optional)
 
-#TODO: Should any (all?) systems have this#
+#TODO: Should any (all?) systems have this and what should the permissions be?#
+
+....
+chown prog:rtx /usr2
+chmod go-w /usr2
+....
 
 === Remove ModemManager (Optional)
 
-#TODO#
+If you use serial ports, it is strongly advised that you remove the
+ModemManager package to avoid conflicts over access to the ports.
+Execute this command:
+
+....
+apt-get purge modemmanger
+....
+

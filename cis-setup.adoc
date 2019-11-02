@@ -7,9 +7,9 @@ Oct 2019
 These notes detail adding extra security features to Field System
 Linux 10 as advised by Center for Internet Security (CIS). With the
 exception of the partition configuration, all actions are to be
-performed post-installation. All tests that failied, topics that need
-to be discussed, and errors in the benchmark remediations are provided
-in separate sections at the end of this document.
+performed post-installation. All tests that failed, topics that need
+to be discussed, and issues with the benchmark remediations are
+provided in separate sections at the end of this document.
 
 A useful minimum set of features to apply would be the `ufw` section
 from the `remediate` script and to implement the `/etc/hosts.deny` and
@@ -79,7 +79,8 @@ Add:
 sshd:ALL
 ....
 
-You may wish to further restrict `sshd` to specific hosts or sub-domains.
+It is recommened that you further restrict `sshd` to specific hosts and/or
+sub-domains.
 
 ==== Password policies
 
@@ -141,7 +142,8 @@ Example:
 CLASS="--class gnu-linux --class gnu --class os --unrestricted"
 ....
 
-Run the following commands to update the grub2 configuration:
+Run the following commands to update the grub2 configuration and reset
+the `grub.cfg` permissions:
 
 ....
 update-grub
@@ -155,26 +157,29 @@ after all the remediations in this document were applied.
 
 === 1.4.2 Ensure bootloader password is set
 
-Must be set later.
+Must be set later by adminstrators.
 
 === 2.2.2 Ensure X Window System is not installed
 
-X Window system is required.
+X Window system is required for FS use.
 
 === 2.2.4 Ensure CUPS is not enabled
 
-CUPS is required.
+CUPS is required for operations.
 
 === 2.2.11 Ensure IMAP and POP3 server is not enabled
 
-Exim4 is required as MTA; it never accepts incoming remote connections.
+Exim4 is required as MTA; it never accepts incoming remote connections
+(blocked at firewall).
 
 === 3.5 Firewall Configuration
 
 The firewall is configured with `ufw` instead of `iptables` and
-`ip6tables`. The configuration is set to by default deny for incoming
-connections, enable incoming SSH connections, and sets logging for all
-connections. Setup:
+`ip6tables`. This causes four to six issues depending on the details
+of the installation, but `ufw` provides the same security as the
+recommended remediations. The configuration is set to by default deny
+for incoming connections, enable incoming SSH connections, and sets
+logging for all connections. Setup:
 
 ....
 apt -y install ufw
@@ -183,44 +188,29 @@ ufw logging on
 ufw --force enable
 ....
 
-=== 3.5.1.1 Ensure default deny firewall policy
-
-Configured with `ufw`, only incoming `ssh` is allowed.
-
-=== 3.5.1.2 Ensure loopback traffic is configured
-
-Configured with `ufw`.
-
-=== 3.5.1.4 Ensure firewall rules exist for all open ports
-
-Configured with `ufw`.
-
-=== 3.5.2.1 Ensure IPv6 default deny firewall policy
-
-Configured with `ufw`, only incoming `ssh` is allowed.
-
-=== 3.5.2.2 Ensure IPv6 loopback traffic is configured
-
-Configured with `ufw`.
-
 === 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host
 
-Central logging host must be set later.
-
+A remote log server must be configured by system adminstrators later.
+	
 === 4.2.4 Ensure permissions on all logfiles are configured
 
 All files except `/var/log/wtmp` have the requested permissions. That
-file changes on a reboot to `rw-rw-r--`, owned by `root.wtmp`.
+file changes on a reboot to `rw-rw-r--`, owned by `root.wtmp`. No
+sensitive information is stored in the file and making it readable for
+others allows commands like `last` and `who` to work.
 
 === 5.2.6 Ensure SSH X11 forwarding is disabled
 
-We require `ssh` X11 forwarding.
+We require `ssh` X11 forwarding for use with FS for remote operations
+and testing.
 
 === 5.4.2 Ensure system accounts are non-login
 
 System accounts (i.e., accounts with user ID less than 1000) `oper`
 and `prog` are needed for compatabilty with the wider VLBI community
-and are only used as service accounts from AUID accounts.
+and are only used as service accounts from AUID accounts. They require
+a valid shell, but direct local login and `ssh` login (including with
+keys) are disabled for these two accounts.
 
 == CIS issues that need to be addressed
 
@@ -287,8 +277,8 @@ The remediation does not make the test pass, that required 'purge'.
 === 3.2.4 Ensure suspicious packets are logged
 
 The remediation lines added in `/etc/sysctl.d/*` are not respected at
-boot (unlike all others). To overcome this, the following lines were
-added to `/etc/rc.local.
+boot (unlike all others). To overcome this, the following lines are
+used in a new systemd service 'CISfix' at boot.
 
 ....
 sysctl -w net.ipv4.conf.all.log_martians=1
