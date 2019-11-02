@@ -7,11 +7,11 @@ if ! [ $(id -u) = 0 ]; then
 fi
 # install mdstat
 cd /usr/local/bin
-cp -a ~/fsl10/mdstat mdstat
+cp -a ~/fsl10/RAID/mdstat mdstat
 chown root:root mdstat
 chmod a+rx mdstat
 # install refresh_secondary
 cd /usr/local/sbin
-cp -a ~/fsl10/refresh_secondary.sdb_efi refresh_secondary
+cp -a ~/fsl10/RAID/refresh_secondary.sdb_efi refresh_secondary
 chown root:root refresh_secondary
 chmod a+r,u+x refresh_secondary
