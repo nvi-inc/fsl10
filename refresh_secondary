@@ -1,0 +1,91 @@
+#!/bin/bash
+set -e
+# For systems with GPT LVM RAID arrays, copies the partition table
+# onto the second disk and adds it back into the array as a spare
+
+disk=/dev/sdb
+devname=$(basename $disk)
+part1="$disk"1
+part2="$disk"2
+
+if [ ! -z "$(sgdisk -i1 /dev/sda | grep 'BIOS boot')" ] && [ ! -d /boot/efi ]; then
+	boot="BIOS";
+elif [ ! -z "$(sgdisk -i1 /dev/sda | grep 'EFI System')" ] && [ -d /boot/efi ]; then
+	boot="EFI";
+else
+	echo "ERROR: Unrecognised boot scheme on \"Primary\" disk /dev/sda"
+	exit 1
+fi
+
+echo "Checking that \"Secondary\" disk $disk is inserted & turned-on ... "
+while [ ! -b $disk ]; do
+        echo  -n -e "\rWaiting for disk $disk, use 'Control-C' to safely abort ..."
+        sleep 1
+done
+echo "done."
+
+if mdadm --detail /dev/md0 | grep -q $disk; then
+        echo "ERROR: \"Secondary\" disk $disk is already active!!"
+        exit 1
+fi
+
+if grep -q ^$disk /proc/mounts; then
+        echo "ERROR: \"Secondary\" disk $disk is mounted!!"
+        exit 1
+fi
+
+if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
+        echo "ERROR: \"Secondary\" device $devname is smaller than sda"
+        exit 1
+fi
+
+if ( [ ! -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] && [ $boot = "EFI" ] ) ||
+	( [ ! -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] && [ $boot = "BIOS" ] ); then
+	echo "WARNING: boot scheme on Secondary disk $disk does not match Primary /dev/sda"
+	echo -n "Continue anyway (or Control-C to abort)?"
+	read $ans
+fi
+
+echo 'Partitioning "Secondary" disk...'
+echo "sgdisk -R$disk /dev/sda"
+echo "sgdisk -G $disk"
+echo "partprobe $disk"
+echo "done."
+
+if [ $boot = "BIOS" ]; then
+	echo "Installing GRUB bootloader in BIOS mode on \"Secondary\" disk /dev/sdb ... "
+	echo "grub-install $disk"
+	echo "done."
+elif [ $boot = "EFI" ]; then
+	# Make sure the primary disk is mounted on /boot/efi
+	echo "umount /boot/efi"
+	echo "mount /dev/sda1 /boot/efi"
+
+	echo "Installing GRUB bootloader in UEFI mode on \"Secondary\" disk /dev/sdb ... "
+	# Note Debian 9 `grub-install` essentially ignores the second argument and
+	# copies the grub EFI shim to /boot/efi, regardless what is mounted there.
+	# Instead, we refresh the grub install on the primary, and unmount it to 
+	# ensure it is consistent, then copy the whole ESP to the second disk. 
+	echo "grub-install $disk"
+	echo "umount /boot/efi"
+	echo "cp /dev/sda1 $part1"
+	echo "done."
+	# and remount the primary on /boot/efi again
+	echo "mount /dev/sda1 /boot/efi"
+fi
+
+echo "Adding \"Secondary\" disk /dev/sdb to RAID array /dev/md0 ... "
+echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
+echo "mdadm --zero-superblock $part2"
+echo "mdadm /dev/md0 --add-spare $part2"
+while ! grep -q recovery /proc/mdstat; do 
+	echo "Waiting for recovery ..."
+	sleep 1;
+done
+#
+while grep -q recovery /proc/mdstat; do 
+    recovery=$(grep recovery /proc/mdstat | cut -c32-)
+	echo -e -n "\r$recovery"
+	sleep 1;
+done
+echo -e "\ndone."

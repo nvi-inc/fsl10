@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+# Recover any failed and/or missing disks into an active raid
+
+if [ $# -gt 0 ]; then
+	raid=/dev/$1
+else
+	raid=/dev/md0
+fi
+
+if ! mdadm --detail $raid 2>&1 | grep "clean, degraded" > /dev/null; then
+	echo "Raid $raid either does not exist or doesn't need recovery"
+	exit 1
+fi
+
+echo "Adding missing/failed disk(s) to RAID array $raid ... "
+echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
+echo "mdadm /dev/md0 --re-add failed"
+echo "mdadm /dev/md0 --re-add missing"
+while ! grep -q recovery /proc/mdstat; do 
+	echo "Waiting for recovery ..."
+	sleep 1;
+done
+#
+while grep -q recovery /proc/mdstat; do 
+    recovery=$(grep recovery /proc/mdstat | cut -c32-)
+	echo -e -n "\r$recovery"
+	sleep 1;
+done
+echo -e "\ndone."
