@@ -8,15 +8,23 @@ else
 	raid=/dev/md0
 fi
 
-if ! mdadm --detail $raid 2>&1 | grep "clean, degraded" > /dev/null; then
-	echo "Raid $raid either does not exist or doesn't need recovery"
+if ! mdadm --detail $raid 2>&1 | grep "clean, degraded$" > /dev/null; then
+	echo "RAID $raid either does not exist or is not recoverable"
 	exit 1
 fi
 
-echo "Adding missing/failed disk(s) to RAID array $raid ... "
+echo "Re-adding failed / missing disk(s) to RAID array $raid ... "
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
 echo "mdadm /dev/md0 --re-add failed"
 echo "mdadm /dev/md0 --re-add missing"
+sleep 1
+
+if ! mdadm --detail $raid 2>&1 | grep "clean, degraded, recovering$" > /dev/null; then
+	echo "RAID $raid failed to start rebuilding"
+	exit 1
+fi
+mdadm --detail $raid
+echo
 while ! grep -q recovery /proc/mdstat; do 
 	echo "Waiting for recovery ..."
 	sleep 1;

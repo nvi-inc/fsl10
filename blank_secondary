@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-# For systems with GPT LVM RAID arrays, tries to reset everything
+# For systems with GPT LVM RAID arrays, tries to reset everything on secondary disk
 
 disk="/dev/sdb"
 devname=$(basename $disk)
@@ -13,18 +13,19 @@ done
 echo -e "done.\n"
 
 if mdadm --detail --scan /dev/md0 | grep -q $disk; then
-        echo "ERROR: \"Secondary\" disk $disk is already active!!"
+        echo "ERROR: \"Secondary\" disk $disk is currently active in RAID /dev/md0!!"
         exit 1
 fi
 
 if grep -q ^$disk /proc/mounts; then
-        echo "ERROR: \"Secondary\" disk $disk is mounted!!"
+        echo "ERROR: Some part of \"Secondary\" disk $disk is still mounted!!"
         exit 1
 fi
 
 if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
-        echo "ERROR: \"Secondary\" device $devname is smaller than sda"
-        exit 1
+        echo "WARNING: \"Secondary\" device $devname is smaller than sda"
+	echo -n "Continue anyway (Control-C aborts)?"
+	read $ans
 fi
 
 for part in $(cd /dev/;ls $devname?*); do
@@ -33,15 +34,16 @@ for part in $(cd /dev/;ls $devname?*); do
 	raid=$(grep $part /proc/mdstat | cut -d' ' -f1)
 	if [ "$raid" = "md0" ]; then 
 		# Belt _and_ braces!
-        	echo "ERROR: \"Secondary\" disk $disk is already active!!"
+        	echo "ERROR: \"Secondary\" disk $disk is currently active in RAID /dev/md0!!"
 		exit 1
 	elif [ ! -z $raid ]; then
 		if grep ^"$raid" /proc/mdstat | grep " sda" > /dev/null; then
-        		echo "ERROR: \"Primary\" disk /dev/sda is in a common array!!"
+        		echo -n "ERROR: \"Primary\" disk /dev/sda is in a common RAID array: "
+			mdadm --detail --scan /dev/$raid
 			exit 1
 		fi
 		# Part of a foreign RAID volume
-		echo -n "Detected /dev/$part in \"foreign\" RAID volume: "
+		echo -n "Detected /dev/$part in \"foreign\" RAID array: "
 		mdadm --detail /dev/$raid
 		echo -n "Blank partition (Control-C aborts)?"
 		read $ans
@@ -59,30 +61,35 @@ for part in $(cd /dev/;ls $devname?*); do
 			echo -n "Blank partition (Control-C aborts)?"
 			read $ans
 		elif mdadm -b --examine /dev/$part 2>&1 | grep ARRAY >/dev/null ; then
-			echo -n "Detected RAID component: "
+			echo -n "Detected (unused) RAID component: "
 			mdadm --examine /dev/$part
 			echo -n "Blank partition (Control-C aborts)?"
 			read $ans
 			echo "mdadm --zero-superblock --force /dev/$part 2>/dev/null"
 		elif pvscan /dev/$part > /dev/null 2>&1; then
-			echo -n "Detected LVM physical volume: "
+			echo -n "Detected raw LVM physical volume: "
 			pvdisplay /dev/$raid
 			echo -n "Blank partition (Control-C aborts)?"
 			read $ans
 			echo "pvremove -ff -y /dev/$part 2>/dev/null"
 		else
-			echo "Detected unknown partition: /dev/$part"
+			echo "Detected unrecognised partition: /dev/$part"
 			echo -n "Blank partition anyway (Control-C aborts)?"
 			read $ans
 		fi
 	fi
-	echo "Overwriting first +-1GB of partition /dev/$part ..."
-	echo "dd if=/dev/zero of=/dev/$part bs=4k count=256000 2>/dev/null"
+	if [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
+		echo "Overwriting first ~1MB of partition /dev/$part ..."
+		echo "dd if=/dev/zero of=/dev/$part bs=4k count=255 2>/dev/null"
+	else
+		echo "Overwriting first ~1GB of partition /dev/$part ..."
+		echo "dd if=/dev/zero of=/dev/$part bs=4k count=261120 2>/dev/null"
+	fi
 	echo -e "done.\n"
 done
 echo -n "Erase partition table of disk $disk (Control-C aborts)?"
 read $ans
-echo "sgdisk -Z $disk"
+echo "sgdisk -Z -o $disk"
 echo "partprobe $disk"
 echo -e "\nDone."
 

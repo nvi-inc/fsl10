@@ -24,36 +24,61 @@ while [ ! -b $disk ]; do
 done
 echo "done."
 
+if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
+        echo "WARNING: \"Secondary\" device $devname is smaller than sda"
+	echo -n "Continue anyway (Control-C to abort)?"
+        read $ans
+fi
+
 if mdadm --detail /dev/md0 | grep -q $disk; then
-        echo "ERROR: \"Secondary\" disk $disk is already active!!"
+        echo "ERROR: \"Secondary\" disk $disk is already part of RAID /dev/md0!!"
         exit 1
+fi
+
+if grep -q " $devname" /proc/mdstat; then
+	echo "ERROR: \"Foreign\" RAID(s) detected on \"Secondary\" disk $disk"
+	echo "(You must use blank_secondary to reset the second disk first)"
+	exit 1
 fi
 
 if grep -q ^$disk /proc/mounts; then
-        echo "ERROR: \"Secondary\" disk $disk is mounted!!"
-        exit 1
-fi
-
-if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
-        echo "ERROR: \"Secondary\" device $devname is smaller than sda"
+	echo "ERROR: Some part of \"Secondary\" disk $disk is mounted!!"
         exit 1
 fi
 
 if ( [ ! -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] && [ $boot = "EFI" ] ) ||
 	( [ ! -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] && [ $boot = "BIOS" ] ); then
-	echo "WARNING: boot scheme on Secondary disk $disk does not match Primary /dev/sda"
-	echo -n "Continue anyway (or Control-C to abort)?"
-	read $ans
+	echo "ERROR: boot scheme on \"Secondary\" disk $disk does not match \"Primary\" disk /dev/sda"
+	echo "(You must use blank_secondary to reset the second disk)"
+	exit 1
 fi
 
-echo 'Partitioning "Secondary" disk...'
-echo "sgdisk -R$disk /dev/sda"
-echo "sgdisk -G $disk"
-echo "partprobe $disk"
-echo "done."
+if [ "$(mdadm --examine -Y /dev/sda2 | grep MD_UUID | cut -d'=' -f2)" != "$(mdadm --examine -Y $part2 | grep MD_UUID | cut -d'=' -f2)" ] ||
+   [ $(mdadm --examine -Y /dev/sda2 | grep TIME | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep TIME | cut -d'=' -f2) ] ||
+   [ $(mdadm --examine -Y /dev/sda2 | grep EVENTS | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep EVENTS | cut -d'=' -f2) ];
+then
+	echo "ERROR: "Secondary\" disk $part2 does not contain an older copy of \"Primary\" disk /dev/sda2
+	echo "(You must use blank_secondary to reset the second disk)"
+	exit 1
+fi
+
+
+if [ "$(partprobe -s /dev/sda | cut -d' ' -f2-)" != "$(partprobe -s $disk | cut -d' ' -f2-)" ]; then
+	if [ "$(partprobe $disk | cut -d' ' -f3-)" = "partitions" ]; then
+		echo "Partitioning blank \"Secondary\" disk $disk..."
+		echo "sgdisk -R$disk /dev/sda"
+		echo "sgdisk -G $disk"
+		echo "partprobe $disk"
+		echo "done."
+	else
+		echo "ERROR: Partitioning of \"Secondary\" disk $disk does not match \"Primary\" disk /dev/sda"
+		echo "(You must use blank_secondary to reset the second disk)"
+		exit 1
+	fi
+fi
 
 if [ $boot = "BIOS" ]; then
-	echo "Installing GRUB bootloader in BIOS mode on \"Secondary\" disk /dev/sdb ... "
+	echo "Installing GRUB bootloader in BIOS mode on \"Secondary\" disk $disk ... "
 	echo "grub-install $disk"
 	echo "done."
 elif [ $boot = "EFI" ]; then
@@ -61,7 +86,7 @@ elif [ $boot = "EFI" ]; then
 	echo "umount /boot/efi"
 	echo "mount /dev/sda1 /boot/efi"
 
-	echo "Installing GRUB bootloader in UEFI mode on \"Secondary\" disk /dev/sdb ... "
+	echo "Installing GRUB bootloader in UEFI mode on \"Secondary\" disk $disk ... "
 	# Note Debian 9 `grub-install` essentially ignores the second argument and
 	# copies the grub EFI shim to /boot/efi, regardless what is mounted there.
 	# Instead, we refresh the grub install on the primary, and unmount it to 
@@ -74,7 +99,7 @@ elif [ $boot = "EFI" ]; then
 	echo "mount /dev/sda1 /boot/efi"
 fi
 
-echo "Adding \"Secondary\" disk /dev/sdb to RAID array /dev/md0 ... "
+echo "Adding \"Secondary\" disk $part2 to RAID array /dev/md0 ... "
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
 echo "mdadm --zero-superblock $part2"
 echo "mdadm /dev/md0 --add-spare $part2"
