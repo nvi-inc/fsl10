@@ -8,30 +8,41 @@ else
 	raid=/dev/md0
 fi
 
-if ! mdadm --detail $raid 2>&1 | grep "clean, degraded$" > /dev/null; then
-	echo "RAID $raid either does not exist or is not recoverable"
+if [ ! -b $raid ]; then
+	echo "ERROR: RAID $raid does not exist!!"
+	exit 1
+fi
+
+if mdadm --detail $raid 2>&1 | grep -q ": clean $" ; then
+	echo "ERROR: RAID $raid is deos not need recovery!!"
+	exit 1
+fi
+
+if ! mdadm --detail $raid 2>&1 | grep -q ": clean, degraded $" ; then
+	echo "ERROR: RAID $raid is not in a recoverable state"
 	exit 1
 fi
 
 echo "Re-adding failed / missing disk(s) to RAID array $raid ... "
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
-echo "mdadm /dev/md0 --re-add failed"
-echo "mdadm /dev/md0 --re-add missing"
+echo "mdadm $raid --re-add failed"
+echo "mdadm $raid --re-add missing"
 sleep 1
 
-if ! mdadm --detail $raid 2>&1 | grep "clean, degraded, recovering$" > /dev/null; then
-	echo "RAID $raid failed to start rebuilding"
+if ! mdadm --detail $raid 2>&1 | grep -q ": clean, degraded, recovering $"; then
+	echo "ERROR: RAID $raid failed to start rebuilding"
 	exit 1
 fi
 mdadm --detail $raid
 echo
+
 while ! grep -q recovery /proc/mdstat; do 
 	echo "Waiting for recovery ..."
 	sleep 1;
 done
 #
 while grep -q recovery /proc/mdstat; do 
-    recovery=$(grep recovery /proc/mdstat | cut -c32-)
+	recovery=$(grep recovery /proc/mdstat | cut -c32-)
 	echo -e -n "\r$recovery"
 	sleep 1;
 done

@@ -3,7 +3,7 @@ set -e
 # For systems with GPT LVM RAID arrays, copies the partition table
 # onto the second disk and adds it back into the array as a spare
 
-disk=/dev/sdb
+disk="/dev/sdb"
 devname=$(basename $disk)
 part1="$disk"1
 part2="$disk"2
@@ -19,37 +19,43 @@ fi
 
 echo "Checking that \"Secondary\" disk $disk is inserted & turned-on ... "
 while [ ! -b $disk ]; do
-        echo  -n -e "\rWaiting for disk $disk, use 'Control-C' to safely abort ..."
-        sleep 1
+	echo  -n -e "\rWaiting for disk $disk, use 'Control-C' to safely abort ..."
+	sleep 1
 done
-echo "done."
+echo -e "done.\n"
 
-if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
-        echo "WARNING: \"Secondary\" device $devname is smaller than sda"
-	echo -n "Continue anyway (Control-C to abort)?"
-        read $ans
+if grep "/boot/efi" /proc/mounts | grep -q "$disk"; then
+	# Ensure the primary disk is mounted on /boot/efi (not the secondary)
+	echo "umount /boot/efi"
+	echo "mount /dev/sda1 /boot/efi"
 fi
 
 if mdadm --detail /dev/md0 | grep -q $disk; then
         echo "ERROR: \"Secondary\" disk $disk is already part of RAID /dev/md0!!"
-        exit 1
+	exit 1
 fi
 
 if grep -q " $devname" /proc/mdstat; then
 	echo "ERROR: \"Foreign\" RAID(s) detected on \"Secondary\" disk $disk"
-	echo "(You must use blank_secondary to reset the second disk first)"
+	echo "(You should use blank_secondary to reset the second disk first)"
 	exit 1
 fi
 
 if grep -q ^$disk /proc/mounts; then
 	echo "ERROR: Some part of \"Secondary\" disk $disk is mounted!!"
-        exit 1
+	exit 1
 fi
 
-if ( [ ! -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] && [ $boot = "EFI" ] ) ||
-	( [ ! -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] && [ $boot = "BIOS" ] ); then
+if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
+	echo "WARNING: \"Secondary\" device $devname is smaller than sda"
+	echo -n "Continue anyway (Control-C aborts)?"
+	read $ans
+fi
+
+if ( [ $boot = "BIOS" ] && [ -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] ) ||
+   ( [ $boot = "EFI" ] && [ -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] ); then
 	echo "ERROR: boot scheme on \"Secondary\" disk $disk does not match \"Primary\" disk /dev/sda"
-	echo "(You must use blank_secondary to reset the second disk)"
+	echo "(You should use blank_secondary to reset the second disk)"
 	exit 1
 fi
 
@@ -58,7 +64,7 @@ if [ "$(mdadm --examine -Y /dev/sda2 | grep MD_UUID | cut -d'=' -f2)" != "$(mdad
    [ $(mdadm --examine -Y /dev/sda2 | grep EVENTS | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep EVENTS | cut -d'=' -f2) ];
 then
 	echo "ERROR: "Secondary\" disk $part2 does not contain an older copy of \"Primary\" disk /dev/sda2
-	echo "(You must use blank_secondary to reset the second disk)"
+	echo "(You should use blank_secondary to reset the second disk)"
 	exit 1
 fi
 
@@ -72,7 +78,7 @@ if [ "$(partprobe -s /dev/sda | cut -d' ' -f2-)" != "$(partprobe -s $disk | cut 
 		echo "done."
 	else
 		echo "ERROR: Partitioning of \"Secondary\" disk $disk does not match \"Primary\" disk /dev/sda"
-		echo "(You must use blank_secondary to reset the second disk)"
+		echo "(You should use blank_secondary to reset the second disk)"
 		exit 1
 	fi
 fi
@@ -82,10 +88,6 @@ if [ $boot = "BIOS" ]; then
 	echo "grub-install $disk"
 	echo "done."
 elif [ $boot = "EFI" ]; then
-	# Make sure the primary disk is mounted on /boot/efi
-	echo "umount /boot/efi"
-	echo "mount /dev/sda1 /boot/efi"
-
 	echo "Installing GRUB bootloader in UEFI mode on \"Secondary\" disk $disk ... "
 	# Note Debian 9 `grub-install` essentially ignores the second argument and
 	# copies the grub EFI shim to /boot/efi, regardless what is mounted there.
@@ -94,22 +96,31 @@ elif [ $boot = "EFI" ]; then
 	echo "grub-install $disk"
 	echo "umount /boot/efi"
 	echo "cp /dev/sda1 $part1"
-	echo "done."
 	# and remount the primary on /boot/efi again
 	echo "mount /dev/sda1 /boot/efi"
+	echo "done."
 fi
 
 echo "Adding \"Secondary\" disk $part2 to RAID array /dev/md0 ... "
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
 echo "mdadm --zero-superblock $part2"
 echo "mdadm /dev/md0 --add-spare $part2"
+sleep 1
+
+if ! mdadm --detail $raid 2>&1 | grep -q ": clean, degraded, recovering $"; then
+	echo "ERROR: RAID $raid failed to start rebuilding"
+	exit 1
+fi
+mdadm --detail $raid
+echo
+
 while ! grep -q recovery /proc/mdstat; do 
 	echo "Waiting for recovery ..."
 	sleep 1;
 done
 #
 while grep -q recovery /proc/mdstat; do 
-    recovery=$(grep recovery /proc/mdstat | cut -c32-)
+	recovery=$(grep recovery /proc/mdstat | cut -c32-)
 	echo -e -n "\r$recovery"
 	sleep 1;
 done
