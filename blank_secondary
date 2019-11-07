@@ -1,6 +1,5 @@
 #!/bin/bash
-set -e
-# For systems with GPT LVM RAID arrays, tries to reset everything on secondary disk
+# For systems with GPT LVM RAID arrays, tries to reset everything on second disk
 
 disk="/dev/sdb"
 devname=$(basename $disk)
@@ -14,8 +13,8 @@ echo -e "done.\n"
 
 if grep "/boot/efi" /proc/mounts | grep -q "$disk"; then
 	# Ensure the primary disk is mounted on /boot/efi (not the secondary)
-	echo "umount /boot/efi"
-	echo "mount /dev/sda1 /boot/efi"
+	umount /boot/efi
+	mount /dev/sda1 /boot/efi
 fi
 
 if mdadm --detail /dev/md0 | grep -q $disk; then
@@ -53,9 +52,9 @@ for part in $(cd /dev/;ls $devname?*); do
 		mdadm --detail /dev/$raid
 		echo -n "Blank partition (Control-C aborts)?"
 		read $ans
-		echo "pvremove -ff -y /dev/$raid 2>/dev/null"
-		echo "mdadm -S /dev/$raid"
-		echo "mdadm --zero-superblock --force /dev/$part 2>/dev/null"
+		pvremove -ff -y /dev/$raid 2>/dev/null
+		mdadm -S /dev/$raid
+		mdadm --zero-superblock --force /dev/$part 2>/dev/null
 	else
 		# Standalone partition or part of a local RAID volume
 		if [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
@@ -71,13 +70,13 @@ for part in $(cd /dev/;ls $devname?*); do
 			mdadm --examine /dev/$part
 			echo -n "Blank partition (Control-C aborts)?"
 			read $ans
-			echo "mdadm --zero-superblock --force /dev/$part 2>/dev/null"
+			mdadm --zero-superblock --force /dev/$part 2>/dev/null
 		elif pvscan /dev/$part > /dev/null 2>&1; then
 			echo -n "Detected raw LVM physical volume: "
 			pvdisplay /dev/$raid
 			echo -n "Blank partition (Control-C aborts)?"
 			read $ans
-			echo "pvremove -ff -y /dev/$part 2>/dev/null"
+			pvremove -ff -y /dev/$part 2>/dev/null
 		else
 			echo "Detected unrecognised partition: /dev/$part"
 			echo -n "Blank partition anyway (Control-C aborts)?"
@@ -86,17 +85,17 @@ for part in $(cd /dev/;ls $devname?*); do
 	fi
 	if [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
 		echo "Overwriting first ~1MB of partition /dev/$part ..."
-		echo "dd if=/dev/zero of=/dev/$part bs=4k count=255 2>/dev/null"
+		dd if=/dev/zero of=/dev/$part bs=4k count=240 2>/dev/null
 	else
 		echo "Overwriting first ~1GB of partition /dev/$part ..."
-		echo "dd if=/dev/zero of=/dev/$part bs=4k count=261120 2>/dev/null"
+		dd if=/dev/zero of=/dev/$part bs=4k count=240000 2>/dev/null
 	fi
 	echo -e "done.\n"
 done
 echo -n "Erase partition table of disk $disk (Control-C aborts)?"
 read $ans
-echo "sgdisk -Z -o $disk"
-echo "partprobe $disk"
+sgdisk -Z -o $disk
+partprobe $disk
 echo -e "\nDone."
 
 exit 0

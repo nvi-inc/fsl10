@@ -1,6 +1,5 @@
 #!/bin/bash
-set -e
-# Recover any failed and/or missing disks into an active raid
+# Recover any failed and/or missing disks back into an active raid
 
 if [ $# -gt 0 ]; then
 	raid=/dev/$1
@@ -14,7 +13,7 @@ if [ ! -b $raid ]; then
 fi
 
 if mdadm --detail $raid 2>&1 | grep -q ": clean $" ; then
-	echo "ERROR: RAID $raid is deos not need recovery!!"
+	echo "ERROR: RAID $raid does not need recovery!!"
 	exit 1
 fi
 
@@ -25,16 +24,15 @@ fi
 
 echo "Re-adding failed / missing disk(s) to RAID array $raid ... "
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
-echo "mdadm $raid --re-add failed"
-echo "mdadm $raid --re-add missing"
+mdadm $raid --re-add failed
+mdadm $raid --re-add missing
 sleep 1
 
-if ! mdadm --detail $raid 2>&1 | grep -q ": clean, degraded, recovering $"; then
+mdadm --detail $raid; echo
+if ! mdadm --detail $raid | grep -q ": clean, degraded, recovering $"; then
 	echo "ERROR: RAID $raid failed to start rebuilding"
 	exit 1
 fi
-mdadm --detail $raid
-echo
 
 while ! grep -q recovery /proc/mdstat; do 
 	echo "Waiting for recovery ..."
