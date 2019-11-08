@@ -484,9 +484,9 @@ First install git and deselect
     apt-get dselect-upgrade
 +
 then press kbd:[Enter] to confirm any updating of installed packages (where
-you have an Internet connection) and the installation of \~300 new packages
+you have an Internet connection) and the installation of \~197 new packages
 (unless you did not select the Desktop or added other tasks earlier -
-currently downloading at least 95MB from the Internet and/or DVDs).
+currently downloading \~188MB from the Internet and/or DVDs).
 
 Downloading commences for up to half an hour (depending on your Internet
 access and the exact revision of DVDs used):
@@ -598,6 +598,8 @@ and enter 'y' to confirm installation.
 === Make the FS
 
 IMPORTANT: Log-out of the console as root, and log-in again as prog.
+Edit the `~prog/.profile` file uncomment `export FS_SERIAL_LOCAL=1`
+line. Log-out and log back in as `prog`.
 
    cd /usr2/fs
    make >& /dev/null
