@@ -598,7 +598,7 @@ and enter 'y' to confirm installation.
 === Make the FS
 
 IMPORTANT: Log-out of the console as root, and log-in again as prog.
-Edit the `~prog/.profile` file uncomment `export FS_SERIAL_LOCAL=1`
+Edit the `~prog/.profile` file uncomment `export FS_SERIAL_CLOCAL=1`
 line. Log-out and log back in as `prog`.
 
    cd /usr2/fs
