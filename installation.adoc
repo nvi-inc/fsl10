@@ -587,12 +587,10 @@ are:
 
     cd /usr2
     git clone https://github.com/nvi-inc/fs fs-git
-    ln -s fs-git fs
-    chown -R prog:rtx fs-git
 
-=== Install default copies of all the FS related directories
+=== Set `/usr2/fs` link, set `/usr2/fs-git` permissions, and install default copies of all the FS related directories
 
-   cd /usr2/fs
+   cd /usr2/fs-git
    make install
 
 and enter 'y' to confirm installation.
@@ -794,22 +792,28 @@ No password will be required (except for `root`).
 To ensure X authorization works do the following (this example is for
 user `oper` but it works analogously for `prog` and `root`):
 
-1. Add this to the following files
-+
-.~/.login
-[source,csh]
-```
-if ( $?XCOOKIE == 1 ) then
-    xauth add $XCOOKIE
-endif
-```
+1. Add this to the following file:
 +
 .~/.profile
 [source,bash]
 ```
 if ! [ -z "$XCOOKIE" ]; then
-    xauth add $XCOOKIE
+   xauth add $XCOOKIE
 fi
+if echo $DISPLAY |grep -q localhost; then
+#   ssh from remote host with X display
+    xrdb -merge ~/.Xresources
+else
+    if ! [ -z $DISPLAY ]; then
+      if xhost|grep -q 'SI:localuser:oper'; then
+#       local X display
+        xrdb -merge ~/.Xresources
+      fi
+    else
+#     text terminal, do nothing
+      :
+    fi
+  fi
 ```
 
 2. Create the following file
@@ -834,8 +838,8 @@ fi
 +
     chmod a+rx /usr/local/bin/oper_account
 
-The three numbered steps above (without updating `~./.login`) can be executed
-for `oper`, `prog`, and `root` with:
+The three numbered steps above can be executed for `oper`, `prog`, and `root`
+with:
 
 ....
 ~/fsl10/AUID/install_AUID
