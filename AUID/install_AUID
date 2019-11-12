@@ -16,4 +16,4 @@ cat ~/fsl10/AUID/profile >> ~oper/.profile
 touch ~prog/.profile
 cat ~/fsl10/AUID/profile >> ~prog/.profile
 touch ~root/.profile
-cat ~/fsl10/AUID/profile >> ~root/.profile
+cat ~/fsl10/AUID/profile_root >> ~root/.profile
