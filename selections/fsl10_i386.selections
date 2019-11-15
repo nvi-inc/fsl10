@@ -398,6 +398,7 @@ i965-va-driver:i386				install
 iagno						install
 iamerican					install
 ibritish					install
+idle-python2.7					install
 ienglish-common					install
 ifupdown					install
 iio-sensor-proxy				install

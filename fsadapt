@@ -555,17 +555,17 @@ fi
       stdaccts)
 # Add std accounts into '/etc/passwd'.
     if [ ! "$is_oper" ]; then
-	echo 'oper:x:501:990:VLBI Operator:/home/oper:/bin/bash' >> "${NEW_ROOT}"etc/passwd
+	echo 'oper:x:501:990:VLBI Operator:/usr2/oper:/bin/bash' >> "${NEW_ROOT}"etc/passwd
 	echo 'oper:*:12256:0:99999:7:::' >> "${NEW_ROOT}"etc/shadow
     fi
-    mkdir -p "${NEW_ROOT}"home/oper
-    chown ${VERBO} 501.990 "${NEW_ROOT}"home/oper
+    mkdir -p "${NEW_ROOT}"usr2/oper
+    chown ${VERBO} 501.990 "${NEW_ROOT}"usr2/oper
     if [ ! "$is_prog" ]; then
-	echo 'prog:x:502:990:FS Programmer:/home/prog:/bin/bash' >> "${NEW_ROOT}"etc/passwd
+	echo 'prog:x:502:990:FS Programmer:/usr2/prog:/bin/bash' >> "${NEW_ROOT}"etc/passwd
 	echo 'prog:*:12256:0:99999:7:::' >> "${NEW_ROOT}"etc/shadow
     fi
-    mkdir -p "${NEW_ROOT}"home/prog
-    chown ${VERBO} 502.990 "${NEW_ROOT}"home/prog
+    mkdir -p "${NEW_ROOT}"usr2/prog
+    chown ${VERBO} 502.990 "${NEW_ROOT}"usr2/prog
 ;;
       fstab)
 # Add swap, '/usr2', '/proc' into '/etc/fstab'.
@@ -784,26 +784,6 @@ fi
 
 # Selecting defaults for phase 2 of updating.
 
-# 'oper' home directory already a symlink?
-if [ -L /home/oper ]; then
-  prev_oper_def="off"
-else
-  if [ -d /usr2/oper ]; then
-    prev_oper_def="on"
-  else
-    prev_oper_def="off"
-  fi
-fi
-# 'prog' home directory already a symlink?
-if [ -L /home/prog ]; then
-  prev_prog_def="off"
-else
-  if [ -d /usr2/prog ]; then
-    prev_prog_def="on"
-  else
-    prev_prog_def="off"
-  fi
-fi
 if [ -x "/lib/modules/$(uname -r)/gpib" ]; then
   config_gpib_def="off"
 else
@@ -832,7 +812,8 @@ else
   sshkeys_def="on"
 fi
 # Do we have apt-get cron for weekly security updates.
-if [ -r "${NEW_ROOT}etc/cron.weekly/apt-get" ]; then
+if [ -r /etc/cron.weekly/apt-get ] && \
+   [ ! -r /etc/apt/apt.conf.d/20auto-upgrades ]; then
   apt_get_def="off"
 else
   apt_get_def="on"
@@ -850,8 +831,6 @@ ${DIALOG} --title "FS Adaptation: Setup (Window 2)" \
 all of these can be safely attempted again and again.)" \
 21 76 10 \
   skip          "Skip all steps below (regardless of [*] marks)" off \
-  prev_oper     "Use existing '/usr2/oper' home directory" $prev_oper_def \
-  prev_prog     "Use existing '/usr2/prog' home directory" $prev_prog_def \
   config_gpib   "Configure Linux GPIB driver and library" $config_gpib_def \
   choose_gpib   "Set '/etc/gpib.conf' for available GPIB interface" $choose_gpib_def \
   set_perms     "Set device permissions (serial, gpib)" on \
@@ -875,50 +854,6 @@ fi
     case $i in
       skip)
 break
-;;
-      prev_oper)
-if [ -L /home/oper ]; then
-  :  # Do nothing if it already is a symlink.
-else
-  if [ -d /usr2/oper ]; then
-    # Need to have existing stuff on /usr2.
-    rm ${VERBO} -rf ${NEW_ROOT}home/oper.FSCOPY
-    if [ -e ${NEW_ROOT}home/oper ]; then
-      mv ${VERBO} -f ${NEW_ROOT}home/oper ${NEW_ROOT}home/oper.FSCOPY
-    fi
-    ln ${VERBO} -s /usr2/oper ${NEW_ROOT}home/oper
-  fi
-fi
-if [ -r /usr2/oper/.fvwmrc ]; then
-  # Convert .fvwmrc settings to .fvwm2rc.
-  su oper -c fvwmrc_convert /usr2/oper/.fvwmrc
-fi
-if [ -r /usr2/oper/.fvwm2rc ]; then
-  sed -e "s,PopUp Window Ops2,PopUp \"Window Ops2\"," /usr2/oper/.fvwm2rc > /tmp/.fvwm2rc_1
-  mv /tmp/.fvwm2rc_1 /usr2/oper/.fvwm2rc
-fi
-;;
-      prev_prog)
-if [ -L /home/prog ]; then
-  :  # Do nothing if it already is a symlink.
-else
-  if [ -d /usr2/prog ]; then
-    # Need to have existing stuff on /usr2.
-    rm ${VERBO} -rf ${NEW_ROOT}home/prog.FSCOPY
-    if [ -e ${NEW_ROOT}home/prog ]; then
-      mv ${VERBO} -f ${NEW_ROOT}home/prog ${NEW_ROOT}home/prog.FSCOPY
-    fi
-    ln ${VERBO} -s /usr2/prog ${NEW_ROOT}home/prog
-  fi
-fi
-if [ -r /usr2/prog/.fvwmrc ]; then
-  # Convert .fvwmrc settings to .fvwm2rc.
-  su prog -c fvwmrc_convert /usr2/prog/.fvwmrc
-fi
-if [ -r /usr2/prog/.fvwm2rc ]; then
-  sed -e "s,PopUp Window Ops2,PopUp \"Window Ops2\"," /usr2/prog/.fvwm2rc > /tmp/.fvwm2rc_1
-  mv /tmp/.fvwm2rc_1 /usr2/prog/.fvwm2rc
-fi
 ;;
       config_gpib)
 # Install the Linux-GPIB firmware collection if not yet installed
@@ -1075,6 +1010,7 @@ if [ -r "${SRCS}"etc_cron.weekly_apt-get ]; then
 	cp ${VERBO} "${SRCS}"etc_cron.weekly_apt-get /etc/cron.weekly/apt-get
 	chmod ${VERBO} 755 /etc/cron.weekly/apt-get
     fi
+    rm -f /etc/apt/apt.conf.d/20auto-upgrades
 else
     :
 fi

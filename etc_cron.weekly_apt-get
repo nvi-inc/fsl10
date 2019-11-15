@@ -24,7 +24,7 @@ else
 	for i in `ls *.deb 2> /dev/null`; do
 		pkg=`echo $i | mawk -F _ '{ print $1}'`
 		a_ver=`echo $i | mawk -F _ '{ gsub("%3a", ":"); print $2}'`
-		i_ver=`dpkg -s $pkg | grep ^Version: | mawk '{ print $2}'`
+		i_ver=`dpkg -s $pkg 2>/dev/null | grep ^Version: | mawk '{ print $2}'`
 		if [ -z $i_ver ]; then
 			i_ver="<none>"
 		fi
@@ -45,7 +45,8 @@ else
 			else
 				basepkg=$pkg
 			fi
-			if [ -d /usr/share/doc/$basepkg-base ]; then
+			b_ver=`dpkg -s $basepkg-base 2>/dev/null | grep ^Version: | mawk '{ print $2}'`
+			if [ -d /usr/share/doc/$basepkg-base ] && [ "$b_ver" = "$i_ver" ]; then
 				basepkg=$basepkg-base
 			fi
 			if [ -e /usr/share/doc/$basepkg/changelog.Debian.gz ]; then
