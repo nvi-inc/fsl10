@@ -8,7 +8,6 @@ else
       xhost +SI:localuser:oper >/dev/null
     fi
     sudo -u oper -i "$@"
-    xhost -SI:localuser:oper >/dev/null
   else 
     sudo -u oper -i "$@"
   fi

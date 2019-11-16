@@ -8,7 +8,6 @@ else
       xhost +SI:localuser:prog >/dev/null
     fi
     sudo -u prog -i "$@"
-    xhost -SI:localuser:prog >/dev/null
   else 
     sudo -u prog -i "$@"
   fi

@@ -8,7 +8,6 @@ else
       xhost +SI:localuser:root >/dev/null
     fi
     sudo -u root -i "$@"
-    xhost -SI:localuser:root >/dev/null
   else 
     sudo -u root -i "$@"
   fi
