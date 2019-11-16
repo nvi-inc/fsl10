@@ -954,7 +954,7 @@ Look for `hostnames=`, use fully qualified name.
 === Disable Desktop User (Optional)
 
 If you do not need the functionality available in the Desktop
-environment, you can disable the `desktop` account. You can re-enanle
+environment, you can disable the `desktop` account. You can re-enable
 the account later if you need it. To disable it, execute:
 
 ....
