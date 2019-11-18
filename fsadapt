@@ -813,7 +813,7 @@ else
 fi
 # Do we have apt-get cron for weekly security updates.
 if [ -r /etc/cron.weekly/apt-get ] && \
-   [ ! -r /etc/apt/apt.conf.d/20auto-upgrades ]; then
+   ! grep -q "^APT" /etc/apt/apt.conf.d/20auto-upgrades; then
   apt_get_def="off"
 else
   apt_get_def="on"
@@ -1010,7 +1010,7 @@ if [ -r "${SRCS}"etc_cron.weekly_apt-get ]; then
 	cp ${VERBO} "${SRCS}"etc_cron.weekly_apt-get /etc/cron.weekly/apt-get
 	chmod ${VERBO} 755 /etc/cron.weekly/apt-get
     fi
-    rm -f /etc/apt/apt.conf.d/20auto-upgrades
+    sed -i -e "s,^APT,# APT," /etc/apt/apt.conf.d/20auto-upgrades
 else
     :
 fi
