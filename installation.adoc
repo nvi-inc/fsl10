@@ -735,6 +735,11 @@ If a user can elevate to `root`, also add:
 
     dhorsley       ALL=(root) ALL
 
+Create the groups if they don't exist:
+
+    addgroup operators
+    addgroup programmers
+
 Add any needed user accounts as appropriate, e.g.:
 
     adduser dhorsley
@@ -744,11 +749,6 @@ create a new `/home/dhorsley` with a useful skeleton for use with the
 FS, by executing (you will be prompted for the user name):
 
     /usr2/fs/misc/auid_update
-
-Create the groups if they don't exist:
-
-    addgroup operators
-    addgroup programmers
 
 Then add each user to these groups as appropriate, e.g.:
 
@@ -832,7 +832,6 @@ else
    xhost +SI:localuser:oper >/dev/null
  fi
  sudo -u oper -i
- xhost -SI:localuser:oper >/dev/null
 fi
 ```
 
@@ -950,6 +949,14 @@ Use fully qualified node name
 ./etc/exim4/update-exim4.conf.conf
 +
 Look for `hostnames=`, use fully qualified name.
++
+./etc/exim4/update-exim4.conf.conf
++
+If you have hardcoded your the mail `HELO` message data as descibed in
+the section "Generate FQDN in HELO for outgoing mail", you will need
+to update your data as described in that section.
+
+When finished, reboot.
 
 === Disable Desktop User (Optional)
 
@@ -980,15 +987,6 @@ You can undo the `ssh` block  be removing the line (if it only has
 `desktop`) or removing `desktop` from the line and then restarting
 `sshd`.
 
-=== Set /usr2 owned by prog (Optional)
-
-#TODO: Should any (all?) systems have this and what should the permissions be?#
-
-....
-chown prog:rtx /usr2
-chmod go-w /usr2
-....
-
 === Remove ModemManager (Optional)
 
 If you use serial ports, it is strongly advised that you remove the
@@ -999,3 +997,46 @@ Execute this command:
 apt-get purge modemmanger
 ....
 
+=== More firewall rules (Optional)
+
+The following tersely summarizes some `ufw` settings that may be useful:
+
+....
+# ssh
+ufw allow OpenSSH
+#NTP
+ufw allow 123
+#RDBE multicast to group from subnet
+ufw allow in proto udp to 239.0.2.0/24 from 128.171.102.0/24
+#? RDBE multicast to group from router/subnet ?
+#ufw allow in proto igmp to 239.0.2.0/24 from 128.171.102.0/24
+....
+
+=== Generate FQDN in HELO for outgoing mail (Optional)
+
+If mail from your system is being rejected by some servers because
+`exim4` is not providing a Fully Qualified Domain Name in its `HELO`
+message, you can correct this by commenting out the following lines
+in `/etc/exim4/exim4.conf.template`:
+
+....
+.ifdef REMOTE_SMTP_HELO_FROM_DNS
+.ifdef REMOTE_SMTP_HELO_DATA
+REMOTE_SMTP_HELO_DATA==${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
+.else
+REMOTE_SMTP_HELO_DATA=${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
+.endif
+.endif
+....
+
+Right after those lines, add the following line:
+
+....
+REMOTE_SMTP_HELO_DATA=FQDN
+....
+
+Where `FQDN` is your system's Fully Qualified Domain Name. The restart the server:
+
+....
+systemctl restart exim4
+....
