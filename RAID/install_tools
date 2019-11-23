@@ -12,6 +12,16 @@ chown root:root mdstat
 chmod a+rx mdstat
 # install refresh_secondary
 cd /usr/local/sbin
-cp -a ~/fsl10/RAID/refresh_secondary.sdb_efi refresh_secondary
+cp -a ~/fsl10/RAID/refresh_secondary .
 chown root:root refresh_secondary
 chmod a+r,u+x refresh_secondary
+# install blank_secondary
+cd /usr/local/sbin
+cp -a ~/fsl10/RAID/blank_secondary .
+chown root:root blank_secondary
+chmod a+r,u+x blank_secondary
+# install recover_raid
+cd /usr/local/sbin
+cp -a ~/fsl10/RAID/recover_raid .
+chown root:root recover_raid
+chmod a+r,u+x recover_raid
