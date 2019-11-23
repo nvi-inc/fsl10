@@ -192,7 +192,7 @@ select your disk, such as listed above, do not select a RAID or your
 boot decice.  Then select *All files in one partition (recommended for
 new users)*.  You may be prompted to confirm deleting RAID and/or
 LVM, which you must do to continue. Then you should be able to select
-your diak, as above, and get *FREE SPACE*.
+your disk, as above, and get *FREE SPACE*.
 
 . Select *Create a new partition*
 
@@ -484,9 +484,11 @@ First install git and deselect
     apt-get dselect-upgrade
 +
 then press kbd:[Enter] to confirm any updating of installed packages (where
-you have an Internet connection) and the installation of \~197 new packages
+you have an Internet connection) and the installation of 
+~197 new packages
 (unless you did not select the Desktop or added other tasks earlier -
-currently downloading \~188MB from the Internet and/or DVDs).
+currently downloading
+~188MB from the Internet and/or DVDs).
 
 Downloading commences for up to half an hour (depending on your Internet
 access and the exact revision of DVDs used):
@@ -634,6 +636,9 @@ All commands (except checking the RAID status) in this section need to be run as
 
 === Setup additional disk
 
+NOTE: An additional disk should be at least as large as the smallest
+disk already in use in the RAID.
+
 NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
 
 NOTE: This section assumes you have installed the "Tools for RAID"
@@ -705,12 +710,18 @@ it is best to avoid in case the boot partition is not fully synced.
 
 When the syncing is complete, you can repeat this process for a third disk.
 
-=== Additional security and CIS Benchmarks (Optional)
+== Optional Items
+
+This section covers several customizations that may be helpful
+depending on the requirements for the system. All actions in this
+section require `root` permissions.
+
+=== Additional security and CIS Benchmarks
 
 For stations that wish to conform to the additional security recommendations of the
 Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
 
-=== Enabling user promotion to `oper`, `prog` and `root` (Optional)
+=== Enabling user promotion to `oper`, `prog` and `root`
 
 The model of FSL assumes `oper` and `prog` accounts will be used for
 operations and programming respectively. However, some institutes may
@@ -731,7 +742,7 @@ run `visudo` then add at end:
     %programmers    ALL=(prog) NOPASSWD: ALL
     %programmers    ALL=(oper) NOPASSWD: ALL
 
-If a user can elevate to `root`, also add:
+If the  user can elevate to `root`, also add:
 
     dhorsley       ALL=(root) ALL
 
@@ -846,7 +857,7 @@ with:
 ~/fsl10/AUID/install_AUID
 ....
 
-=== Network configuration changes (Optional)
+=== Network configuration changes
 
 This section requires using `nm-connection-editor` on a graphic
 display (`nmtui` may be an option on a text terminal, but it has not
@@ -958,7 +969,7 @@ to update your data as described in that section.
 
 When finished, reboot.
 
-=== Disable Desktop User (Optional)
+=== Disable Desktop User
 
 If you do not need the functionality available in the Desktop
 environment, you can disable the `desktop` account. You can re-enable
@@ -987,7 +998,7 @@ You can undo the `ssh` block  be removing the line (if it only has
 `desktop`) or removing `desktop` from the line and then restarting
 `sshd`.
 
-=== Remove ModemManager (Optional)
+=== Remove ModemManager
 
 If you use serial ports, it is strongly advised that you remove the
 ModemManager package to avoid conflicts over access to the ports.
@@ -997,7 +1008,7 @@ Execute this command:
 apt-get purge modemmanger
 ....
 
-=== More firewall rules (Optional)
+=== More firewall rules
 
 The following tersely summarizes some `ufw` settings that may be useful:
 
@@ -1012,11 +1023,11 @@ ufw allow in proto udp to 239.0.2.0/24 from 128.171.102.0/24
 #ufw allow in proto igmp to 239.0.2.0/24 from 128.171.102.0/24
 ....
 
-=== Generate FQDN in HELO for outgoing mail (Optional)
+=== Generate FQDN in HELO for outgoing mail
 
 If mail from your system is being rejected by some servers because
 `exim4` is not providing a Fully Qualified Domain Name in its `HELO`
-message, you can correct this by commenting out the following lines
+message, one way to fix this is to comment out the following lines
 in `/etc/exim4/exim4.conf.template`:
 
 ....
@@ -1035,8 +1046,12 @@ Right after those lines, add the following line:
 REMOTE_SMTP_HELO_DATA=FQDN
 ....
 
-Where `FQDN` is your system's Fully Qualified Domain Name. The restart the server:
+Where `FQDN` is your system's Fully Qualified Domain Name. Then restart the server:
 
 ....
 systemctl restart exim4
 ....
+
+A defect of this approach is that it hard codes the `HELO` message data,
+  which will have to be manually updated if the FQDN changes.  A more
+  general solution may be possible, but hasn't been discovered yet.
