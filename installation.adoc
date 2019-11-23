@@ -440,10 +440,10 @@ the file, again adding in *contrib* and/or *non-free* as needed:
    deb http://deb.debian.org/debian/ stretch-updates main contrib non-free
    deb-src http://deb.debian.org/debian/ stretch-updates main contrib non-free
 
-(where you can use any suitable mirror instead of *ftp.us.debian.org*)
+(where you can use any suitable mirror instead of *deb.debian.org*)
 
 Also add *contrib* and/or *non-free* to the lines referring to the
-security.debian.org mirror in the middle of the file.
+*security.debian.org* mirror in the middle of the file.
 
 IMPORTANT: you _MUST_ use *stretch* and _NOT_ *stable* for the distribution in
 all these entries (but CD/DVD entries might use *unstable*.)
