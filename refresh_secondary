@@ -42,7 +42,7 @@ else
 fi
 
 # Now get the user to load the Secondary disk
-if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ]; then
+if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && [ ! -f /tmp/.accept_load ]; then
 	echo "ERROR:\"Secondary\" disk $disk must not be loaded before start of script"
 	exit 1
 fi
@@ -51,6 +51,7 @@ if [ ! -b $disk ]; then
 		echo  -n -e "\rWaiting for disk $disk to be loaded, use 'Control-C' to safely abort ..."
 		sleep 1
 	done
+	touch /tmp/.accept_load
 	echo -e "done.\n"
 fi
 
@@ -94,11 +95,11 @@ then
 	exit 1
 fi
 
-# Warn if "Secondary" disk has been booted separately
+# Check if "Secondary" disk has been booted separately
 if [ -b $part2 ] && [ "$(mdadm --examine $part2 | grep "Array State" | cut -d' ' -f7)" != "AA" ]; then
-	echo "WARNING: \"Secondary\" disk $part2 appears to have been booted separately!!"
-	echo -n "Continue anyway (Control-C aborts)?"
-	read $ans
+	echo "ERROR: \"Secondary\" disk $part2 appears to have been booted separately!!"
+	echo "(You should use blank_secondary to reset the second disk)"
+	exit 1
 fi
 
 # Ensure the Primary disk is mounted on /boot/efi (ie. not Secondary) if applicable
