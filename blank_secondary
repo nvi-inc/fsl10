@@ -21,7 +21,7 @@ devname=$(basename $disk)
 lockf=/tmp/.accept_load
 
 # Now get the user to load the Secondary disk
-if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -f $lockf ] || [ "$(cat $lockf)" != "$(lsblk --nodeps -no serial $disk)" ]); then
+if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -O $lockf ] || [ "$(cat $lockf)" != "$(lsblk --nodeps -no serial $disk)" ]); then
 	echo "ERROR:\"Secondary\" disk $disk must not be loaded before start of script"
 	exit 1
 fi
