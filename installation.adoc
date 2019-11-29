@@ -656,10 +656,10 @@ IMPORTANT: Do not initialize a disk unless you are sure there is no
 data on it that you need to preserve.
 
 For the first time use of an additional disk with a new install, the
-disk should be initialized to make sure it has no existing structure.
-To be safe in all cases, this should be done even if the disk has been
-used in a different FS computer or a previous install on this
-computer.
+disk should be initialized to make sure it has no elready existing
+structure.  To be safe in all cases, this should be done even if the
+disk has been used in a different FS computer or a previous install on
+this computer.
 
 Boot with just the primary disk installed. Use the script:
 
@@ -670,7 +670,7 @@ disk in the secondary slot. Turn the key to turn the disk on. There
 will be a few prompts asking to continue. If it is a new disk or you
 are sure it safe to erase this disk, it is safe to press return at
 each prompt. If you are unsure about this or otherwise need to abort
-use kbd:[Ctrl+C] as described in the prompt.
+use kbd:[Ctrl+C] as described in the prompts.
 
 ==== Refresh secondary disk
 
