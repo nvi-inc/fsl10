@@ -18,9 +18,10 @@ done
 
 disk="/dev/sdb"
 devname=$(basename $disk)
+lockf=/tmp/.accept_load
 
 # Now get the user to load the Secondary disk
-if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && [ ! -f /tmp/.accept_load ]; then
+if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -f $lockf ] || [ "$(cat $lockf)" != "$(lsblk --nodeps -no serial $disk)" ]); then
 	echo "ERROR:\"Secondary\" disk $disk must not be loaded before start of script"
 	exit 1
 fi
@@ -29,7 +30,7 @@ if [ ! -b $disk ]; then
 		echo  -n -e "\rWaiting for disk $disk to be loaded, use 'Control-C' to safely abort ..."
 		sleep 1
 	done
-	touch /tmp/.accept_load
+	echo $(lsblk --nodeps -no serial $disk) > $lockf
 	echo -e "done.\n"
 fi
 
