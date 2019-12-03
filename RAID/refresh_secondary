@@ -3,11 +3,36 @@
 # the second disk (if missing), rebuilds the boot sector and adds the RAID
 # partition back into the array as a spare to be rebuilt.
 
+usage() { echo "Usage: $0 [-A][-h]"; echo -e "  where\t-A\tAllow \"Secondary\" disk to be loaded at start"; echo -e "  \t-h\tdisplay this help and exit"; }
+
+ACCEPT_LOAD=0
+while getopts "Ah" arg; do
+	case $arg in
+		A)
+			ACCEPT_LOAD=1
+			;;
+		h | *)
+			usage
+			exit 0
+			;;
+	esac
+done
+
 disk="/dev/sdb"
 devname=$(basename $disk)
 part1="$disk"1
 part2="$disk"2
+lockf=/tmp/.accept_load
 
+# Perform sanity checks on primary disk first
+if ! mdadm --detail /dev/md0 | grep -q /dev/sda; then
+        echo "ERROR: \"Primary\" disk /dev/sda is not part of RAID /dev/md0!!"
+	exit 1
+fi
+if [ "$(cat /sys/block/sda/removable)" != "0" ]; then
+	echo "ERROR: \"Primary\" disk /dev/sda is removable, check USB devices!!"
+	exit 1
+fi
 if [ ! -z "$(sgdisk -i1 /dev/sda | grep 'BIOS boot')" ] && [ ! -d /boot/efi ]; then
 	boot="BIOS";
 elif [ ! -z "$(sgdisk -i1 /dev/sda | grep 'EFI System')" ] && [ -d /boot/efi ]; then
@@ -17,41 +42,43 @@ else
 	exit 1
 fi
 
-echo "Checking that \"Secondary\" disk $disk is inserted & turned-on ... "
-while [ ! -b $disk ]; do
-	echo  -n -e "\rWaiting for disk $disk, use 'Control-C' to safely abort ..."
-	sleep 1
-done
-echo -e "done.\n"
-
-if grep "/boot/efi" /proc/mounts | grep -q "$disk"; then
-	# Ensure the primary disk is mounted on /boot/efi (not the secondary)
-	umount /boot/efi
-	mount /dev/sda1 /boot/efi
+# Now get the user to load the Secondary disk
+if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -O $lockf ] || [ "$(cat $lockf)" != "$(lsblk --nodeps -no serial $disk)" ]); then
+	echo "ERROR:\"Secondary\" disk $disk must not be loaded before start of script"
+	exit 1
+fi
+if [ ! -b $disk ]; then
+	while [ ! -b $disk ]; do
+		echo  -n -e "\rWaiting for disk $disk to be loaded, use 'Control-C' to safely abort ..."
+		sleep 1
+	done
+	echo $(lsblk --nodeps -no serial $disk) > $lockf
+	echo -e "done.\n"
 fi
 
+# Perform sanity checks on secondary disk now that it's available
+if [ "$(cat /sys/block/$devname/removable)" != "0" ]; then
+	echo "ERROR: \"Secondary\" disk $disk is removable, check USB devices!!"
+	exit 1
+fi
 if mdadm --detail /dev/md0 | grep -q $disk; then
         echo "ERROR: \"Secondary\" disk $disk is already part of RAID /dev/md0!!"
 	exit 1
 fi
-
 if grep -q " $devname" /proc/mdstat; then
 	echo "ERROR: \"Foreign\" RAID(s) detected on \"Secondary\" disk $disk"
 	echo "(You should use blank_secondary to reset the second disk first)"
 	exit 1
 fi
-
 if grep -q ^$disk /proc/mounts; then
 	echo "ERROR: Some part of \"Secondary\" disk $disk is mounted!!"
 	exit 1
 fi
-
 if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
 	echo "WARNING: \"Secondary\" device $devname is smaller than sda"
 	echo -n "Continue anyway (Control-C aborts)?"
 	read $ans
 fi
-
 if ( [ $boot = "BIOS" ] && [ ! -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] ) ||
    ( [ $boot = "EFI" ] && [ ! -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] ); then
 	echo "ERROR: boot scheme on \"Secondary\" disk $disk does not match \"Primary\" disk /dev/sda"
@@ -59,16 +86,33 @@ if ( [ $boot = "BIOS" ] && [ ! -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] ) 
 	exit 1
 fi
 
+# Cross-compare state of the RAID partitions
 if [ -b $part2 ] && ([ "$(mdadm --examine -Y /dev/sda2 | grep MD_UUID | cut -d'=' -f2)" != "$(mdadm --examine -Y $part2 | grep MD_UUID | cut -d'=' -f2)" ] ||
    [ $(mdadm --examine -Y /dev/sda2 | grep TIME | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep TIME | cut -d'=' -f2) ] ||
    [ $(mdadm --examine -Y /dev/sda2 | grep EVENTS | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep EVENTS | cut -d'=' -f2) ]);
 then
-	echo "ERROR: "Secondary\" disk $part2 does not contain an older copy of \"Primary\" disk /dev/sda2
+	echo "ERROR: \"Secondary\" disk $part2 does not contain an older copy of \"Primary\" disk /dev/sda2"
 	echo "(You should use blank_secondary to reset the second disk)"
 	exit 1
 fi
 
+# Check if "Secondary" disk has been booted separately
+if [ -b $part2 ] && [ "$(mdadm --examine $part2 | grep "Array State" | cut -d' ' -f7)" != "AA" ]; then
+	echo "ERROR: \"Secondary\" disk $part2 appears to have been booted separately!!"
+	echo "(You should use blank_secondary to reset the second disk)"
+	exit 1
+fi
 
+# Ensure the Primary disk is mounted on /boot/efi (ie. not Secondary) if applicable
+if [ $boot = "EFI" ]; then
+	umount /boot/efi
+	mount /dev/sda1 /boot/efi
+fi
+
+
+# ------------- Everything looks sane so let's set to work ----------------
+
+# First repartition the Secondary disk by cloning the Primary's table if blank
 if [ "$(partprobe -s /dev/sda | cut -d' ' -f2-)" != "$(partprobe -s $disk | cut -d' ' -f2-)" ]; then
 	if [ "$(partprobe -s $disk | cut -d' ' -f3-)" = "partitions" ]; then
 		echo "Partitioning blank \"Secondary\" disk $disk..."
@@ -83,17 +127,24 @@ if [ "$(partprobe -s /dev/sda | cut -d' ' -f2-)" != "$(partprobe -s $disk | cut 
 	fi
 fi
 
+# Next install the bootloader to the Secondary disk
 if [ $boot = "BIOS" ]; then
 	echo "Installing GRUB bootloader in BIOS mode on \"Secondary\" disk $disk ... "
 	grub-install $disk
 	echo "done."
 elif [ $boot = "EFI" ]; then
+	# Ensure the primary disk is mounted on /boot/efi (not anything else)
+	if ! grep "/boot/efi" /proc/mounts | grep -q /dev/sda1; then
+		umount /boot/efi
+		mount /dev/sda1 /boot/efi
+	fi
+
 	echo "Installing GRUB bootloader in UEFI mode on \"Secondary\" disk $disk ... "
 	# Note Debian 9 `grub-install` essentially ignores the second argument and
 	# copies the grub EFI shim to /boot/efi, regardless what is mounted there.
 	# Instead, we refresh the grub install on the primary, and unmount it to 
 	# ensure it is consistent, then copy the whole ESP to the second disk. 
-	grub-install $disk
+	grub-install $disk 2> /dev/null		# suppress spurious warnings
 	umount /boot/efi
 	cp /dev/sda1 $part1
 	# and remount the primary on /boot/efi again
@@ -101,18 +152,21 @@ elif [ $boot = "EFI" ]; then
 	echo "done."
 fi
 
+# Then add the Secondary RAID partition as a replacement into the RAIO
 echo "Adding \"Secondary\" disk $part2 to RAID array /dev/md0 ... "
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
-mdadm --zero-superblock $part2
+mdadm --zero-superblock $part2 2> /dev/null	# will fail if disk is blank
 mdadm /dev/md0 --add-spare $part2
 sleep 1
 
+# Check that the RAID is now rebuilding ie. the addition succeeded
 mdadm --detail /dev/md0; echo
-if ! mdadm --detail /dev/md0 | grep -q ": clean, degraded, recovering $"; then
+if ! (mdadm --detail /dev/md0 | grep -q ": clean, degraded, recovering $"); then
 	echo "ERROR: RAID /dev/md0 failed to start rebuilding"
 	exit 1
 fi
 
+# Finally report on recovery progress until it completes
 while ! grep -q recovery /proc/mdstat; do 
 	echo "Waiting for recovery ..."
 	sleep 1;
