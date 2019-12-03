@@ -517,7 +517,7 @@ In the */root/fsl10* directory, start *fsadapt* with
 Using the arrow keys and kbd:[Space] make your selections and press kbd:[Enter].
 
 *  For NASA stations select *govt* and *noident*.
-*  If you are not using a GPIB board os USB, you can deselect the GPIB option.
+*  If you are not using a GPIB board or USB, you can deselect the GPIB option.
 
 ==== FS Adaptation: Setup (Window 2)
 
@@ -580,10 +580,10 @@ You can install some useful tools for working with the RAID with:
 The rest of this document assumes the first three of these tools have
 been installed.  The four tools are:
 
-   * *mdstat* allows all users to check on RAID status
-   * *refresh_secondary* allows *root* to refresh a secondary disk that is from the same RAID and older than the running disk
+   * *mdstat* allows all users to check on the RAID status
+   * *refresh_secondary* allows *root* to refresh a secondary disk that is from the same RAID and has been booted on its own
    * *blank_secondary* allows *root* to initialize a secondary disk, must be used with extreme care
-   * *recover_raid* allows *root* to add a re-add missing disks back into a RAID
+   * *recover_raid* allows *root* to re-add a disk that fell out of the RAID back into it
 
 === Download the Field System
 
