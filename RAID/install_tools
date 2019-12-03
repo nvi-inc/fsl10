@@ -6,22 +6,33 @@ if ! [ $(id -u) = 0 ]; then
    exit 1
 fi
 # install mdstat
+echo "setting up mdstat"
 cd /usr/local/bin
 cp -a ~/fsl10/RAID/mdstat mdstat
 chown root:root mdstat
 chmod a+rx mdstat
 # install refresh_secondary
+echo "setting up refresh_secondary"
 cd /usr/local/sbin
 cp -a ~/fsl10/RAID/refresh_secondary .
 chown root:root refresh_secondary
 chmod a+r,u+x refresh_secondary
 # install blank_secondary
+echo "setting up blank_secondary"
 cd /usr/local/sbin
 cp -a ~/fsl10/RAID/blank_secondary .
 chown root:root blank_secondary
 chmod a+r,u+x blank_secondary
 # install recover_raid
+echo "setting up recover_raid"
 cd /usr/local/sbin
 cp -a ~/fsl10/RAID/recover_raid .
 chown root:root recover_raid
 chmod a+r,u+x recover_raid
+# install refresh_spare_usr2
+echo "setting up refresh_spare_usr2"
+cd /usr/local/sbin
+cp -a ~/fsl10/RAID/refresh_spare_usr2 .
+chown root:root refresh_spare_usr2
+chmod a+r,u+x refresh_spare_usr2
+echo "done"

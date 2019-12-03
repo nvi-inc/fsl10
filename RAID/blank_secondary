@@ -1,15 +1,38 @@
 #!/bin/bash
 # For systems with GPT LVM RAID arrays, tries to reset everything on second disk
 
+usage() { echo "Usage: $0 [-A][-h]"; echo -e "  where\t-A\tAllow \"Secondary\" disk to be loaded at start"; echo -e "  \t-h\tdisplay this help and exit"; }
+
+ACCEPT_LOAD=0
+while getopts "Ah" arg; do
+	case $arg in
+		A)
+			ACCEPT_LOAD=1
+			;;
+		h | *)
+			usage
+			exit 0
+			;;
+	esac
+done
+
 disk="/dev/sdb"
 devname=$(basename $disk)
+lockf=/tmp/.accept_load
 
-echo "Checking that \"Secondary\" disk $disk is inserted & turned-on ... "
-while [ ! -b $disk ]; do
-	echo  -n -e "\rWaiting for disk $disk, use 'Control-C' to safely abort ..."
-	sleep 1
-done
-echo -e "done.\n"
+# Now get the user to load the Secondary disk
+if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -O $lockf ] || [ "$(cat $lockf)" != "$(lsblk --nodeps -no serial $disk)" ]); then
+	echo "ERROR:\"Secondary\" disk $disk must not be loaded before start of script"
+	exit 1
+fi
+if [ ! -b $disk ]; then
+	while [ ! -b $disk ]; do
+		echo  -n -e "\rWaiting for disk $disk to be loaded, use 'Control-C' to safely abort ..."
+		sleep 1
+	done
+	echo $(lsblk --nodeps -no serial $disk) > $lockf
+	echo -e "done.\n"
+fi
 
 if grep "/boot/efi" /proc/mounts | grep -q "$disk"; then
 	# Ensure the primary disk is mounted on /boot/efi (not the secondary)
