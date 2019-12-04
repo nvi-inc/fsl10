@@ -14,10 +14,15 @@ echo "         are using the /usr2 partition.  Rebooting afterwards is"
 echo "         recommended."
 echo ""
 echo "This script must be executed by 'root' on the Spare computer. "
-echo "You must be logged-in as 'root', do not use 'su' or 'ssh' to"
-echo "become 'root' locally. Remote login via 'ssh' as 'root' is okay."
-echo "Make sure all other users are logged-out before proceeding."
+echo "You must be logged-in as 'root', do not use 'su', 'ssh', or"
+echo "'sudo/'root_account' to  become 'root' locally.  Remote login"
+echo "via 'ssh' as 'root' is okay, if that is permitted.  Make sure"
+echo "all other users are logged-out before proceeding."
 echo ""
+if ! [ ${EUID:-`id -u`} = 0 ]; then
+   echo "You are not running with root priviledges!"
+   exit 1
+fi
 echo -e "Do you wish to continue with the REFRESH? (y=yes, n=no) : \c" 
 badans=true
 while [ "$badans" = "true" ]
@@ -40,15 +45,15 @@ echo "See script for details."
 #   1. MAKE ABSOLUTELY SURE YOU ARE WORKING ON THE SPARE COMPUTER
 #   2. Execute the commands:
 #        cd /usr/local/sbin
-#        cp -a /usr2/fs/misc/refresh_spare_usr2.9 refresh_spare_usr2
+#        cp -a /root/fsl10/RAID/refresh_spare_usr2 refresh_spare_usr2
 #        chown root.root refresh_spare_usr2
 #        chmod a+r,u+wx,go-wx refresh_spare_usr2
 #   3. Edit '/usr/local/sbin/refresh_spare_usr2':
 #        A. comment out the two echo commands above (add leading '#'s).
 #        B  change the 'operational' on the ssh command below to the node name
-#           (a fully qualified hostname may be needed) or IP address of
-#           the operational machine
-#        C. uncomment (delete the leading '#'s) the 21 commands
+#           (a fully qualified hostname may be needed) or IP address of the
+#           operational machine
+#        C. uncomment (delete the leading '#'s) in the 22 commands
 #            below (#echo "Refreshing ..." ... #echo "Done. ...").
 #        D. Save the results
 #   4. Test it the first time after a Spare computer disk rotation.
@@ -59,17 +64,18 @@ echo "See script for details."
 #fi
 #device=$(grep " /usr2 " /proc/mounts | cut -d' ' -f1)
 #type=$(grep " /usr2 " /proc/mounts | cut -d' ' -f3)
-#fuser -k -m /usr2
+#fuser -k -M -m /usr2 || :
 #umount /usr2
-#mk2efs -t $type -U `tune2fs -l $device | grep UUID | grep -o '[^ ]*$'` $device
+#mke2fs -F -t $type -U `tune2fs -l $device | grep UUID | grep -o '[^ ]*$'` $device
 #mount /usr2
 #echo ""
 #echo "You may be prompted for your operational machine's root password, then"
 #echo "there will be a long pause without any output unless there are errors."
+#echo "When the transfer finished, a summary of transfer will be printed.
 #echo "If there are errors, please note them and report them to Ed.Himwich@nasa.gov."
 #echo "The refresh is finished when you see a line that starts: 'Done. ...',"
 #echo "and get a prompt. Please follow the directions on the 'Done. ...' line."
 #echo ""
-#ssh root@operational "(cd /usr2; tar --one-file-system -cf - .)" | (cd /usr2; tar xpf -)
+#ssh root@operational "(cd /usr2; tar --one-file-system -cf - .)" | (cd /usr2; tar xpf - --totals)
 #echo ""
 #echo "Done. Wait until 'mdstat' does not show an active recovery and then reboot."
