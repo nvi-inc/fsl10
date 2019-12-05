@@ -1,13 +1,17 @@
 #!/bin/bash
 # For systems with GPT LVM RAID arrays, tries to reset everything on second disk
 
-usage() { echo "Usage: $0 [-A][-h]"; echo -e "  where\t-A\tAllow \"Secondary\" disk to be loaded at start"; echo -e "  \t-h\tdisplay this help and exit"; }
+usage() { echo "Usage: $0 [-A][-h]"; echo -e "  where\t-A\tAllow \"Secondary\" disk to be loaded at start"; echo -e " \t-v\tverbose (prompted) operation"; echo -e "  \t-h\tdisplay this help and exit"; }
 
 ACCEPT_LOAD=0
-while getopts "Ah" arg; do
+VERBOSE=0
+while getopts "Avh" arg; do
 	case $arg in
 		A)
 			ACCEPT_LOAD=1
+			;;
+		v)
+			VERBOSE=1
 			;;
 		h | *)
 			usage
@@ -56,9 +60,9 @@ if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
 	read $ans
 fi
 
-for part in $(cd /dev/;ls $devname?*); do
+for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 	partnum=$(echo $part | sed -e "s/$devname//")
-	sgdisk -i$partnum $disk | head -n 1
+	[ $VERBOSE == 1 ] && sgdisk -i$partnum $disk | head -n 1
 	raid=$(grep $part /proc/mdstat | cut -d' ' -f1)
 	if [ "$raid" = "md0" ]; then 
 		# Belt _and_ braces!
@@ -71,38 +75,59 @@ for part in $(cd /dev/;ls $devname?*); do
 			exit 1
 		fi
 		# Part of a foreign RAID volume
-		echo -n "Detected /dev/$part in \"foreign\" RAID array: "
-		mdadm --detail /dev/$raid
-		echo -n "Blank partition (Control-C aborts)?"
-		read $ans
+		if [ $VERBOSE == 1 ]; then
+			echo -n "Detected /dev/$part in \"foreign\" RAID array: "
+			mdadm --detail /dev/$raid
+			echo -n "Enter to continue (Control-C aborts):"
+			read $ans
+		fi
 		pvremove -ff -y /dev/$raid 2>/dev/null
 		mdadm -S /dev/$raid
 		mdadm --zero-superblock --force /dev/$part 2>/dev/null
 	else
 		# Standalone partition or part of a local RAID volume
-		if [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
+		if [ $VERBOSE == 1 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
 			echo "Detected BIOS boot partition: /dev/$part"
-			echo -n "Blank partition (Control-C aborts)?"
+			echo -n "Enter to continue (Control-C aborts):"
 			read $ans
-		elif [ ! -z "$(sgdisk -i$partnum $disk | grep 'EFI System')" ]; then
+		elif [ $VERBOSE == 1 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'EFI System')" ]; then
 			echo "Detected EFI System partition: /dev/$part"
-			echo -n "Blank partition (Control-C aborts)?"
+			echo -n "Enter to continue (Control-C aborts):"
 			read $ans
-		elif mdadm -b --examine /dev/$part 2>&1 | grep ARRAY >/dev/null ; then
-			echo -n "Detected (unused) RAID component: "
-			mdadm --examine /dev/$part
-			echo -n "Blank partition (Control-C aborts)?"
+		elif [ $VERBOSE == 1 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'Linux filesystem')" ]; then
+			echo "Detected Linux filesystem partition: /dev/$part"
+			tune2fs -l /dev/$part
+			echo -n "Enter to continue (Control-C aborts):"
 			read $ans
+		elif mdadm -b --examine /dev/$part 2>&1 | grep -q ARRAY ; then
+			if [ $VERBOSE == 1 ]; then
+				echo -n "Detected (unused) RAID component: "
+				mdadm --examine /dev/$part
+				echo -n "Enter to continue (Control-C aborts):"
+				read $ans
+			fi
 			mdadm --zero-superblock --force /dev/$part 2>/dev/null
-		elif pvscan /dev/$part > /dev/null 2>&1; then
-			echo -n "Detected raw LVM physical volume: "
-			pvdisplay /dev/$raid
-			echo -n "Blank partition (Control-C aborts)?"
-			read $ans
-			pvremove -ff -y /dev/$part 2>/dev/null
-		else
+		elif pvdisplay /dev/$part 2>/dev/null | grep -q "/dev/$part" ; then
+			VG=$(pvs --noheadings -o vg_name /dev/$part | tr -d " ")
+			LVS=$(pvs --noheadings -o lv_name /dev/$part | tr -d " " | sort -u)
+			if [ $VERBOSE == 1 ]; then
+				echo "Detected raw LVM physical volume:"
+				pvdisplay /dev/$part
+				echo -n "Which contains LV(s):"
+				for lv in $LVS; do
+					echo -n " $VG/$lv"
+				done; echo
+				echo -n "Enter to continue (Control-C aborts):"
+				read $ans
+			fi
+			for lv in $LVS; do
+				lvremove -f $VG/$lv
+			done
+			vgreduce -f $VG /dev/$part
+			pvremove -ff -y /dev/$part
+		elif [ $VERBOSE == 1 ]; then
 			echo "Detected unrecognised partition: /dev/$part"
-			echo -n "Blank partition anyway (Control-C aborts)?"
+			echo -n "Enter to continue (Control-C aborts):"
 			read $ans
 		fi
 	fi
@@ -115,8 +140,10 @@ for part in $(cd /dev/;ls $devname?*); do
 	fi
 	echo -e "done.\n"
 done
-echo -n "Erase partition table of disk $disk (Control-C aborts)?"
-read $ans
+if [ $VERBOSE == 1 ]; then
+	echo -n "Erase partition table of disk $disk (Control-C aborts)?"
+	read $ans
+fi
 sgdisk -Z -o $disk
 partprobe $disk
 echo -e "\nDone."
