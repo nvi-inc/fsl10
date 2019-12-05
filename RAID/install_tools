@@ -29,10 +29,4 @@ cd /usr/local/sbin
 cp -a ~/fsl10/RAID/recover_raid .
 chown root:root recover_raid
 chmod a+r,u+x recover_raid
-# install refresh_spare_usr2
-echo "setting up refresh_spare_usr2"
-cd /usr/local/sbin
-cp -a ~/fsl10/RAID/refresh_spare_usr2 .
-chown root:root refresh_spare_usr2
-chmod a+r,u+x refresh_spare_usr2
 echo "done"
