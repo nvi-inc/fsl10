@@ -1215,8 +1215,9 @@ EOF
     sed -i -e "s/^restrict [-46]* default/& ignore # was:/" /etc/ntp.conf
   fi
   systemctl restart ntp
-  systemctl --now mask cups-browsed; systemctl --now mask cups
-  systemctl --now mask avahi-daemon
+  systemctl --now mask cups-browsed
+  systemctl --now mask cups.socket; systemctl --now mask cups.
+  systemctl --now mask avahi-daemon.socket; systemctl --now mask avahi-daemon
 # always make sure these old insecure services are disabled just in case
   systemctl --now mask ftp > /dev/null 2>&1
   systemctl --now mask telnet > /dev/null 2>&1
@@ -1252,11 +1253,11 @@ fi
 systemctl restart ntp
 ;;
       netipp)
-systemctl unmask cups; systemctl start cups
+systemctl unmask cups; systemctl unmask cups.socket; systemctl start cups
 systemctl unmask cups-browsed; systemctl start cups-browsed
 ;;
       netmdns)
-systemctl unmask avahi-daemon; systemctl start avahi-daemon
+systemctl unmask avahi-daemon; systemctl unmask avahi-daemon.socket; systemctl start avahi-daemon
 ;;
     esac
   done
