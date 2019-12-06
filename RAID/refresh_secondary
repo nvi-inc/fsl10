@@ -87,10 +87,17 @@ if ( [ $boot = "BIOS" ] && [ ! -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] ) 
 fi
 
 # Cross-compare state of the RAID partitions
-if [ -b $part2 ] && ([ "$(mdadm --examine -Y /dev/sda2 | grep MD_UUID | cut -d'=' -f2)" != "$(mdadm --examine -Y $part2 | grep MD_UUID | cut -d'=' -f2)" ] ||
-   [ $(mdadm --examine -Y /dev/sda2 | grep TIME | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep TIME | cut -d'=' -f2) ] ||
-   [ $(mdadm --examine -Y /dev/sda2 | grep EVENTS | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep EVENTS | cut -d'=' -f2) ]);
-then
+if [ -b $part2 ] && [ "$(mdadm --examine -Y /dev/sda2 | grep MD_UUID | cut -d'=' -f2)" != "$(mdadm --examine -Y $part2 | grep MD_UUID | cut -d'=' -f2)" ]; then
+	echo "ERROR: \"Secondary\" disk $part2 MD_UUID does not match \"Primary\" disk /dev/sda2"
+	echo "(You should use blank_secondary to reset the second disk)"
+	exit 1
+fi
+if [ -b $part2 ] && [ $(mdadm --examine -Y /dev/sda2 | grep TIME | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep TIME | cut -d'=' -f2) ]; then
+	echo "ERROR: \"Secondary\" disk $part2 TIME is ahead of \"Primary\" disk /dev/sda2"
+	echo "(You should use blank_secondary to reset the second disk)"
+	exit 1
+fi
+if [ -b $part2 ] && [ $(mdadm --examine -Y /dev/sda2 | grep EVENTS | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep EVENTS | cut -d'=' -f2) ]; then
 	echo "ERROR: \"Secondary\" disk $part2 does not contain an older copy of \"Primary\" disk /dev/sda2"
 	echo "(You should use blank_secondary to reset the second disk)"
 	exit 1
