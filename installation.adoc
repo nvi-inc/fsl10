@@ -186,11 +186,12 @@ When prompted, select *Manual*
 . Select the *FREE SPACE* under the first device
 
 NOTE: If some other file system, like *xfs*, or other  old setup is
-displayed, you may need to use *Guided partitioning* to temporarily
-create new partitions. Then select *Guided - use entire disk*. Then
+displayed, you can, and may need, to use *Guided partitioning* to
+delete the existing configuration (and temporarily create new
+    partitions). In this case, select *Guided - use entire disk*. Then
 select your disk, such as listed above, do not select a RAID or your
 boot device.  Then select *All files in one partition (recommended for
-new users)*.  You may be prompted to confirm deleting RAID and/or
+    new users)*.  You may be prompted to confirm deleting RAID and/or
 LVM, which you must do to continue. Then you should be able to select
 your disk, as above, and get *FREE SPACE*.
 
@@ -368,12 +369,16 @@ leaves something nasty in the machine's removable drives by mistake.
 
 You can now boot to your new OS.
 
-NOTE: If the login screen is painfully slow, try disabling Wayland in
-GDM3. Edit */etc/gdm3/daemon.conf* and uncomment the line
-*WaylandEnable=false*. Then *gdm3* will need to be restarted either by
-rebooting or entering *systemctl restart gdm3*. You can restart
-an individual virtual console getty with *systemctl restart getty@ttyN*
-where *N* is the number of the virtual console.
+NOTE: If the login screen is painfully slow and your CPU does not
+include a GPU, you can probably fix the slowness by disabling
+*Wayland* in *gdm3*. However, the result may be that rebooting or
+shutting down will typically have an enforced 90-120 second delay. You
+may find the slow login screen preferable. To disable *Wayland*, edit
+*/etc/gdm3/daemon.conf* and uncomment the line *WaylandEnable=false*.
+Then *gdm3* will need to be restarted either by rebooting or entering
+*systemctl restart gdm3*.  You can restart an individual virtual
+console getty with *systemctl restart getty@ttyN* where *N* is the
+number of the virtual console.
 
 === Login as root 
 
@@ -382,7 +387,7 @@ Debian 9, the graphical environment login is on virtual console 1.
 Each login there for a different user creates a session on the next
 unused virtual console.
 
-Switce to Virtual Console 2, by pressing kbd:[Ctrl+Alt+F2].
+Switch to Virtual Console 2, by pressing kbd:[Ctrl+Alt+F2].
 
 Enter *root* and press kbd:[Enter], then enter the *root* password you set
 earlier.
@@ -462,9 +467,10 @@ NOTE: It is also possible to add additional DVDs at this stage using the
 
 === Download the FS Linux 10 package selections
 
-First install *git* and *deselect*
+First install *git* and *deselect* and update *dselect*:
 
-    apt install git dselect
+   apt install git dselect
+   dselect update
 
 . Get the selections by downloading this repository:
 +
@@ -472,9 +478,8 @@ First install *git* and *deselect*
     git clone https://github.com/nvi-inc/fsl10
     cd fsl10
 
-. Feed the package selections into *dpkg* using the commands
+. Feed the package selections into *dpkg* using the command
 +
-   dselect update
    dpkg --set-selections < selections/fsl10_amd64.selections
    (or dpkg --set-selections < selections/fsl10_i686.selections)
 
@@ -761,13 +766,12 @@ Create the groups if they don't exist:
 
 Add any needed user accounts as appropriate, e.g.:
 
-    adduser dhorsley
+IMPORTANT: If you are configuring a spare computer, you will need to
+make sure the *UID* and *GID* for each user with a home direcory on
+*/usr2* is the same on both computers for the system-to-system backup
+of */usr2* to work properly.
 
-Move an existing */home/dhorsley* to */home/dhorsley.FSCOPY* and
-create a new */home/dhorsley* with a useful skeleton for use with the
-FS, by executing (you will be prompted for the user name):
-
-    /usr2/fs/misc/auid_update
+    adduser dhorsley --home /usr2/dehorsley
 
 Then add each user to these groups as appropriate, e.g.:
 
@@ -776,6 +780,12 @@ Then add each user to these groups as appropriate, e.g.:
 and/or:
 
     adduser dhorsley programmers
+
+Move an existing */home/dhorsley* to */home/dhorsley.FSCOPY* and
+create a new */home/dhorsley* with a useful skeleton for use with the
+FS, by executing (you will be prompted for the user name):
+
+    /usr2/fs/misc/auid_update
 
 If they don't already, make sure *oper* and *prog* have usable shells:
 
@@ -794,7 +804,7 @@ NOTE: If you used the CIS *remediate* script, you should comment out
 the line: *DenyGroup rtx* as well.
 
 ....
-DenyUsers: oper prog
+DenyUsers oper prog
 ....
 
 And restart *sshd* with:
@@ -911,7 +921,7 @@ to *Delete* any other connections _except_ *Wired Connection 1*.
 4. Select the *Ethernet* tab.
 
 5. Make sure the *Device* field just lists the second ethernet
-device, typically *eno2*, with no MAC address in parentheses.
+device (typically *eno2*) with no MAC address in parentheses.
 
 6. Select the *IPv4 Settings* tab.
 
@@ -993,7 +1003,7 @@ To prevent connecting with *ssh* using a key, create (or add *desktop*
 to an existing) *DenyUsers* line in */etc/ssh/sshd_config*:
 
 ....
-DenyUsers: desktop
+DenyUsers desktop
 ....
 
 And restart *sshd* with:
