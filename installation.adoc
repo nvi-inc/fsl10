@@ -781,8 +781,8 @@ and/or:
 
     adduser dhorsley programmers
 
-Move an existing */home/dhorsley* to */home/dhorsley.FSCOPY* and
-create a new */home/dhorsley* with a useful skeleton for use with the
+Move an existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and
+create a new */usr2/dhorsley* with a useful skeleton for use with the
 FS, by executing (you will be prompted for the user name):
 
     /usr2/fs/misc/auid_update
