@@ -37,7 +37,7 @@ RAID can intervene).
 
 ....
 cd /root/fsl10
-script remediate.txt
+script ../remediate.txt
 ./remediate
 exit
 ....
