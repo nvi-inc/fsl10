@@ -17,7 +17,7 @@ if mdadm --detail $raid 2>&1 | grep -q ": clean $" ; then
 	exit 1
 fi
 
-if ! mdadm --detail $raid 2>&1 | grep -q ": clean, degraded $" ; then
+if ! mdadm --detail $raid 2>&1 | grep -q ", degraded $" ; then
 	echo "ERROR: RAID $raid is not in a recoverable state"
 	exit 1
 fi
@@ -29,7 +29,7 @@ mdadm $raid --re-add missing
 sleep 1
 
 mdadm --detail $raid; echo
-if ! mdadm --detail $raid | grep -q ": clean, degraded, recovering $"; then
+if ! mdadm --detail $raid | grep -q ", recovering $"; then
 	echo "ERROR: RAID $raid failed to start rebuilding"
 	exit 1
 fi

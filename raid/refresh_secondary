@@ -167,7 +167,7 @@ mdadm /dev/md0 --add-spare $part2
 sleep 1
 
 # Check that the RAID is now rebuilding ie. the addition succeeded
-if ! (mdadm --detail /dev/md0 | grep -q ": clean, degraded, recovering $"); then
+if ! (mdadm --detail /dev/md0 | grep -q ", recovering $"); then
 	echo "ERROR: RAID /dev/md0 failed to start rebuilding"
 	exit 1
 fi
