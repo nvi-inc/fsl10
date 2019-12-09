@@ -1073,3 +1073,129 @@ systemctl restart exim4
 A defect of this approach is that it hard codes the *HELO* message data,
   which will have to be manually updated if the FQDN changes.  A more
   general solution may be possible, but hasn't been discovered yet.
+
+=== Configure e-mail
+
+As "root", enter:
+
+   dpkg-reconfigure exim4-config
+
+to change the set-up. Typically you should select *internet site*, use
+your host name in place of *debian* when it occurs, and otherwise
+select defaults at all the other prompts.  (The only other recommended
+    choices are *local delivery only* or *mail sent by smarthost;
+    received via SMTP or fetchmail*.)  If you want to receive incoming
+mail, you will also need to enable SMTP connections in *Window 4* of
+_fsadapt_ (and if you are using a firewall, you will need to enable
+    such connections for it).  We recommend that you NOT receive
+incoming mail on this computer.
+
+If you follow the recommendation not to receive incoming mail
+and your system is not set-up for *local delivery only*, you
+should set the *Reply-To* address for outgoing messages to a
+real e-mail account at your institution that is read
+regularly.  You can do this by (all as *root*):
+
+1. Create a file */etc/exim4/reply-to-filter* with contents
+(four lines):
++
+....
+# Exim filter          << THIS LINE REQUIRED
+
+headers remove "Reply-To"
+headers add "Reply-To: email@address"
+....
++
+Where *email@address* is the e-mail address you want replies to be
+addressed to. If you want more than one, separate them with commas.
+
+2. In */etc/exim4/exim4.conf.template*, at the beginning of
+the file add (two lines):
++
+....
+#set reply to
+system_filter = /etc/exim4/reply-to-filter
+....
+
+3. Then execute
+
+    systemctl restart exim4
+
+The configuration described here (*Internet site* or *mail
+sent by smarthost* in the _exim4_ configuration, no incoming
+mail, reply-to-filter, and modified user names), provides
+good support of the FS _msg_ utility.
+
+You should change your */etc/aliases* so *root* and *prog* e-mail goes to *oper*.
+
+    change root: desktop to root: oper
+    add prog: oper
+    add desktop: oper
+
+This is recommended as a "catch all" since the *oper* account is
+presumably under regular use and any messages sent there are likely to
+be noticed.  This is particularly important for system error messages
+since they should be delivered to a mail box on the system in case
+there is a network problem that might prevent them from being
+delivered off system.  You can however add additional off machine
+delivery of these messages to whatever addressees you wish and we
+recommend this as well.  These should include an e-mail account at
+your institution that is read regularly (maybe the same address as the
+    *Reply-To* address you may have set above would be a good choice).
+To do this, create a *.forward* file in *oper*'s home directory. The
+contents should be similar to (left justified):
+
+    \oper
+    user@node.domain
+
+where *user@node.domain* is the off machine addressee you
+want the messages to go to.  You can add additional lines for
+additional addressees. The backslash (*\*) before *oper*
+prevents the mail system from getting into an infinite loop
+re-checking *oper*'s *.forward* file.
+
+If you have made the above changes to forward messages to another an
+e-mail account on another machine, you should customize the User Name
+(not login name, the User Name is the fifth field) of *root*, *prog*,
+  *oper*, and *desktop* in */etc/passwd* to identify the source of the
+  message.  For *root* and *prog*, it is recommended to append a
+  string like *at node* (it is probably best to avoid FQDNs), where
+  node is this machine, e.g., for *atri* you might change the 5th
+  field for *root* from
+
+    root
+
+to
+
+    root at atri
+
+For *oper*, you might instead prepend your site name to the
+accounts for clearer reading in *ops* e-mail messages, e.g.,
+for *oper* on *atri* at GSFC, we changed the 5th field for
+*oper* to:
+
+    GSFC VLBI Operator
+
+and for completeness, for *prog* and *desktop* we use:
+GSFC VLBI Programmer
+
+    GSFC Desktop User
+
+These changes will help the recipient (possibly you)
+determine which system generated this message since it may
+not be obvious given the modified return address.
+
+Lastly, check the default mailbox directory */var/mail/* for
+account that may have messages that arrived before the e-mail
+system was fully configured.  Be sure to resolve any system
+messages that may have been received. You can check to see what
+accounts have mail with:
+
+    ls /var/mail
+
+which will list each user account mail file that
+exists. Check and clear each user's mailbox (where *user* in
+the line below is the account name) that has received mail
+(as *root*):
+
+    mail -f /var/mail/user
