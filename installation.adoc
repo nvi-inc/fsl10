@@ -742,9 +742,11 @@ have security and auditing restrictions that mean operators must
 log-in to their own account (possibly named with their Agency User ID,
     AUID).  As the Field System currently operates, users will then
 need to switch to the *oper* or *prog* account after login. Likewise,
-     if a user is allowed to elevate to *root*, they will need to do so
-     after log-in to their own account. (The following method uses
-         *dhorsley* as an example user.)
+     if a user is allowed to elevate to *root*, they will need to do
+     so after log-in to their own account. This section covers how to
+     enable this capability. The following section covers how to add a
+     AUID account. The method dsecribed here, and in the next section,
+     uses *dhorsley* as an example user.
 
 For *oper* and *prog*, we suggest creating two groups that can *sudo*
 to the accounts.
@@ -763,29 +765,6 @@ Create the groups if they don't exist:
 
     addgroup operators
     addgroup programmers
-
-Add any needed user accounts as appropriate, e.g.:
-
-IMPORTANT: If you are configuring a spare computer, you will need to
-make sure the *UID* and *GID* for each user with a home direcory on
-*/usr2* is the same on both computers for the system-to-system backup
-of */usr2* to work properly.
-
-    adduser dhorsley --home /usr2/dehorsley
-
-Then add each user to these groups as appropriate, e.g.:
-
-    adduser dhorsley operators
-
-and/or:
-
-    adduser dhorsley programmers
-
-Move an existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and
-create a new */usr2/dhorsley* with a useful skeleton for use with the
-FS, by executing (you will be prompted for the user name):
-
-    /usr2/fs/misc/auid_update
 
 If they don't already, make sure *oper* and *prog* have usable shells:
 
@@ -874,6 +853,37 @@ with:
 ....
 ~/fsl10/AUID/install_AUID
 ....
+
+=== Adding AUID accounts
+
+This section describees how to add AUID accounts to be used with the
+ability to promote to *oper*, *prog*, and *root* as described in the
+previous section. As in the previous section, the following method
+uses *dhorsley* as an example user.  Add any needed user accounts as
+appropriate:
+
+IMPORTANT: If you are configuring a spare computer, you will need to
+make sure the *UID* and *GID* for each user with a home direcory on
+*/usr2* is the same on both computers for the system-to-system backup
+of */usr2* to work properly.
+
+    adduser dhorsley --home /usr2/dehorsley
+
+Then add each user to these groups as appropriate, e.g.:
+
+    adduser dhorsley operators
+
+and/or:
+
+    adduser dhorsley programmers
+
+If the account will be used by an operator and/or programmer, the X11
+environment needs to be set-up. The following command will move an
+existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and create a new
+*/usr2/dhorsley* with a useful skeleton for use with the FS (you will
+    be prompted for the user name):
+
+    /usr2/fs/misc/auid_update
 
 === Network configuration changes
 
