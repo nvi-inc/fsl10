@@ -71,7 +71,7 @@ echo "See script for details."
 #echo ""
 #echo "You may be prompted for your operational machine's root password, then"
 #echo "there will be a long pause without any output unless there are errors."
-#echo "When the transfer finished, a summary of transfer will be printed.
+#echo "When the transfer finishes, a summary of the transfer will be printed."
 #echo "If there are errors, please note them and report them to Ed.Himwich@nasa.gov."
 #echo "The refresh is finished when you see a line that starts: 'Done. ...',"
 #echo "and get a prompt. Please follow the directions on the 'Done. ...' line."
