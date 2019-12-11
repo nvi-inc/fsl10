@@ -734,6 +734,14 @@ section require *root* permissions.
 For stations that wish to conform to the additional security recommendations of the
 Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
 
+To reset a locked-out user after CIS hardening, use:
+
+....
+/sbin/pam_tally2 -u <user> --reset
+....
+
+where *<user>* is the user name.
+
 === Enabling user promotion to 'oper', 'prog' and 'root'
 
 The model of FSL assumes *oper* and *prog* accounts will be used for
@@ -1209,3 +1217,83 @@ the line below is the account name) that has received mail
 (as *root*):
 
     mail -f /var/mail/user
+
+=== Set X display resolution at boot
+
+If your display sometimes starts with the wrong resolution, you may be
+able to configure a better resolution. The following is a description
+of something that worked for at least one system. The details of your
+system may require some changes (beyond the resolution and output name).
+
+First you need to determine the correct resolution and output name.
+You may be able to do this with *xrandr*. If the screen currently has
+the correct resolution, you can just execute:
+....
+xrandr
+....
+
+The output might look like:
+....
+Screen 0: minimum 320 x 200, current 1920 x 1200, maximum 1920 x 2048
+VGA-1 connected primary 1920x1200+0+0 (normal left inverted right x axis y axis) 0mm x 0mm
+   1024x768      60.00  
+   800x600       60.32    56.25  
+   640x480       59.94  
+  1920x1200 (0x42) 154.000MHz +HSync -VSync
+        h: width  1920 start 1968 end 2000 total 2080 skew    0 clock  74.04KHz
+        v: height 1200 start 1203 end 1209 total 1235           clock  59.95Hz
+....
+
+Where the current screen resolution is *1920x1200* and the output name is *VGA-1*.
+
+You can then generate the needed *Modeline* by executing:
+
+....
+cvt 1920 1200
+....
+
+Which might generate output:
+
+....
+# 1920x1200 59.88 Hz (CVT 2.30MA) hsync: 74.56 kHz; pclk: 193.25 MHz
+ Modeline "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync
+....
+
+As a test, you can make a script, in this case it might be named
+*display_1920x1080*, that will enable that resolution:
+
+....
+#!/bin/bash
+xrandr --newmode "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync
+xrandr --addmode VGA-1 1920x1200_60.00
+xrandr --output VGA-1 --mode "1920x1200_60.00"
+....
+
+If that is successful, you can make a file */usr/share/X11/xorg.conf.d/10-monitor.conf* containing:
+
+....
+Section "Monitor"
+Identifier     "VGA-1"
+Option         "Enable" "true"
+Modeline "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync
+EndSection
+
+Section "Screen"
+Identifier     "Screen0"
+Device         "Device0"
+Monitor        "VGA-1"
+DefaultDepth    24
+#Option         "TwinView" "0"
+SubSection "Display"
+    Depth          24
+    Modes          "1920x1200_60.00"
+EndSubSection
+EndSection
+....
+
+You could then try restarting the display (after closing all windows) with:
+....
+systemctl restart gdm3
+....
+
+or rebooting.
