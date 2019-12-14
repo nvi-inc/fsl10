@@ -1,0 +1,19 @@
+#
+if ! [ -z "$XCOOKIE" ]; then
+   xauth add $XCOOKIE
+fi
+# set .Xresources for AUID accounts
+if echo $DISPLAY |grep -q localhost; then
+# ssh from remote host with X display
+  xrdb -merge ~/.Xresources
+else
+  if ! [ -z $DISPLAY ]; then
+    if xhost|grep -q 'SI:localuser:prog'; then
+#     local X display
+      xrdb -merge ~/.Xresources
+    fi
+  else
+#   text terminal, do nothing
+    :
+  fi
+fi
