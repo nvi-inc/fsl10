@@ -12,8 +12,8 @@ chown root:root *_account
 chmod a+rx *_account
 #
 touch ~oper/.profile
-cat ~/fsl10/AUID/profile >> ~oper/.profile
+cat ~/fsl10/AUID/profile_oper >> ~oper/.profile
 touch ~prog/.profile
-cat ~/fsl10/AUID/profile >> ~prog/.profile
+cat ~/fsl10/AUID/profile_prog >> ~prog/.profile
 touch ~root/.profile
 cat ~/fsl10/AUID/profile_root >> ~root/.profile
