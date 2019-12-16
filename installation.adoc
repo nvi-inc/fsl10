@@ -611,9 +611,9 @@ IMPORTANT: Log-out of the console as *root*, and log-in again as *prog*.
 
 then
 
-    make
+    make -s
 
-to confirm that everything compiled correctly.
+to confirm that everything compiled correctly (no news is good news).
 
 === Wait for the RAID1 disk mirroring to set up
 
@@ -644,7 +644,7 @@ disk already in use in the RAID.
 
 NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
 
-NOTE: This section assumes you have installed the "Tools for RAID"
+NOTE: This sub-section assumes you have installed the "Tools for RAID"
 above.
 
 Ensure the RAID is synced by checking that
@@ -661,10 +661,9 @@ IMPORTANT: Do not initialize a disk unless you are sure there is no
 data on it that you need to preserve.
 
 For the first time use of an additional disk with a new install, the
-disk should be initialized to make sure it has no elready existing
-structure.  To be safe in all cases, this should be done even if the
-disk has been used in a different FS computer or a previous install on
-this computer.
+disk should be initialized to make sure it has no already existing
+structure.  This should be done even if the disk has been used in a
+different FS computer or a previous install on this computer.
 
 Boot with just the primary disk installed. Use the script:
 
@@ -688,7 +687,7 @@ RAID (i.e., system) or has a different structure (i.e., was previously
 script will detect these conditions and stop with an appropriate
 message. In that case, consider carefully if it is safe to erase the
 disk (probably not). If you determine it is safe, follow the
-instructions in the previous section for running *blank_secondary*.
+instructions in the previous sub-section for running *blank_secondary*.
 
 Boot with only the primary disk installed. The new secondary disk must
 be keyed off or removed. The script will refuse to run if there is a
@@ -720,7 +719,7 @@ While the operating system can resume syncing the RAID if you reboot,
 it is best to avoid in case the boot partition is not fully synced.
 
 When the syncing is complete, you can repeat the process of the
-previous section and this section if you have a third disk that needs
+previous sub-section and this sub-section if you have a third disk that needs
 to be set-up.
 
 == Optional Items
@@ -768,9 +767,9 @@ log-in to their own account (possibly named with their Agency User ID,
     AUID).  As the Field System currently operates, users will then
 need to switch to the *oper* or *prog* account after login. Likewise,
      if a user is allowed to elevate to *root*, they will need to do
-     so after log-in to their own account. This section covers how to
-     enable this capability. The following section covers how to add a
-     AUID account. The method dsecribed here, and in the next section,
+     so after log-in to their own account. This sub-section covers how to
+     enable this capability. The next sub-section covers how to add a
+     AUID account. The method described here, and in the next sub-section,
      uses *dhorsley* as an example user.
 
 For *oper* and *prog*, we suggest creating two groups that can *sudo*
@@ -881,9 +880,9 @@ with:
 
 === Adding AUID accounts
 
-This section describees how to add AUID accounts to be used with the
+This sub-section describes how to add AUID accounts to be used with the
 ability to promote to *oper*, *prog*, and *root* as described in the
-previous section. As in the previous section, the following method
+previous sub-section. As in the previous sub-section, the following method
 uses *dhorsley* as an example user.  Add any needed user accounts as
 appropriate:
 
@@ -912,7 +911,7 @@ existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and create a new
 
 === Network configuration changes
 
-This section requires using *nm-connection-editor* on a graphic
+This sub-section requires using *nm-connection-editor* on a graphic
 display (*nmtui* may be an option on a text terminal, but it has not
 been fully verified). You will probably need to be *root* or
 *desktop* to do this. When you run this program and select a
@@ -1017,8 +1016,8 @@ Look for *hostnames=*, use fully qualified name.
 ./etc/exim4/update-exim4.conf.conf
 +
 If you have hardcoded your the mail *HELO* message data as descibed in
-the section "Generate FQDN in HELO for outgoing mail", you will need
-to update your data as described in that section.
+the sub-section "Generate FQDN in HELO for outgoing mail", you will need
+to update your data as described in that sub-section.
 
 When finished, reboot.
 
