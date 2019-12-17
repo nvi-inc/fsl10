@@ -826,7 +826,7 @@ Authorized users can then switch to *oper* with (similarly for
 No password will be required (except for *root*).
 
 To ensure X authorization works do the following (this example is for
-user *oper* but it works analogously for *prog* and *root*):
+user *oper* but it works analogously for *prog* and *root*, see the note at the end of step (1( about *root*'s Xresources):
 
 1. Add this to the following file:
 +
@@ -849,10 +849,12 @@ else
 #     text terminal, do nothing
       :
     fi
-  fi
+fi
 ```
 +
-This will also set the Xresources to those of the *oper*.
+This will also set the Xresources to those of *oper*. (For *root*
+    only the first clause would be used since Xresources would not be
+    set.)
 
 2. Create the following file
 +
