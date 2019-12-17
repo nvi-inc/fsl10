@@ -373,12 +373,14 @@ NOTE: If the login screen is painfully slow and your CPU does not
 include a GPU, you can probably fix the slowness by disabling
 *Wayland* in *gdm3*. However, the result may be that rebooting or
 shutting down will typically have an enforced 90-120 second delay. You
-may find the slow login screen preferable. To disable *Wayland*, edit
-*/etc/gdm3/daemon.conf* and uncomment the line *WaylandEnable=false*.
-Then *gdm3* will need to be restarted either by rebooting or entering
-*systemctl restart gdm3*.  You can restart an individual virtual
-console getty with *systemctl restart getty@ttyN* where *N* is the
-number of the virtual console.
+may find the slow login screen preferable. (Please see the Optional
+    Items section for a method to fix slow reboots/shutdowns
+    with *Wayland* disabled.) To disable
+*Wayland*, edit */etc/gdm3/daemon.conf* and uncomment the line
+*WaylandEnable=false*.  Then *gdm3* will need to be restarted either
+by rebooting or entering *systemctl restart gdm3*.  You can restart an
+individual virtual console getty with *systemctl restart getty@ttyN*
+where *N* is the number of the virtual console.
 
 === Login as root 
 
@@ -758,7 +760,7 @@ some careless errors.
 existing files with I/O redirection. Other options to consider setting
 are *physical* and *ignoreeof*.
 
-=== Enabling user promotion to 'oper', 'prog' and 'root'
+=== Enabling user promotion to *oper*, *prog* and *root*
 
 The model of FSL assumes *oper* and *prog* accounts will be used for
 operations and programming respectively. However, some institutes may
@@ -849,6 +851,8 @@ else
     fi
   fi
 ```
++
+This will also set the Xresources to those of the *oper*.
 
 2. Create the following file
 +
@@ -1319,8 +1323,8 @@ EndSubSection
 EndSection
 ----
 
-You should make need to *chmod* the directory permissios with *o+rx*
-and the file with *o+r*, if those are not already set.
+You should *chmod* the permissions for directory with *o+rx* and the
+file with *o+r*, if those are not already set.
 
 You could then try restarting the display (after closing all windows) with:
 ....
@@ -1328,3 +1332,19 @@ systemctl restart gdm3
 ....
 
 or rebooting.
+
+=== Fix for slow reboot/shutdown with *Wayland* disabled
+
+If you have chosen to disable *Wayland* for *gdm3* and have a problem with slow reboots/shutdowns, the following may help.
+
+1. Copy the file */lib/systemd/system/gdm3.service* into */etc/systemd/system/*.
+
+2. Comment out the *KillMode* line (which changes it to *control-group*, the default).
+
+3. Execute:
++
+....
+systemctl daemon-reload
+....
++
+or reboot.
