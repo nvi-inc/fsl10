@@ -1350,3 +1350,28 @@ systemctl daemon-reload
 ....
 +
 or reboot.
+
+=== Use "KeepAlive" to prevent VLAN firewall inactivity time-out
+
+If there is a VLAN firewall in use on the local network, it may be
+necessary to use "KeepAlive" for TCP connections to prevent inactivity
+time-outs for network connections from the FS to the VLBI equipment
+when not activity is occurring with the system. For some devices, having
+the time-out break the connect may cause an issue with the number of
+connections available.
+
+To use "KeepAlive" to prevent the inactivity time-outs, first install
+the package *libkeepalive0*:
+
+....
+apt-get install libkeepalive0
+....
+
+Then add the follow lines *oper*'s' (and *prog*'s) *.profile* file:
+
+....
+export LD_PRELOAD=libkeepalive.so
+export KEEPCNT=20
+export KEEPIDLE=180
+export KEEPINTVL=60
+....
