@@ -49,9 +49,13 @@ if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -O $lockf ] || [ "$(cat $lockf)
 fi
 if [ ! -b $disk ]; then
 	while [ ! -b $disk ]; do
-		echo  -n -e "\rWaiting for disk $disk to be loaded, use 'Control-C' to safely abort ..."
+		echo  -n -e "\rWaiting for disk $disk to be loaded, use 'Control-C' to safely abort ... "
 		sleep 1
 	done
+	echo  -n -e "\r                                                                              "
+	echo  -n -e "\rWaiting for disk $disk to settle ... "
+	udevadm settle
+	sleep 2
 	echo $(lsblk --nodeps -no serial $disk) > $lockf
 	echo -e "done.\n"
 fi
@@ -122,9 +126,9 @@ fi
 # First repartition the Secondary disk by cloning the Primary's table if blank
 if [ "$(partprobe -s /dev/sda | cut -d' ' -f2-)" != "$(partprobe -s $disk | cut -d' ' -f2-)" ]; then
 	if [ "$(partprobe -s $disk | cut -d' ' -f3-)" = "partitions" ]; then
-		echo "Partitioning blank \"Secondary\" disk $disk..."
-		sgdisk -R$disk /dev/sda
-		sgdisk -G $disk
+		echo -n "Partitioning blank \"Secondary\" disk $disk ... "
+		sgdisk -R$disk /dev/sda > /dev/null
+		sgdisk -G $disk > /dev/null
 		partprobe $disk
 		echo "done."
 	else
@@ -136,7 +140,7 @@ fi
 
 # Next install the bootloader to the Secondary disk
 if [ $boot = "BIOS" ]; then
-	echo "Installing GRUB bootloader in BIOS mode on \"Secondary\" disk $disk ... "
+	echo -n "Installing GRUB bootloader in BIOS mode on \"Secondary\" disk $disk ... "
 	grub-install $disk
 	echo "done."
 elif [ $boot = "EFI" ]; then
@@ -146,7 +150,7 @@ elif [ $boot = "EFI" ]; then
 		mount /dev/sda1 /boot/efi
 	fi
 
-	echo "Installing GRUB bootloader in UEFI mode on \"Secondary\" disk $disk ... "
+	echo -n "Installing GRUB bootloader in UEFI mode on \"Secondary\" disk $disk ... "
 	# Note Debian 9 `grub-install` essentially ignores the second argument and
 	# copies the grub EFI shim to /boot/efi, regardless what is mounted there.
 	# Instead, we refresh the grub install on the primary, and unmount it to 
@@ -177,7 +181,7 @@ rm -f $lockf
 
 # Finally report on recovery progress until it completes
 while ! grep -q recovery /proc/mdstat; do 
-	echo "Waiting for recovery ..."
+	echo "Waiting for recovery ... "
 	sleep 1;
 done
 #

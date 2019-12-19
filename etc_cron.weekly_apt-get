@@ -91,7 +91,7 @@ else
 		rm -r /tmp/usr
 		echo "To install these upgrades run (as root)"
 		echo
-		echo "        apt-get -uy upgrade"
-		echo "        apt-get clean"
+		echo "        apt -uy upgrade"
+		echo "        apt clean"
 	fi
 fi
