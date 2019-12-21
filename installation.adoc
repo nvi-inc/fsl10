@@ -783,6 +783,12 @@ run *visudo* then add at end:
     %programmers    ALL=(prog) NOPASSWD: ALL
     %programmers    ALL=(oper) NOPASSWD: ALL
 
+To allow *operators* to use *refresh_secondary*, *shutdown*, and *reboot*, add (respectively):
+
+   %operators      ALL=(ALL) /usr/local/sbin/refresh_secondary
+   %operators      ALL=(ALL) /usr/sbin/shutdown
+   %operators      ALL=(ALL) /usr/sbin/reboot
+
 If the  user can elevate to *root*, also add:
 
     dhorsley       ALL=(root) ALL
@@ -824,6 +830,14 @@ Authorized users can then switch to *oper* with (similarly for
     sudo -i -u oper
 
 No password will be required (except for *root*).
+
+To make sure the *tally2* failure count is reset after a successful *sudo*, add to:
+
+./etc/pam.d/common-account
+[source,bash]
+```
+account required pam_tally2.so
+```
 
 To ensure X authorization works do the following (this example is for
 user *oper* but it works analogously for *prog* and *root*, see the note at the end of step (1( about *root*'s Xresources):
@@ -1074,45 +1088,12 @@ The following tersely summarizes some *ufw* settings that may be useful:
 # ssh
 ufw allow OpenSSH
 #NTP
-ufw allow 123
+ufw allow ntp
 #RDBE multicast to addresses from subnet
 ufw allow in proto udp to 239.0.2.0/24 from 128.171.102.0/24
 #? RDBE multicast to group from subnet ?
 #ufw allow in proto igmp to 239.0.2.0/24 from 128.171.102.0/24
 ....
-
-=== Generate FQDN in 'HELO' for outgoing mail
-
-If mail from your system is being rejected by some servers because
-*exim4* is not providing a Fully Qualified Domain Name in its *HELO*
-message, one way to fix this is to comment out the following lines
-in */etc/exim4/exim4.conf.template*:
-
-....
-.ifdef REMOTE_SMTP_HELO_FROM_DNS
-.ifdef REMOTE_SMTP_HELO_DATA
-REMOTE_SMTP_HELO_DATA==${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
-.else
-REMOTE_SMTP_HELO_DATA=${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
-.endif
-.endif
-....
-
-Right after those lines, add the following line:
-
-....
-REMOTE_SMTP_HELO_DATA=FQDN
-....
-
-Where *FQDN* is your system's Fully Qualified Domain Name. Then restart the server:
-
-....
-systemctl restart exim4
-....
-
-A defect of this approach is that it hard codes the *HELO* message data,
-  which will have to be manually updated if the FQDN changes.  A more
-  general solution may be possible, but hasn't been discovered yet.
 
 === Configure e-mail
 
@@ -1185,7 +1166,8 @@ recommend this as well.  These should include an e-mail account at
 your institution that is read regularly (maybe the same address as the
     *Reply-To* address you may have set above would be a good choice).
 To do this, create a *.forward* file in *oper*'s home directory. The
-contents should be similar to (left justified):
+permissions should be *-rw-r--r--*. The contents should be similar to
+(left justified):
 
     \oper
     user@node.domain
@@ -1241,6 +1223,65 @@ the line below is the account name) that has received mail
 (as *root*):
 
     mail -f /var/mail/user
+
+=== Generate FQDN in 'HELO' for outgoing mail
+
+If mail from your system is being rejected by some servers because
+*exim4* is not providing a Fully Qualified Domain Name in its *HELO*
+message, one way to fix this is to comment out the following lines
+in */etc/exim4/exim4.conf.template*:
+
+....
+.ifdef REMOTE_SMTP_HELO_FROM_DNS
+.ifdef REMOTE_SMTP_HELO_DATA
+REMOTE_SMTP_HELO_DATA==${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
+.else
+REMOTE_SMTP_HELO_DATA=${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
+.endif
+.endif
+....
+
+Right after those lines, add the following line:
+
+....
+REMOTE_SMTP_HELO_DATA=FQDN
+....
+
+Where *FQDN* is your system's Fully Qualified Domain Name. Then restart the server:
+
+....
+systemctl restart exim4
+....
+
+A defect of this approach is that it hard codes the *HELO* message data,
+  which will have to be manually updated if the FQDN changes.  A more
+  general solution may be possible, but hasn't been discovered yet.
+
+=== Adjust number of login failures before lock-out
+
+The number of login failures before lock-out can cause a problem if it
+is set too low.  The main issue is for an operator working at odd
+hours, alone, at a remote location, who is dealng with multiple
+issue, which might include: power failures, equipment problems, and
+logistical issues. It can be a chaotic situation. Typing long and
+complicated passwors in the heat of battle, particularly if they vary
+between machines, can be error-prone. Being locked-out will make the
+situation more difficult and increase the amount of data that will be
+lost.
+
+If you find the number of login failures before lock-out too small,
+you can increase it by increasing the value of the *deny* parameter
+(*5* in the example below, other typical parameters are omitted and
+should not be changed) in:
+
+./etc/pam.d/common-auth
+[source]
+----
+auth required pam_tally2.so deny=5
+----
+
+Small integer values (20 or less) should not be a signficant risk with
+long and complicated passwords and a lock-out of several minutes.
 
 === Set X display resolution at boot
 
@@ -1343,7 +1384,9 @@ If you have chosen to disable *Wayland* for *gdm3* and have a problem with slow 
 
 2. Comment out the *KillMode* line (which changes it to *control-group*, the default).
 
-3. Execute:
+3. Add a line *TimeoutStopSec=1* to the *[Service]* section.
+
+4. Execute:
 +
 ....
 systemctl daemon-reload
@@ -1375,3 +1418,121 @@ export KEEPCNT=20
 export KEEPIDLE=180
 export KEEPINTVL=60
 ....
+
+=== refresh_spare_usr2 with AUID accounts
+
+If you have a spare FS computer, the *refresh_spare_usr2* script can be  used
+to copy the operational computer's */usr2* partition to the spare
+computer.  Normally this partition holds all the operational FS
+programs and data. For this to work, the operational and spare
+computers must have the same set-up including particularly the same
+user accounts with same UIDs and GIDs for all account that have home
+directories on */usr2*, as well as other OS set-up information the FS
+may depends such as */etc/hosts* and */etc/ntp.conf*.
+
+The script is used on the spare computer. Neither computer should have anyone logged in
+logged in with a home directory on */usr2* nor should there be any activity occuring that
+will affect */usr2*.
+
+Normally, the script is run by *root* and requires direct login on the
+console. For the AUID environment it could be run by a user with a
+home directory that is not on */usr2*.  The following set-up allows
+for either possibility. If the script is run by a user other than
+*root*, it must be run with:
+
+....
+sudo refresh_spare_usr2
+....
+
+==== On *operational* computer
+
+===== Use *visudo* to add:
+
+....
+spare          ALL=(ALL) NOPASSWD: /usr/local/sbin/send_usr2
+....
+
+===== Create file:
+
+./usr/local/sbin/send_usr2
+[source,bash]
+----
+#!/bin/bash
+cd /usr2; tar --one-file-system -cf - .
+----
+
+Permissions: *rwxr-xr--*, ownership *root:root*.
+
+===== Create *spare* account:
+
+----
+adduser --uid 503 --gid 990 spare
+----
+
+==== On *spare* computer
+
+===== In *refresh_spare_usr2*, customize as usual and change:
+
+....
+ssh root@operational "(cd /usr2; tar --one-file-system -cf - .)" | (cd /usr2; tar xpf - --totals)
+....
+
+to
+....
+ssh spare@operational "(sudo send_usr2)" | (cd /usr2; tar xpf - --totals)
+....
+
+where *operational* is the name or IP of your operational computer.
+
+===== If *root* will run the script
+
+Create a key (unless *root* already has one). In any event, copy it to
+the *spare* account on your operational computer:
+
+----
+ssh-keygen
+ssh-copy-id spare@operational
+----
+
+where *operational* is the name or IP of your operational computer.
+
+===== For a different user than *root* to run the script
+
+IMPORTANT: They must not have their home directory on */usr2*.
+
+Use *visudo* to add
+
+....
+%spare         ALL=(ALL) /usr/local/sbin/refresh_spare_usr2
+....
+
+Create a *spare* group and add the user to the group:
+
+....
+addgroup spare
+adduser <user> spare
+....
+
+where *<user>* is the user that wll run the script.
+
+Create a key for the user (unless one already
+    exists). In any event, copy it to the *spare* account on your operational computer:
+
+----
+su - <user>
+ssh-keygen
+ssh-copy-id spare@operational
+----
+
+where *<user>* is the user that wll run the script and *operational*
+is the name or IP of your operational computer.
+
+==== On *operational* computer,
+
+===== Lock out *spare* account from normal login (but must have a shell):
+
+----
+usermod -L spare
+----
+
+IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.
