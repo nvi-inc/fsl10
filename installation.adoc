@@ -831,7 +831,8 @@ Authorized users can then switch to *oper* with (similarly for
 
 No password will be required (except for *root*).
 
-To make sure the *tally2* failure count is reset after a successful *sudo*, add to:
+To make sure the *tally2* failure count is reset after a successful
+*sudo* that required a passowd, add to:
 
 ./etc/pam.d/common-account
 [source,bash]
@@ -839,8 +840,11 @@ To make sure the *tally2* failure count is reset after a successful *sudo*, add 
 account required pam_tally2.so
 ```
 
+Otherwise the *tally2*  grows almost without bound for every *sudo*.
+
 To ensure X authorization works do the following (this example is for
-user *oper* but it works analogously for *prog* and *root*, see the note at the end of step (1( about *root*'s Xresources):
+user *oper* and  works analogously for *prog* and *root*, but see the
+note at the end of step (1) about *root*'s Xresources:
 
 1. Add this to the following file:
 +
@@ -1378,6 +1382,8 @@ or rebooting.
 
 === Fix for slow reboot/shutdown with *Wayland* disabled
 
+#TODO: Still slow for some cases (exact ones still not clear)#
+
 If you have chosen to disable *Wayland* for *gdm3* and have a problem with slow reboots/shutdowns, the following may help.
 
 1. Copy the file */lib/systemd/system/gdm3.service* into */etc/systemd/system/*.
@@ -1474,12 +1480,12 @@ adduser --uid 503 --gid 990 spare
 ===== In *refresh_spare_usr2*, customize as usual and change:
 
 ....
-ssh root@operational "(cd /usr2; tar --one-file-system -cf - .)" | (cd /usr2; tar xpf - --totals)
+ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | (cd /usr2; tar xpf - --totals)
 ....
 
 to
 ....
-ssh spare@operational "(sudo send_usr2)" | (cd /usr2; tar xpf - --totals)
+ssh spare@operational sudo send_usr2 | (cd /usr2; tar xpf - --totals)
 ....
 
 where *operational* is the name or IP of your operational computer.
