@@ -1534,5 +1534,6 @@ is the name or IP of your operational computer.
 ----
 usermod -L spare
 ----
+#TODO: It may be necessary to disable password update policies for this account to avoid ssh being locked out#
 
 IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.
