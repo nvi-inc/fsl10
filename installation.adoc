@@ -735,12 +735,40 @@ section require *root* permissions.
 For stations that wish to conform to the additional security recommendations of the
 Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
 
-To reset a locked-out user after CIS hardening, use:
+There are two issues that need to be corrected after the CIS hardening.
 
+1. The AIDE package used in CIS hardening adds a line to */etc/crontab*
+to run *aide.wrapper*. Unfortunately at this time, the line inserted is
+incorrectly formatted, missing the "user" field, for Debian systems.
+This causes the *cron* daemon to ignore the file, thereby breaking
+basic *cron* functionality. This can be fixed by adding *root* as the
+user in a new field after the fifth field on the *aide.wrapper* line
+and then running:
++
+....
+systemctl restart cron
+....
+
+2. The CIS hardening configuration of PAM causes uses of *sudo* that
+require a password to increment the failure count when a correct
+password is accepted, leading to eventual lock-out of the user using
+*sudo* when the *deny* tally count is reached.  To make sure the
+*tally2* failure count is reset after a successful *sudo* that
+required a passowd, add to:
+
++
+./etc/pam.d/common-account
+[source,bash]
+```
+account required pam_tally2.so
+```
++
+To reset a locked-out user after CIS hardening, use:
++
 ....
 /sbin/pam_tally2 -u <user> --reset
 ....
-
++
 where *<user>* is the user name.
 
 === Customize *root*'s *.bashrc* file
@@ -830,17 +858,6 @@ Authorized users can then switch to *oper* with (similarly for
     sudo -i -u oper
 
 No password will be required (except for *root*).
-
-To make sure the *tally2* failure count is reset after a successful
-*sudo* that required a passowd, add to:
-
-./etc/pam.d/common-account
-[source,bash]
-```
-account required pam_tally2.so
-```
-
-Otherwise the *tally2*  grows almost without bound for every *sudo*.
 
 To ensure X authorization works do the following (this example is for
 user *oper* and  works analogously for *prog* and *root*, but see the
