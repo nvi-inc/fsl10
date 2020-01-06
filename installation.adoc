@@ -1433,13 +1433,24 @@ the package *libkeepalive0*:
 apt-get install libkeepalive0
 ....
 
-Then add the follow lines *oper*'s' (and *prog*'s) *.profile* file:
+Then add the follow lines *oper* 's (and *prog* 's) *.profile* file:
 
 ....
 export LD_PRELOAD=libkeepalive.so
 export KEEPCNT=20
 export KEEPIDLE=180
 export KEEPINTVL=60
+....
+
+If you get an error message about preloading *libkeepalive.so* when
+you use *ssh*, something that may help is to *unset LD_PRELOAD* before
+using *ssh* with the following added to *oper* 's (and *prog* 's)
+*.ssh/config* file:
+
+....
+Host *
+    ServerAliveInterval 300
+    ServerAliveCountMax 2
 ....
 
 === refresh_spare_usr2 with AUID accounts
