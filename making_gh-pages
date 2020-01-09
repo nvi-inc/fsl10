@@ -1,0 +1,19 @@
+Requires asciidoctor
+
+To update:
+
+  git add *.adoc
+  git commit
+  git push
+  git branch -f gh-pages <branch>
+     <branch> is whatever is checked out, usually master
+  git checkout gh-pages
+  make
+  cp installation.html index.html
+  git add -f *.html
+  git commit
+  git push —force
+
+View at:
+
+https://nvi-inc.github.io/fsl10/
