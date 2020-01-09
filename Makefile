@@ -1,4 +1,4 @@
-all: installation.html cis-setup.html
+all: installation.html cis-setup.html raid.html
 
 installation.html: installation.adoc
 ris-setup.html: cis-setup.adoc
