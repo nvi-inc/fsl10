@@ -1,20 +1,20 @@
 = FS Linux 10 Installation Guide
-J.F.H. Quick and D.E. Horsley 
-Draft Sep 2019
+J.F.H. Quick, D.E. Horsley, and W.E. Himwich
+Draft 0.5  Nov 2019
 
 :sectnums:
 :experimental:
 :downarrow: &darr;
 
-Please note that for each step in this guide, we recommend you carefully read all
-the included caveats and notes as the material is not always logically
-sequential, i.e. instructions may proceed explanations that impact what you
-actually type.
+Please note that for each step in this guide, we recommend you
+carefully read all the included caveats and notes as the material is
+not always logically sequential, i.e., instructions may proceed
+explanations that impact what you actually type.
 
 
 == Choosing architecture and creating installation media
 
-As of Field System version 10.0, both `i386` and `amd64` architecture are
+As of Field System version 10.0, both *i386* and *amd64* architecture are
 supported natively. However, some work may be required to port your station code
 from a 32-bit to a 64-bit OS. Some automatic tools have been developed for this,
 and can be provided upon request.
@@ -23,7 +23,7 @@ To install Debian 9, you can either use a DVD or USB drive. The latter is
 faster, and also necessary if you wish to use UEFI. Directions for creating your
 installation media can be found online. 
 
-NOTE: Don't be confused by the `amd64` name, this architecture is supports both
+NOTE: Don't be confused by the *amd64* name, this architecture is supports both
 AMD and Intel manufactured x86-64 processors. This includes CPU lines such as
 Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel had a
 completing and incompatible 64 bit architecture.
@@ -34,7 +34,7 @@ many security patches from the network which may already be included in the
 latest revision. Note also that installing from DVDs as described here is
 recommended mainly for sites with little to poor Internet connectivity (even
 then use of a single DVD may suffice) and the equivalent use of a Debian
-GNU/Linux 9.x "Stretch" - Official i386/amd64 "netinst" CD would suffice for
+GNU/Linux 9.x "Stretch" - Official i386/amd64 *netinst* CD would suffice for
 installation at most sites with good connectivity. Disk images for the installer
 ca be found at: https://cdimage.debian.org/cdimage/archive/
 
@@ -66,7 +66,17 @@ third disk later, you must make sure that the smallest disk of the three
 disks available is used as the first of this initial RAID pair. Use of a
 single disk (for a test install etc.) is also annotated below.
 
+TIP: Installing to a single disk is recommended and has some
+advantages. It is faster and you can control when the syncing for the
+second disk occurs, such as when you leave for the evening.  The
+set-up of the second (and third) disk is covered in the "Post Install"
+section. As mentioned in the warning above, you should start with the
+smallest disk.
+
 === Boot from the installation medium
+
+Connect an active network cable to your lowest numbered interface
+(only). Usually it is on the left if there are two.
 
 Insert/plug-in your installation media and reboot.
 
@@ -78,37 +88,30 @@ boot menu, which is typically accessed by pressing kbd:[F11] or kbd:[F12].
 
 At the 'Installer boot menu':
 
-. _Highlight_ `Install` (or `Graphical install` -- only the installer
+. _Highlight_ *Install* (or *Graphical install* -- only the installer
   interface differs -- but this may not work on some video hardware)
     * BIOS: press kbd:[Tab]; or
-    * UEFI: kbd:[e], kbd:[{downarrow}] three times, then kbd:[End]
+    * UEFI: kbd:[e], kbd:[{downarrow}] three times (*vmlinuz*), then kbd:[End]
 . To the end of the displayed command, add the additional options:
 
-   locale=C netcfg/disable_dhcp=true time/zone=UTC
+   locale=en_US.UTF8 netcfg/disable_dhcp=true time/zone=UTC
 
 . Press:
     * BIOS: kbd:[Enter]
     * UEFI: kbd:[F10] 
 
-// TODO: "locale=C" is begining to be a problem. Not having a UTF-8 locale set does cause
-// some problems. Tmux for example is unhappy about this.
-
-NOTE: You may omit the `netcfg/disable_dhcp=true` if you want to use DHCP to
+NOTE: You may omit the *netcfg/disable_dhcp=true* if you want to use DHCP to
 configure the network settings of this machine, though this is not advised.
 
 The installer will now boot.
 
-=== Select your continent or region
-
-Find your region from the available list and press kbd:[Enter],
-then select your country, territory or area and press  kbd:[Enter] again.
-(These notes were produced by selecting "North America" and then
-"United States" - you may experience small differences if you select
-another location)
+NOTE: If you do not set a locale or set *locale=C*, you will be
+prompted to select your language and your country. However some
+applications may have problems if a UTF8 locale is not used.
 
 === Select a keyboard layout
 
-Find your keyboard on the keymap list and press  kbd:[Enter]. (The most common one is "American English")
+Find your keyboard on the keymap list and press  kbd:[Enter]. (The most common one is *American English*)
 
 The installation media is now scanned and additional installer components loaded.
 
@@ -117,44 +120,44 @@ The installation media is now scanned and additional installer components loaded
 You may need to locate the files requested (especially if they relate to
 your network or disk-drive interfaces)  and place them on a USB stick which
 should be inserted at this stage.  If you do have the required files select
-'kbd:[Yes]', otherwise press kbd:[Tab] to select kbd:[No], then press
+*Yes*, otherwise press kbd:[Tab] to select *No* then press
 kbd:[Enter] to continue.
 
 === If you are presented with a dialog asking which interface to use 
 Typically only shown if two or more network interfaces are
 found, which might include a virtual firewire interface in some cases.
-Select the interface you require (usually 'eth0') and press  kbd:[Enter].
+Select the interface you require (usually *eno1*) and press  kbd:[Enter].
 
 ====
 Unless you are using DHCP (which is not advisable) you will be prompted to:
-Type in the required static IP address in the form `xxx.xxx.xxx.xxx` (where
-xxx is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
-Type in the required netmask in the form `255.yyy.yyy.yyy` (where yyy is
+Type in the required static IP address in the form *xxx.xxx.xxx.xxx* (where
+*xxx* is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
+Type in the required netmask in the form *255.yyy.yyy.yyy* (where *yyy* is
 typically 0, 64, 128, 192 or 255) and press  kbd:[Enter].
-Type in the required gateway IP address in the form `xxx.xxx.xxx.xxx` (where
-xxx is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
+Type in the required gateway IP address in the form *xxx.xxx.xxx.xxx* (where
+*xxx* is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
 Type in the required nameserver IP addresses, space separated, in the form
-`xxx.xxx.xxx.xxx` (where xxx is any integer from 1 - 254 inclusive) and
+*xxx.xxx.xxx.xxx* (where *xxx* is any integer from 1 - 254 inclusive) and
 press  kbd:[Enter].
 
 Alternatively, if you are only using the installer to initialize new disks,
-you may want to use kbd:[Go Back] and directly select "Detect disks" from the
-main menu to skip forward to step 10 below.
+you may want to use *Go Back* and directly select *Detect disks* from the
+main menu to skip forward to step 11 below.
 ====
 
 === Set a hostname
-Backspace over the default hostname "debian" and type in the name
+Backspace over the default hostname *debian* and type in the name
 you require (if not already retrieved vis DNS), then press  kbd:[Enter].
 Enter the required Internet Domain name (if not found) and press  kbd:[Enter].
 
-=== Enter a suitable root password
+=== Enter a suitable 'root' password
 
 Twice as prompted.
 
 === Setup first account
 
-Enter "Desktop User" for the name of the new user
-then press  kbd:[Enter]  to accept "desktop" as the username and enter a (real)
+Enter *Desktop User* for the name of the new user
+then press  kbd:[Enter]  to accept *desktop* as the username and enter a (real)
 password twice as prompted.
 
 === Get network time
@@ -168,16 +171,29 @@ to press kbd:[Enter] to cancel this process.
 NOTE: These notes assume you have disks larger than 2TB so that GPT will be the partition
 format selected by the installer.
 
+NOTE: If you are using UEFI and the disk was previously used for BIOS, you may need
+to confirm forcing UEFI installation.
+
 When prompted, select *Manual*
 
 ==== Setup the first disk
 
 . If needed create a new partition table by:
-.. Select first disk, something like `SCSI1 (0,0,0) (sda) - 4 TB ATA SATA HARDDISK`, and
-    preset kbd:[Enter]
+.. Select first disk, something like *SCSI1 (0,0,0) (sda) - 4 TB ATA SATA HARDDISK*, and
+    press kbd:[Enter]
 .. Installer may warn: *You have selected an entire device to partition…*. Select *Yes*
 
 . Select the *FREE SPACE* under the first device
+
+NOTE: If some other file system, like *xfs*, or other  old setup is
+displayed, you can, and may need, to use *Guided partitioning* to
+delete the existing configuration (and temporarily create new
+    partitions). In this case, select *Guided - use entire disk*. Then
+select your disk, such as listed above, do not select a RAID or your
+boot device.  Then select *All files in one partition (recommended for
+    new users)*.  You may be prompted to confirm deleting RAID and/or
+LVM, which you must do to continue. Then you should be able to select
+your disk, as above, and get *FREE SPACE*.
 
 . Select *Create a new partition*
 
@@ -193,8 +209,8 @@ When prompted, select *Manual*
 
 . Next select the *FREE SPACE* and *Create a new partition* again. 
 +
-NOTE: You may see a small 1MB "FREE SPACE" at the start of the disk. This is
-fine, just be sure to choose the large "FREE SPACE" at the end of the disk.
+NOTE: You may see a small *1MB FREE SPACE* at the start of the disk. This is
+fine, just be sure to choose the large *FREE SPACE* at the end of the disk.
 
 . This time choose the whole amount of free space (the default).
 
@@ -202,7 +218,7 @@ fine, just be sure to choose the large "FREE SPACE" at the end of the disk.
 
 ==== Setup the second disk
 
-Repeat the process for the second disk
+Repeat the process for the second disk, if present.
 
 ==== Setup RAID
 
@@ -212,8 +228,9 @@ Repeat the process for the second disk
 . Select *Create MD device*, choose *RAID 1* and enter *2* as number
 of devices and *0* as number of spare.
 
-. Select the two raid partitions we just created using space -- these should be sda2 and
-sdb2) -- then presse kbd:[Enter]
+. Select the RAID partitions we just created using space -- these
+should be *sda2* and *sdb2*, if just have one disk, just pick *sda2* --
+then press kbd:[Enter]
 
 . Select *Finish*.
 
@@ -223,16 +240,16 @@ sdb2) -- then presse kbd:[Enter]
 
 ==== Setup Logical Volume Manager (LVM)
 
-. Now choose *Configure the Logical Volume Manager* and select "yes" if prompted to write the changes to disk
+. Now choose *Configure the Logical Volume Manager* and select *yes* if prompted to write the changes to disk
 
 . Choose *Create volume group* 
-. Enter a name appropriate for the machine and group, eg *gs-fs1*, and press kbd:[Enter]
+. Enter a name appropriate for the machine and group, e.g., *lv*, and press kbd:[Enter]
 . Select the raid device *md0* by pressing kbd:[Space], then press kbd:[Enter]
 to continue
 
 . For each item in the following table run *Create logical volume*, select the
 your volume group and assign the corresponding label. Those marked with "*" are
-optional for non-NASA stations
+optional unless you are applying CIS hardening.
 +
 .Logical volumes
 |=======================================
@@ -246,13 +263,14 @@ optional for non-NASA stations
 |6 |swap           | swap     | 8 G
 |7 |/tmp           | tmp      | 8 G
 |8 |/var           | var*     | 8 G
-|9 |/usr2          | usr2     | remaining disk space *less ~50 GB*
+|9 |/var/tmp       | vartmp*  | 8 G
+|10|/usr2          | usr2     | remaining disk space *less ~50 GB*
 |=======================================
 
 . In the LVM configuration window, select *Finish*
 
 . Then for each logical volume in the table except swap, do the following:
-.. Select the free space under the label (eg "#1    ") and press kbd:[Enter]
+.. Select the free space under the label (eg *#1*) and press kbd:[Enter]
 .. Select *Use as* and press kbd:[Enter] then select *Ext4 journaling file system* 
 .. Select *Mount point*, press kbd:[Enter], then select the appropriate mount point from the list or use *Enter manually* if not there.
 .. Select *Done setting up this partition*
@@ -265,16 +283,16 @@ a little time to create the ext4 file systems.
 
 === Configure the package manager
 
-If you start from a "netinst" CD image, the installer now
+If you start from a *netinst* CD image, the installer now
 assumes you will install only from the network, and jumps straight to
-the "Choose your country..." part of the dialogue as detailed below.
+the *Choose your country...* part of the dialogue as detailed below.
 
 Select the fastest Debian mirror from those available.
 
-TIP: The new `deb.debian.org` mirror is a good choice for most
+TIP: The new *deb.debian.org* mirror is a good choice for most
 sites as it uses DNS to find a local mirror.
 
-Enter any necessary HTTP: proxy information (usually left blank.)
+Enter any necessary *HTTP* proxy information (usually left blank.)
 
 If you are using DVD installer you will be prompted to scan additional DVDs.
 Scanning the additional DVDs (and obtaining copies of them in the
@@ -283,17 +301,17 @@ reliable network connection to a suitable Debian mirror and hence would
 prefer not to download packages you get from the DVD.
 
 NOTE: If you do want to use a mirror in future, it is better not to scan any
-DVDs at this stage and to scan them later during Stage 2 using 'apt-cdrom'.
+DVDs at this stage and to scan them later during Stage 2 using *apt-cdrom*.
 
 For each additional DVD you wish to scan, insert it in the drive, select
 *Yes* and press  kbd:[Enter]  to perform the scan (which takes a while.)
 
 (If you are using DVDs, and are prompted to insert another DVD, you
-will need to use 'eject /dev/cdrom' from another virtual console to do this)
+will need to use *eject /dev/cdrom* from another virtual console to do this)
 
 Select *No* and press  kbd:[Enter]  to continue once you are done.
-If prompted, insert the Debian GNU/Linux 9.x "Stretch" - Official i386/amd64
-Binary-1 DVD back into the DVD-ROM drive and press  kbd:[Enter].
+If prompted, insert the "Debian GNU/Linux 9.x Stretch - Official i386/amd64
+Binary-1 DVD" back into the DVD-ROM drive and press  kbd:[Enter].
 
 WARNING: If you do scan additional DVDs, the following useful dialogue
 which allows you to select a suitable network mirror from a country-based
@@ -315,13 +333,13 @@ When prompted to choose packages, select *SSH server* by highlighting it with
 the arrow keys and pressing kbd:[Space] on it (unless you don't want it). 
 
 TIP: If you have a small disks and are worried about space, then you can
-also press kbd:[Space] on "Desktop Environment" to unselect it (which may
+also press kbd:[Space] on *Desktop Environment* to unselect it (which may
 then change the dialogue presented below).
 
 Finally press, kbd:[Enter] to install the standard system.
 
 The Debian standard system is now installed from the installation media plus any
-updates from the network mirror and/or security.debian.org site if they can be
+updates from the network mirror and/or *security.debian.org* site if they can be
 reached. 
 
 This can take a while, up to one and half hours or more.
@@ -351,30 +369,42 @@ leaves something nasty in the machine's removable drives by mistake.
 
 You can now boot to your new OS.
 
-NOTE: If the login screen is painfully slow, try disabling Wayland in
-GDM3. Edit `/etc/gdm3/daemon.conf` and uncomment the line `WaylandEnable=false`
+NOTE: If the login screen is painfully slow and your CPU does not
+include a GPU, you can probably fix the slowness by disabling
+*Wayland* in *gdm3*. However, the result may be that rebooting or
+shutting down will typically have an enforced 90-120 second delay. You
+may find the slow login screen preferable. (Please see the Optional
+    Items section for a method to fix slow reboots/shutdowns
+    with *Wayland* disabled.) To disable
+*Wayland*, edit */etc/gdm3/daemon.conf* and uncomment the line
+*WaylandEnable=false*.  Then *gdm3* will need to be restarted either
+by rebooting or entering *systemctl restart gdm3*.  You can restart an
+individual virtual console getty with *systemctl restart getty@ttyN*
+where *N* is the number of the virtual console.
 
 === Login as root 
 
 TIP: Previous versions of Debian ran X11 on virtual console 7. As of
-Debian 9, the desktop environment consoles are virtual console 1 and 2. 
+Debian 9, the graphical environment login is on virtual console 1.
+Each login there for a different user creates a session on the next
+unused virtual console.
 
-Switch to Virtual Console 3, by pressing kbd:[Ctrl+Alt+F3].
+Switch to Virtual Console 2, by pressing kbd:[Ctrl+Alt+F2].
 
-Enter `root` and press kbd:[Enter], then enter the root password you set
+Enter *root* and press kbd:[Enter], then enter the *root* password you set
 earlier.
 
 
-=== Remove the dummy "Desktop User" (optional)
+=== Remove the dummy 'Desktop User' (optional)
 
 Unless you want another account that that is set up to use the default
-desktop environment, delete "desktop" with:
+desktop environment, delete *desktop* with:
 
    deluser --remove-home desktop
 
 NOTE: If you do keep this account, you will not be able to run the FS from
 it unless you add this account into the additional hardware access groups
-such as is done for oper/prog by FSADAPT.
+such as is done for *oper* and *prog* by *fsadapt*.
 
 === Install GRUB secondary disk (if available)
 
@@ -382,67 +412,67 @@ such as is done for oper/prog by FSADAPT.
 +
     cp /dev/sda1 /dev/sdb1
 
-* If you installed BIOS boot install GRUB to the Master Boot Record by running:
-+
-   dpkg-reconfigure -plow grub-pc
-+
-and after pressing kbd:[Enter] twice to accept the kernel command line extra
-arguments and default command line argruments, use the arrow keys and
-kbd:[Space] to select both /dev/sda and /dev/sdb (but not /dev/md0) and press
-kbd:[Enter] to finalise the reconfiguration. (You should then see "Installation
-finished. No error reported" appear twice in the progress messages as GRUB is
-re-installed to both drives.)
+* If you installed BIOS boot install GRUB to the Master Boot Record by
+running: *dpkg-reconfigure -plow grub-pc* and after pressing
+kbd:[Enter] twice to accept the kernel command line extra arguments
+and default command line argruments, use the arrow keys and
+kbd:[Space] to select both */dev/sda* and */dev/sdb* (but not
+    */dev/md0*) and press kbd:[Enter] to finalise the reconfiguration.
+(You should then see *Installation finished. No error reported* appear
+ twice in the progress messages as GRUB is re-installed to both
+ drives.)
 
 === Setup HTTP Proxy for APT (Optional)
 Should you wish to make APT use an HTTP proxy for downloads,
-create the new file `/etc/apt/apt.conf.d/00proxies` using `vi` containing:
+create the new file */etc/apt/apt.conf.d/00proxies* using *vi* containing:
 
    ACQUIRE::http::Proxy "http://proxy.some.where:8080/"; 
 
-to use a proxy `proxy.some.where` at port 8080 for example.
+to use a proxy *proxy.some.where* at port 8080 for example.
 
-=== Edit /etc/apt/sources.list 
+=== Edit '/etc/apt/sources.list'
 
-Using your favourite text editor, eg `vi`, and comment out all 'cdrom' entries
+Using your favourite text editor, eg *vi*, and comment out all *cdrom* entries
 (unless you don't have a decent Internet connection and need to use DVDs,
 whereupon the dialogue presented below may differ) and check you have the
 equivalent of the following entries towards the top of the file, adding
-in 'contrib' and/or 'non-free' as needed:
+in *contrib* and/or *non-free* as needed:
 
    deb http://deb.debian.org/debian/ stretch main contrib non-free
    deb-src http://deb.debian.org/debian/ stretch main contrib non-free
 
 and likewise the equivalent of the following entries towards the bottom of
-the file, again adding in 'contrib' and/or non-free as needed:
+the file, again adding in *contrib* and/or *non-free* as needed:
 
    deb http://deb.debian.org/debian/ stretch-updates main contrib non-free
    deb-src http://deb.debian.org/debian/ stretch-updates main contrib non-free
 
-(where you can use any suitable mirror instead of "ftp.us.debian.org")
+(where you can use any suitable mirror instead of *deb.debian.org*)
 
-Also add `contrib` and/or `non-free` to the lines referring to the
-security.debian.org mirror in the middle of the file.
+Also add *contrib* and/or *non-free* to the lines referring to the
+*security.debian.org* mirror in the middle of the file.
 
-IMPORTANT: you _MUST_ use "stretch" and _NOT_ "stable" for the distribution in
-all these entries (but CD/DVD entries might use "unstable".)
+IMPORTANT: you _MUST_ use *stretch* and _NOT_ *stable* for the distribution in
+all these entries (but CD/DVD entries might use *unstable*.)
 
 === Update APT's list of packages
 
-TIP: Recent versions of Debian have the `apt` program, which gives a more
-     user-friendly interface to the package manager than `apt-get`
+TIP: Recent versions of Debian have the *apt* program, which gives a more
+     user-friendly interface to the package manager than *apt-get*
 
 Next tell APT to update its internal source list of packages using
 
    apt update 
 
 NOTE: It is also possible to add additional DVDs at this stage using the
-'apt-cdrom add' command 
+*apt-cdrom add* command 
 
 === Download the FS Linux 10 package selections
 
-First install git and deselect
+First install *git* and *deselect* and update *dselect*:
 
-    apt install git dselect
+   apt install git dselect
+   dselect update
 
 . Get the selections by downloading this repository:
 +
@@ -450,9 +480,8 @@ First install git and deselect
     git clone https://github.com/nvi-inc/fsl10
     cd fsl10
 
-. Feed the package selections into `dpkg` using the commands
+. Feed the package selections into *dpkg* using the command
 +
-   dselect update
    dpkg --set-selections < selections/fsl10_amd64.selections
    (or dpkg --set-selections < selections/fsl10_i686.selections)
 
@@ -462,9 +491,11 @@ First install git and deselect
     apt-get dselect-upgrade
 +
 then press kbd:[Enter] to confirm any updating of installed packages (where
-you have an Internet connection) and the installation of \~300 new packages
+you have an Internet connection) and the installation of 
+~198 new packages
 (unless you did not select the Desktop or added other tasks earlier -
-currently downloading at least 95MB from the Internet and/or DVDs).
+currently downloading
+~188 MB from the Internet and/or DVDs).
 
 Downloading commences for up to half an hour (depending on your Internet
 access and the exact revision of DVDs used):
@@ -473,7 +504,7 @@ Installation runs to completion.
 
 
 === Clean up the APT download directory
-// TODO: perhaps we can change to `apt-listchanges`
+#TODO: perhaps we can change to *apt-listchanges*#
 
 So that the update mechanism will work correctly, run
 
@@ -482,9 +513,9 @@ So that the update mechanism will work correctly, run
 
 == Third Stage Installation 
 
-=== FSADAPT
+=== 'fsadapt'
 
-In the /root/fsl10 directory, start FSADAPT with
+In the */root/fsl10* directory, start *fsadapt* with
 
     ./fsadapt
 
@@ -492,211 +523,1051 @@ In the /root/fsl10 directory, start FSADAPT with
 
 Using the arrow keys and kbd:[Space] make your selections and press kbd:[Enter].
 
-*  For NASA stations select `govt` and `noident`.
+*  For NASA stations select *govt* and *noident*.
+*  If you are not using a GPIB board or USB, you can deselect the GPIB option.
 
 ==== FS Adaptation: Setup (Window 2)
 
-All of the steps in Window 2 need to be done once with the exception of
-"sshkeys" which can be used to recover old SSH keys from a backup.  So simply
-press kbd:[Enter] with the *OK* selected to continue.
+All of the steps in Window 2 need to be done once with the exception
+of *sshkeys* which can be used to recover old SSH keys from a backup.
+If you did not select the GPIB option in the previous page deselect the
+two related options on this page. Otherwise, simply press kbd:[Enter]
+with the *OK* selected to continue.
 
-NOTE: The "updates" option relies on email to 'root' being re-directed to some
+NOTE: The *updates* option relies on email to *root* being re-directed to some
       mailbox that will be read regularly, so make sure you set that up and
-      test it as well.  The installer sets it up to go the 'desktop' account
+      test it as well.  The installer sets it up to go the *desktop* account
       by default which would definitely be a problem if you have removed that!
 
 ==== GPIB driver configuration
 
-On the "/etc/gpib.conf" screen, use the up/down arrow keys to select the
+On the */etc/gpib.conf* screen, use the up/down arrow keys to select the
 required GPIB controller and press kbd:[Enter] on *OK* to continue.
 
 ==== Serial port configuration
 
-On the "/etc/default/grub: serial port configuration" screen
+On the */etc/default/grub: serial port configuration* screen
 up/down arrow keys to select the required RS232 serial card and press
 kbd:[Enter] on *OK* to continue.
 
 ==== FS Adaptation: Settings (Window 3)
 
-On Window 3 modify the email settings as required.  Simply press kbd:[Enter] on
-*OK* to continue.
+On Window 3 modify the email settings or network settings as required.
+Simply press kbd:[Enter] on *OK* to continue.
 
 ==== FS Adaptation: Network Services (Window 4)
 
-The Window 4 will show what services are enabled.  Use the up/down arrows
-and kbd:[Space] to select "secure" and press kbd:[Enter] on *OK*.  Thereafter
-use the up/down arrows and kbd:[Space] to select those services you actually
-need and press kbd:[Enter] on *OK* to set them up and finish with
-FSADAPT.  (This will complain about the current start and stop runlevels of
-the avahi-daemon if you have disabled it as recommended for a secure
-system.) 
+The Window 4 will show what services are enabled.  Use the up/down
+arrows and kbd:[Space] to select *secure* and press kbd:[Enter] on
+*OK*.  Thereafter use the up/down arrows and kbd:[Space] to select
+those services you actually need.  If you need printing, you will need
+to select *netipp* (remote access to this can be blocked by
+    configuring *ufw* with either not explicitly allowing or instead
+    denying the CUPS service).  Press kbd:[Enter] on *OK* to set them
+up and finish with *fsadapt*.
 
-Note that the FSADAPT script can be re-run at a later date should you need to
+Note that the *fsadapt* script can be re-run at a later date should you need to
 change the adaptations.
 
 === Set Passwords
 
-Set passwords for the 'oper' and 'prog' accounts with:
+Set passwords for the *oper* and *prog* accounts with:
 
    passwd oper
    passwd prog
 
 entering the passwords twice as prompted.
 
+=== Install tools for RAID (Optional)
+
+You can install some useful tools for working with the RAID with:
+
+   ~/fsl10/RAID/install_tools
+
+The rest of this document assumes the first three of these tools have
+been installed.  The four tools are:
+
+   * *mdstat* allows all users to check on the RAID status
+   * *refresh_secondary* allows *root* to refresh a secondary disk that is from the same RAID and has been booted on its own
+   * *blank_secondary* allows *root* to initialize a secondary disk, must be used with extreme care
+   * *recover_raid* allows *root* to re-add a disk that fell out of the RAID back into it
+
 === Download the Field System
 
     cd /usr2
     git clone https://github.com/nvi-inc/fs fs-git
-    ln -s fs-git fs
-    chown -R prog:rtx fs-git
 
-    mkdir sched
-    chown oper:rtx sched
+=== Set '/usr2/fs' link, set '/usr2/fs-git' permissions, and install default copies of all the FS related directories
 
-=== Install default copies of all the FS related directories
-
-   cd /usr2/fs
+   cd /usr2/fs-git
    make install
 
-and enter 'y' to confirm installation.
+and enter *y* to confirm installation.
 
 === Make the FS
 
-IMPORTANT: Log-out of the console as root, and log-in again as prog.
+IMPORTANT: Log-out of the console as *root*, and log-in again as *prog*.
 
    cd /usr2/fs
-   mkdir bin
    make >& /dev/null
 
 then
 
-    make
+    make -s
 
-to confirm that everything compiled correctly.
+to confirm that everything compiled correctly (no news is good news).
 
 === Wait for the RAID1 disk mirroring to set up
 
 watching its progress with:
 
-   cat /proc/mdstat
+   mdstat
 
 until the array no-longer shows a recovery in progress.
 
 The final step is to remove any DVD from the machine and to restart the machine
-using "reboot" as root or kbd:[Ctrl+Alt+Del] whilst watching that everything
+using *reboot* as *root* or kbd:[Ctrl+Alt+Del] whilst watching that everything
 starts up smoothly.
 
 Your new FS machine should now be ready to be customised to your requirements
-by tailoring the control files in `/usr2/control` and adding suitable station
-specific software to `/usr2/st`.  See the files in the `/usr2/fs/misc` directory
+by tailoring the control files in */usr2/control* and adding suitable station
+specific software to */usr2/st*.  See the files in the */usr2/fs/misc* directory
 for more information.
 
 
 == Post Install
 
+All commands (except checking the RAID status) in this section need to be run as *root*.
+
 === Setup additional disk
+
+NOTE: An additional disk should be at least as large as the smallest
+disk already in use in the RAID.
 
 NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
 
-Ensure the RAID is syncd by checking 
+NOTE: This sub-section assumes you have installed the "Tools for RAID"
+above.
 
-    cat /proc/mdstat
+Ensure the RAID is synced by checking that
 
-shows no resyncing in progress. If there is none, shut down the machine safely.
+    mdstat
 
-Next, remove and place on the shelf.
+shows no recovery in progress. If there is none, shut down the
+machine safely. If you installed with a second disk, remove and place
+on the shelf.
 
-Boot with new secondary disk keyed off or removed. This will ensure the machine is booted from the good disk.
+==== Initialize new disk
 
-With the RAID now missing a disk, you may see 20-30s of "volume group not found", then the machine will boot.
+IMPORTANT: Do not initialize a disk unless you are sure there is no
+data on it that you need to preserve.
 
-Once booted you, key on the disk. This will ensure the secondary disk is initialized second and is
-available as `/dev/sdb`.
+For the first time use of an additional disk with a new install, the
+disk should be initialized to make sure it has no already existing
+structure.  This should be done even if the disk has been used in a
+different FS computer or a previous install on this computer.
 
-Next, login as root and setup the partition table on the secondary disk with
+Boot with just the primary disk installed. Use the script:
 
-    sgdisk -R/dev/sdb /dev/sda
-    sgdisk -G /dev/sdb
+   blank_secondary
 
-Note, the order is important! 
+The script will wait for the new disk to be turned on. Insert a new
+disk in the secondary slot. Turn the key to turn the disk on. There
+will be a few prompts asking to continue. If it is a new disk or you
+are sure it safe to erase this disk, it is safe to press return at
+each prompt. If you are unsure about this or otherwise need to abort
+use kbd:[Ctrl+C] as described in the prompts.
 
-Now, copy the bootloader partition onto the first partition of the second disk
+==== Refresh secondary disk
 
-    cp /dev/sda1 /dev/sdb1
+IMPORTANT: You can refresh a disk if it has been erased or has
+previously been used in this RAID and is older than the current
+primary.  If it is newer than the current primary (maybe from a failed
+    FS upgrade that needs to be abandoned) or comes from a different
+RAID (i.e., system) or has a different structure (i.e., was previously
+    used for something else), it will have to be erased first. The
+script will detect these conditions and stop with an appropriate
+message. In that case, consider carefully if it is safe to erase the
+disk (probably not). If you determine it is safe, follow the
+instructions in the previous sub-section for running *blank_secondary*.
 
-and add the second partition
+Boot with only the primary disk installed. The new secondary disk must
+be keyed off or removed. The script will refuse to run if there is a
+disk already installed. This will ensure that no other disk is
+installed and mistaken for the disk to be refreshed.
 
-    mdadm /dev/md0 --add /dev/sdb2
+NOTE: With the RAID now missing a disk, you may see
+~20 of the *volume group
+not found* error messages, then the machine will boot. These error
+message  only appear is such a large quantity the first time a disk
+from the RAID is booted without its pair.
 
-You can now resume using the computer as usual. 
+Once booted, login as *root*.
 
-You can check the status of the RAID resync with
+Run the script:
 
-    cat /proc/mdstat
+    refresh_secondary
+  
+When the script says it is waiting for the second disk, key it on.
 
-While the operating system can resume syncing the RAID if you reboot, it is best to avoid in case the boot partition
-is not fully synced.
+Once your reach the message that it recovering, you can resume using
+the computer as usual. You can stop the updating of the *recoverying*
+message wth kbd:[Ctrl+C] as described in the output. If later you want
+to check the progress of the status of the RAID resync, you can use:
 
-=== Additional security and CIS Benchmarks (Optional)
+    mdstat
+
+While the operating system can resume syncing the RAID if you reboot,
+it is best to avoid in case the boot partition is not fully synced.
+
+When the syncing is complete, you can repeat the process of the
+previous sub-section and this sub-section if you have a third disk that needs
+to be set-up.
+
+== Optional Items
+
+This section covers several customizations that may be helpful
+depending on the requirements for the system. All actions in this
+section require *root* permissions.
+
+=== Additional security and CIS Benchmarks
 
 For stations that wish to conform to the additional security recommendations of the
 Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
 
-=== Disabling direct login to oper and prog (Optional)
+There are two issues that need to be corrected after the CIS hardening.
 
-The model of FSL assumes oper and prog accounts will be used for operations and
-programming respectively. However, some institutes may have security and
-auditing restrictions that mean operators must log-in to their own account.
-As the Field System currently operates, users will then need to switch to
-the oper or prog account after login.
+1. The AIDE package used in CIS hardening adds a line to */etc/crontab*
+to run *aide.wrapper*. Unfortunately at this time, the line inserted is
+incorrectly formatted, missing the "user" field, for Debian systems.
+This causes the *cron* daemon to ignore the file, thereby breaking
+basic *cron* functionality. This can be fixed by adding *root* as the
+user in a new field after the fifth field on the *aide.wrapper* line
+and then running:
++
+....
+systemctl restart cron
+....
 
-To do this, we suggest suggest create two groups that can sudo to the oper and
-prog accounts.
+2. The CIS hardening configuration of PAM causes uses of *sudo* that
+require a password to increment the failure count when a correct
+password is accepted, leading to eventual lock-out of the user using
+*sudo* when the *deny* tally count is reached.  To make sure the
+*tally2* failure count is reset after a successful *sudo* that
+required a passowd, add to:
 
-run `visudo` then add at end:
++
+./etc/pam.d/common-account
+[source,bash]
+```
+account required pam_tally2.so
+```
++
+To reset a locked-out user after CIS hardening, use:
++
+....
+/sbin/pam_tally2 -u <user> --reset
+....
++
+where *<user>* is the user name.
+
+=== Customize *root*'s *.bashrc* file
+
+There are a few changes you should consider for *root*'s *.bashrc* file.
+
+1. If you have applied the CIS remediations, you should consider
+ucommenting the line that sets the *umask* to *022*. The remediations
+set it to *027* in */etc/profile*, which may cause problems with
+routinely created files, including some in this section covering optional changes.
+
+2. Uncomment the the *alias* commands that add the *-i* option to the
+commands *cp*, *mv*, and *rm* as the default.  This can help avoid
+some careless errors.
+
+3. Add the command *set -o noclobber* to avoid accidently overwriting
+existing files with I/O redirection. Other options to consider setting
+are *physical* and *ignoreeof*.
+
+=== Enabling user promotion to *oper*, *prog* and *root*
+
+The model of FSL assumes *oper* and *prog* accounts will be used for
+operations and programming respectively. However, some institutes may
+have security and auditing restrictions that mean operators must
+log-in to their own account (possibly named with their Agency User ID,
+    AUID).  As the Field System currently operates, users will then
+need to switch to the *oper* or *prog* account after login. Likewise,
+     if a user is allowed to elevate to *root*, they will need to do
+     so after log-in to their own account. This sub-section covers how to
+     enable this capability. The next sub-section covers how to add a
+     AUID account. The method described here, and in the next sub-section,
+     uses *dhorsley* as an example user.
+
+For *oper* and *prog*, we suggest creating two groups that can *sudo*
+to the accounts.
+
+run *visudo* then add at end:
 
     %operators      ALL=(oper) NOPASSWD: ALL
     %programmers    ALL=(prog) NOPASSWD: ALL
     %programmers    ALL=(oper) NOPASSWD: ALL
 
-Then add each user to these groups ass appropriate, eg:
+To allow *operators* to use *refresh_secondary*, *shutdown*, and *reboot*, add (respectively):
 
-    adduser dhorsley programmers
+   %operators      ALL=(ALL) /usr/local/sbin/refresh_secondary
+   %operators      ALL=(ALL) /usr/sbin/shutdown
+   %operators      ALL=(ALL) /usr/sbin/reboot
 
-or 
+If the  user can elevate to *root*, also add:
 
-    adduser dhorsley operators
+    dhorsley       ALL=(root) ALL
 
-Authorized users can then switch to prog or oper with:
+Create the groups if they don't exist:
 
-    sudo -i -u prog
+    addgroup operators
+    addgroup programmers
 
+If they don't already, make sure *oper* and *prog* have usable shells:
 
-So ensure X authorization works do the following:
+    chsh -s /bin/bash oper
+    chsh -s /bin/bash prog
 
-1. Add this to the following files
-+
-.~/.login
-[source,csh]
-```
-if ( $?XCOOKIE == 1 ) then
-    xauth add $XCOOKIE
-endif
-```
+If the accounts haven't been disabled for login already, do so:
+
+    usermod -L oper
+    usermod -L prog
+
+To prevent connecting with *ssh* using a key, create (or add *oper*
+and *prog* to an existing) *DenyUsers* line in */etc/ssh/sshd_config*:
+
+NOTE: If you used the CIS *remediate* script, you should comment out
+the line: *DenyGroup rtx* as well.
+
+....
+DenyUsers oper prog
+....
+
+And restart *sshd* with:
+
+....
+systemctl restart sshd
+....
+
+Authorized users can then switch to *oper* with (similarly for
+*prog* and *root*):
+
+    sudo -i -u oper
+
+No password will be required (except for *root*).
+
+To ensure X authorization works do the following (this example is for
+user *oper* and  works analogously for *prog* and *root*, but see the
+note at the end of step (1) about *root*'s Xresources:
+
+1. Add this to the following file:
 +
 .~/.profile
 [source,bash]
 ```
-if [ -z $XCOOKIE ]; then
-    xauth add $XCOOKIE
+if ! [ -z "$XCOOKIE" ]; then
+   xauth add $XCOOKIE
+fi
+if echo $DISPLAY |grep -q localhost; then
+#   ssh from remote host with X display
+    xrdb -merge ~/.Xresources
+else
+    if ! [ -z $DISPLAY ]; then
+      if xhost|grep -q 'SI:localuser:oper'; then
+#       local X display
+        xrdb -merge ~/.Xresources
+      fi
+    else
+#     text terminal, do nothing
+      :
+    fi
 fi
 ```
 +
-2. Make the file `/usr/local/bin/fs` with contents
+This will also set the Xresources to those of *oper*. (For *root*
+    only the first clause would be used since Xresources would not be
+    set.)
 
+2. Create the following file
++
+./usr/local/bin/oper_account`
 [source,bash]
 ```
 #!/bin/bash
-sudo -u oper XCOOKIE="$(xauth list $DISPLAY)" FS_DISPLAY_SERVER=on -i fs
+set -e
+if echo $DISPLAY |grep -q localhost; then
+ sudo -u oper XCOOKIE="$(xauth list $DISPLAY)" -i
+else
+ if ! xhost|grep -q 'SI:localuser:oper'; then
+   xhost +SI:localuser:oper >/dev/null
+ fi
+ sudo -u oper -i
+fi
 ```
 
+3. Execute:
++
+    chmod a+rx /usr/local/bin/oper_account
+
+The three numbered steps above can be executed for *oper*, *prog*, and *root*
+with:
+
+....
+~/fsl10/AUID/install_AUID
+....
+
+=== Adding AUID accounts
+
+This sub-section describes how to add AUID accounts to be used with the
+ability to promote to *oper*, *prog*, and *root* as described in the
+previous sub-section. As in the previous sub-section, the following method
+uses *dhorsley* as an example user.  Add any needed user accounts as
+appropriate:
+
+IMPORTANT: If you are configuring a spare computer, you will need to
+make sure the *UID* and *GID* for each user with a home direcory on
+*/usr2* is the same on both computers for the system-to-system backup
+of */usr2* to work properly.
+
+    adduser dhorsley --home /usr2/dehorsley
+
+Then add each user to these groups as appropriate, e.g.:
+
+    adduser dhorsley operators
+
+and/or:
+
+    adduser dhorsley programmers
+
+If the account will be used by an operator and/or programmer, the X11
+environment needs to be set-up. The following command will move an
+existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and create a new
+*/usr2/dhorsley* with a useful skeleton for use with the FS (you will
+    be prompted for the user name):
+
+    /usr2/fs/misc/auid_update
+
+=== Network configuration changes
+
+This sub-section requires using *nm-connection-editor* on a graphic
+display (*nmtui* may be an option on a text terminal, but it has not
+been fully verified). You will probably need to be *root* or
+*desktop* to do this. When you run this program and select a
+connection, e.g., *Wired Connecton 1* under *Ethernet*, the *Edit*
+button should become active.  If it stays greyed out, you don't have
+sufficent permission. All the sub-sections below assume you are in
+program and have sufficent permision,
+
+==== Make the connection always appear on the same interface regardless of the MAC address.
+
+This is useful both to make the connection appear on only one
+interface and/or make it the same interface if the computer (or NIC)
+is changed.
+
+1. Select your connection snd click *Edit*.
+
+2. Select the *Ethernet* tab.
+
+3. Change the *Device* field to just list the name of the interface (typically *eno1*) by removing the MAC address in parentheses.
+
+4. You may want to also set the *IPv6 Settings* to use *Method: Ignore*.
+
+5. Click *Save*.
+
+6. Click *Close*.
+
+==== Disable the second Ethernet port
+
+This may be useful if your second port has a IPMI interface and the
+kernel detected a connection there and it is interferring with the
+normal or the IPMI connection.
+
+1. If there is no *Wired Connection 2*, click *Add*. Otherwise select
+that connection, click *Edit*, and skip to step 4.  It _may_ be benign
+to *Delete* any other connections _except_ *Wired Connection 1*.
+
+2. Make sure *Ethernet* is selected in the drop down box and click *Create...*.
+
+3. Change the *Connection name:* to *Wired Connection 2*.
+
+4. Select the *Ethernet* tab.
+
+5. Make sure the *Device* field just lists the second ethernet
+device (typically *eno2*) with no MAC address in parentheses.
+
+6. Select the *IPv4 Settings* tab.
+
+7. For *Method* select *Disabled*.
+
+8. Select the *IPv6 Settings* tab.
+
+9. For *Method* select *Ignore*.
+
+10. Click *Save*.
+
+11. Click *Close*.
+
+==== Update IP address, hostname, FQDN, and other network information
+
+This is useful if the computer is physically moved to a different
+site or its network information needs to be be updated for a different
+reason. This is typically not needed if you use DHCP, which may still
+require some of the changes in step 6 (please let us know if you gain
+experience).
+
+1. Select your connection and click *Edit*.
+
+2. Select the *IPv4 Settings* (or *IPv6 Settings* if you are using IPv6) tab.
+
+3. Adjust your *Manual* Method configuration: *Addresses*, *DNS Servers* (comma separated), and *Search domains*.
+
+4. Click *Save*.
+
+5. Click *Close*.
+
+6. Modify other system files
+
++
+Update the information as appropriate. The system may have initially
+been installed with the default hostname *debian* and no domain name.
++
+./etc/hostname
++
+Change your hostname
++
+./etc/hosts
++
+Update your IP address, FQDN, and alias (typically the hostname, multiple aliases are allowed).
++
+./etc/networks
++
+Use your local subnet (class A, B, or C) for the *localnet* line.
++
+./etc/mailname
++
+Use fully qualified node name
++
+./etc/exim4/update-exim4.conf.conf
++
+Look for *hostnames=*, use fully qualified name.
++
+./etc/exim4/update-exim4.conf.conf
++
+If you have hardcoded your the mail *HELO* message data as descibed in
+the sub-section "Generate FQDN in HELO for outgoing mail", you will need
+to update your data as described in that sub-section.
+
+When finished, reboot.
+
+=== Disable 'Desktop User'
+
+If you do not need the functionality available in the Desktop
+environment, you can disable the *desktop* account. You can re-enable
+the account later if you need it. To disable it, execute:
+
+....
+usermod -L desktop
+....
+
+You can undo this by using the *-U* option instead.
+
+To prevent connecting with *ssh* using a key, create (or add *desktop*
+to an existing) *DenyUsers* line in */etc/ssh/sshd_config*:
+
+....
+DenyUsers desktop
+....
+
+And restart *sshd* with:
+
+....
+systemctl restart sshd
+....
+
+You can undo the *ssh* block  be removing the line (if it only has
+*desktop*) or removing *desktop* from the line and then restarting
+*sshd*.
+
+=== Remove 'ModemManager'
+
+If you use serial ports, it is strongly advised that you remove the
+ModemManager package to avoid conflicts over access to the ports.
+Execute this command:
+
+....
+apt-get purge modemmanger
+....
+
+=== More firewall rules
+
+The following tersely summarizes some *ufw* settings that may be useful:
+
+....
+# ssh
+ufw allow OpenSSH
+#NTP
+ufw allow ntp
+#RDBE multicast to addresses from subnet
+ufw allow in proto udp to 239.0.2.0/24 from 128.171.102.0/24
+#? RDBE multicast to group from subnet ?
+#ufw allow in proto igmp to 239.0.2.0/24 from 128.171.102.0/24
+....
+
+=== Configure e-mail
+
+As "root", enter:
+
+   dpkg-reconfigure exim4-config
+
+to change the set-up. Typically you should select *internet site*, use
+your host name in place of *debian* when it occurs, and otherwise
+select defaults at all the other prompts.  (The only other recommended
+    choices are *local delivery only* or *mail sent by smarthost;
+    received via SMTP or fetchmail*.)  If you want to receive incoming
+mail, you will also need to enable SMTP connections in *Window 4* of
+_fsadapt_ (and if you are using a firewall, you will need to enable
+    such connections for it).  We recommend that you NOT receive
+incoming mail on this computer.
+
+If you follow the recommendation not to receive incoming mail
+and your system is not set-up for *local delivery only*, you
+should set the *Reply-To* address for outgoing messages to a
+real e-mail account at your institution that is read
+regularly.  You can do this by (all as *root*):
+
+1. Create a file with contents
+(four lines):
++
+.*/etc/exim4/reply-to-filter* 
+[source]
+----
+# Exim filter          << THIS LINE REQUIRED
+
+headers remove "Reply-To"
+headers add "Reply-To: email@address"
+----
++
+Where *email@address* is the e-mail address you want replies to be
+addressed to. If you want more than one, separate them with commas.
+
+2. In */etc/exim4/exim4.conf.template*, at the beginning of
+the file add (two lines):
++
+....
+#set reply to
+system_filter = /etc/exim4/reply-to-filter
+....
+
+3. Then execute
+
+    systemctl restart exim4
+
+The configuration described here (*Internet site* or *mail
+sent by smarthost* in the _exim4_ configuration, no incoming
+mail, reply-to-filter, and modified user names), provides
+good support of the FS _msg_ utility.
+
+You should change your */etc/aliases* so *root* and *prog* e-mail goes to *oper*.
+
+    change root: desktop to root: oper
+    add prog: oper
+    add desktop: oper
+
+This is recommended as a "catch all" since the *oper* account is
+presumably under regular use and any messages sent there are likely to
+be noticed.  This is particularly important for system error messages
+since they should be delivered to a mail box on the system in case
+there is a network problem that might prevent them from being
+delivered off system.  You can however add additional off machine
+delivery of these messages to whatever addressees you wish and we
+recommend this as well.  These should include an e-mail account at
+your institution that is read regularly (maybe the same address as the
+    *Reply-To* address you may have set above would be a good choice).
+To do this, create a *.forward* file in *oper*'s home directory. The
+permissions should be *-rw-r--r--*. The contents should be similar to
+(left justified):
+
+    \oper
+    user@node.domain
+
+where *user@node.domain* is the off machine addressee you
+want the messages to go to.  You can add additional lines for
+additional addressees. The backslash (*\*) before *oper*
+prevents the mail system from getting into an infinite loop
+re-checking *oper*'s *.forward* file.
+
+If you have made the above changes to forward messages to another an
+e-mail account on another machine, you should customize the User Name
+(not login name, the User Name is the fifth field) of *root*, *prog*,
+  *oper*, and *desktop* in */etc/passwd* to identify the source of the
+  message.  For *root* and *prog*, it is recommended to append a
+  string like *at node* (it is probably best to avoid FQDNs), where
+  node is this machine, e.g., for *atri* you might change the 5th
+  field for *root* from
+
+    root
+
+to
+
+    root at atri
+
+For *oper*, you might instead prepend your site name to the
+accounts for clearer reading in *ops* e-mail messages, e.g.,
+for *oper* on *atri* at GSFC, we changed the 5th field for
+*oper* to:
+
+    GSFC VLBI Operator
+
+and for completeness, for *prog* and *desktop* we use:
+GSFC VLBI Programmer
+
+    GSFC Desktop User
+
+These changes will help the recipient (possibly you)
+determine which system generated this message since it may
+not be obvious given the modified return address.
+
+Lastly, check the default mailbox directory */var/mail/* for
+account that may have messages that arrived before the e-mail
+system was fully configured.  Be sure to resolve any system
+messages that may have been received. You can check to see what
+accounts have mail with:
+
+    ls /var/mail
+
+which will list each user account mail file that
+exists. Check and clear each user's mailbox (where *user* in
+the line below is the account name) that has received mail
+(as *root*):
+
+    mail -f /var/mail/user
+
+=== Generate FQDN in 'HELO' for outgoing mail
+
+If mail from your system is being rejected by some servers because
+*exim4* is not providing a Fully Qualified Domain Name in its *HELO*
+message, one way to fix this is to comment out the following lines
+in */etc/exim4/exim4.conf.template*:
+
+....
+.ifdef REMOTE_SMTP_HELO_FROM_DNS
+.ifdef REMOTE_SMTP_HELO_DATA
+REMOTE_SMTP_HELO_DATA==${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
+.else
+REMOTE_SMTP_HELO_DATA=${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
+.endif
+.endif
+....
+
+Right after those lines, add the following line:
+
+....
+REMOTE_SMTP_HELO_DATA=FQDN
+....
+
+Where *FQDN* is your system's Fully Qualified Domain Name. Then restart the server:
+
+....
+systemctl restart exim4
+....
+
+A defect of this approach is that it hard codes the *HELO* message data,
+  which will have to be manually updated if the FQDN changes.  A more
+  general solution may be possible, but hasn't been discovered yet.
+
+=== Adjust number of login failures before lock-out
+
+The number of login failures before lock-out can cause a problem if it
+is set too low.  The main issue is for an operator working at odd
+hours, alone, at a remote location, who is dealng with multiple
+issue, which might include: power failures, equipment problems, and
+logistical issues. It can be a chaotic situation. Typing long and
+complicated passwors in the heat of battle, particularly if they vary
+between machines, can be error-prone. Being locked-out will make the
+situation more difficult and increase the amount of data that will be
+lost.
+
+If you find the number of login failures before lock-out too small,
+you can increase it by increasing the value of the *deny* parameter
+(*5* in the example below, other typical parameters are omitted and
+should not be changed) in:
+
+./etc/pam.d/common-auth
+[source]
+----
+auth required pam_tally2.so deny=5
+----
+
+Small integer values (20 or less) should not be a signficant risk with
+long and complicated passwords and a lock-out of several minutes.
+
+=== Set X display resolution at boot
+
+If your display sometimes starts with the wrong resolution, you may be
+able to configure a better resolution. The following is a description
+of something that worked for at least one system. The details of your
+system may require some changes (beyond the resolution and output name).
+
+First you need to determine the correct resolution and output name.
+You may be able to do this with *xrandr*. If the screen currently has
+the correct resolution, you can just execute:
+....
+xrandr
+....
+
+The output might look like:
+....
+Screen 0: minimum 320 x 200, current 1920 x 1200, maximum 1920 x 2048
+VGA-1 connected primary 1920x1200+0+0 (normal left inverted right x axis y axis) 0mm x 0mm
+   1024x768      60.00  
+   800x600       60.32    56.25  
+   640x480       59.94  
+  1920x1200 (0x42) 154.000MHz +HSync -VSync
+        h: width  1920 start 1968 end 2000 total 2080 skew    0 clock  74.04KHz
+        v: height 1200 start 1203 end 1209 total 1235           clock  59.95Hz
+....
+
+Where the current screen resolution is *1920x1200* and the output name is *VGA-1*.
+
+You can then generate the needed *Modeline* by executing:
+
+....
+cvt 1920 1200
+....
+
+Which might generate output:
+
+....
+# 1920x1200 59.88 Hz (CVT 2.30MA) hsync: 74.56 kHz; pclk: 193.25 MHz
+ Modeline "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync
+....
+
+As a test, you can make a script (use an appropriate name), that will
+enable that resolution. Use the output name (*VGA-1* in this example)
+and the tokens following  *Modeline* from above. There are three lines
+after the *#!/bin/bash* line.
+
+.~/display_1920x1200
+[source,bash]
+----
+#!/bin/bash
+xrandr --newmode "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync
+xrandr --addmode VGA-1 1920x1200_60.00
+xrandr --output VGA-1 --mode "1920x1200_60.00"
+----
+
+Be sure to *chmod u+x* the file before executing.
+
+If that is successful, you can use output name (*VGA-1* in this
+example) and *Modeline* from above to make a file (you may need to create
+  the directory first):
+
+./etc/X11/xorg.conf.d/10-monitor.conf 
+[source]
+----
+Section "Monitor"
+Identifier     "VGA-1"
+Option         "Enable" "true"
+Modeline "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync
+EndSection
+
+Section "Screen"
+Identifier     "Screen0"
+Device         "Device0"
+Monitor        "VGA-1"
+DefaultDepth    24
+#Option         "TwinView" "0"
+SubSection "Display"
+    Depth          24
+    Modes          "1920x1200_60.00"
+EndSubSection
+EndSection
+----
+
+You should *chmod* the permissions for directory with *o+rx* and the
+file with *o+r*, if those are not already set.
+
+You could then try restarting the display (after closing all windows) with:
+....
+systemctl restart gdm3
+....
+
+or rebooting.
+
+=== Fix for slow reboot/shutdown with *Wayland* disabled
+
+#TODO: Still slow for some cases (exact ones still not clear)#
+
+If you have chosen to disable *Wayland* for *gdm3* and have a problem with slow reboots/shutdowns, the following may help.
+
+1. Copy the file */lib/systemd/system/gdm3.service* into */etc/systemd/system/*.
+
+2. Comment out the *KillMode* line (which changes it to *control-group*, the default).
+
+3. Add a line *TimeoutStopSec=1* to the *[Service]* section.
+
+4. Execute:
++
+....
+systemctl daemon-reload
+....
++
+or reboot.
+
+=== Use "KeepAlive" to prevent VLAN firewall inactivity time-out
+
+If there is a VLAN firewall in use on the local network, it may be
+necessary to use "KeepAlive" for TCP connections to prevent inactivity
+time-outs for network connections from the FS to the VLBI equipment
+when not activity is occurring with the system. For some devices, having
+the time-out break the connect may cause an issue with the number of
+connections available.
+
+To use "KeepAlive" to prevent the inactivity time-outs, first install
+the package *libkeepalive0*:
+
+....
+apt-get install libkeepalive0
+....
+
+Then add the follow lines *oper* 's (and *prog* 's) *.profile* file:
+
+....
+export LD_PRELOAD=libkeepalive.so
+export KEEPCNT=20
+export KEEPIDLE=180
+export KEEPINTVL=60
+....
+
+If you get an error message about preloading *libkeepalive.so* when
+you use *ssh*, something that may help is to *unset LD_PRELOAD* before
+using *ssh* with the following added to *oper* 's (and *prog* 's)
+*.ssh/config* file:
+
+....
+Host *
+    ServerAliveInterval 300
+    ServerAliveCountMax 2
+....
+
+=== refresh_spare_usr2 with AUID accounts
+
+If you have a spare FS computer, the *refresh_spare_usr2* script can be  used
+to copy the operational computer's */usr2* partition to the spare
+computer.  Normally this partition holds all the operational FS
+programs and data. For this to work, the operational and spare
+computers must have the same set-up including particularly the same
+user accounts with same UIDs and GIDs for all account that have home
+directories on */usr2*, as well as other OS set-up information the FS
+may depends such as */etc/hosts* and */etc/ntp.conf*.
+
+The script is used on the spare computer. Neither computer should have anyone logged in
+logged in with a home directory on */usr2* nor should there be any activity occuring that
+will affect */usr2*.
+
+Normally, the script is run by *root* and requires direct login on the
+console. For the AUID environment it could be run by a user with a
+home directory that is not on */usr2*.  The following set-up allows
+for either possibility. If the script is run by a user other than
+*root*, it must be run with:
+
+....
+sudo refresh_spare_usr2
+....
+
+==== On *operational* computer
+
+===== Use *visudo* to add:
+
+....
+spare          ALL=(ALL) NOPASSWD: /usr/local/sbin/send_usr2
+....
+
+===== Create file:
+
+./usr/local/sbin/send_usr2
+[source,bash]
+----
+#!/bin/bash
+cd /usr2; tar --one-file-system -cf - .
+----
+
+Permissions: *rwxr-xr--*, ownership *root:root*.
+
+===== Create *spare* account:
+
+----
+adduser --uid 503 --gid 990 spare
+----
+
+==== On *spare* computer
+
+===== In *refresh_spare_usr2*, customize as usual and change:
+
+....
+ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | (cd /usr2; tar xpf - --totals)
+....
+
+to
+....
+ssh spare@operational sudo send_usr2 | (cd /usr2; tar xpf - --totals)
+....
+
+where *operational* is the name or IP of your operational computer.
+
+===== If *root* will run the script
+
+Create a key (unless *root* already has one). In any event, copy it to
+the *spare* account on your operational computer:
+
+----
+ssh-keygen
+ssh-copy-id spare@operational
+----
+
+where *operational* is the name or IP of your operational computer.
+
+===== For a different user than *root* to run the script
+
+IMPORTANT: They must not have their home directory on */usr2*.
+
+Use *visudo* to add
+
+....
+%spare         ALL=(ALL) /usr/local/sbin/refresh_spare_usr2
+....
+
+Create a *spare* group and add the user to the group:
+
+....
+addgroup spare
+adduser <user> spare
+....
+
+where *<user>* is the user that wll run the script.
+
+Create a key for the user (unless one already
+    exists). In any event, copy it to the *spare* account on your operational computer:
+
+----
+su - <user>
+ssh-keygen
+ssh-copy-id spare@operational
+----
+
+where *<user>* is the user that wll run the script and *operational*
+is the name or IP of your operational computer.
+
+==== On *operational* computer,
+
+===== Lock out *spare* account from normal login (but must have a shell):
+
+----
+usermod -L spare
+----
+#TODO: It may be necessary to disable password update policies for this account to avoid ssh being locked out#
+
+IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.

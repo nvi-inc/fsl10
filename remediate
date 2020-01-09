@@ -1,0 +1,609 @@
+#!/bin/bash -x
+set -e
+#
+if ! [ $(id -u) = 0 ]; then
+   echo "This script must be run as root."
+   exit 1
+fi
+#
+# 1.1.1 Disable unused filesystems
+#
+touch /etc/modprobe.d/CIS.conf
+cat >>/etc/modprobe.d/CIS.conf <<EOT
+# 1.1.1
+install freevxfs /bin/true
+install jffs2 /bin/true
+install hfs /bin/true
+install hfsplus /bin/true
+install udf /bin/true
+EOT
+#
+#rmmod freevxfs
+#rmmod jffs2
+#rmmod hfs
+#rmmod hfsplus
+#rmmod udf
+#
+# 1.1.3-1.1.5 Ensure nodevi,nosuid,noexec options set on /tmp partition
+#
+sed -i 's/ \/tmp \+ext4 \+defaults/&,nodev,nosuid,noexec/' /etc/fstab
+#Doesn't work
+## touch /etc/systemd/system/local-fs.target.wants/tmp.mount
+## cat >>/etc/systemd/system/local-fs.target.wants/tmp.mount <<EOT
+## [Mount]
+## What=tmpfs
+## Where=/tmp
+## Type=tmpfs
+## Options=mode=1777,strictatime,noexec,nodev,nosuid
+## EOT
+#
+##systemctl unmask tmp.mount
+##systemctl enable tmp.mount
+#
+mount -o remount,nodev /tmp
+mount -o remount,nosuid /tmp
+mount -o remount,noexec /tmp
+#
+# 1.1.7-9 Ensure nodevi,nosuid,noexec options set on /var/tmp partition
+#
+sed -i 's/ \/var\/tmp \+ext4 \+defaults/&,nodev,nosuid,noexec/' /etc/fstab
+#
+mount -o remount,nodev /var/tmp
+mount -o remount,nosuid /var/tmp
+mount -o remount,noexec /var/tmp
+#
+# 1.1.14 Ensure nodev option set on /home partition
+#
+sed -i 's/ \/home \+ext4 \+defaults/&,nodev/' /etc/fstab
+#
+mount -o remount,nodev /home
+#
+# 1.1.15-17 Ensure nodev,nosuid,noexec  option set on /dev/shm partition
+#
+cat >>/etc/fstab <<EOT
+tmpfs /dev/shm tmpfs defaults,nodev,nosuid,noexec 0 0
+EOT
+#
+mount -o remount,noexec /dev/shm
+#
+# 1.3.1 Ensure AIDE is installed
+#
+apt-get -y install aide aide-common
+aideinit
+#
+# 1.3.2 Ensure filesystem integrity is regularly checked
+#
+touch /etc/crontab
+cat >>/etc/crontab <<EOT
+0 5 * * * /usr/bin/aide.wrapper --config /etc/aide/aide.conf --check
+EOT
+#
+# 1.4.1 Ensure permissions on bootloader config are configured
+#
+#move to end so not overriden by update-grub's
+#chown root:root /boot/grub/grub.cfg
+#chmod og-rwx /boot/grub/grub.cfg
+#
+# 1.5.1 Ensure core dumps are restricted
+#
+touch /etc/security/limits.d/CIS.conf 
+cat >>/etc/security/limits.d/CIS.conf <<EOT
+# 1.5.1
+* hard core 0
+EOT
+touch /etc/sysctl.d/CIS.conf
+cat >>/etc/sysctl.d/CIS.conf <<EOT
+# 1.5.1
+fs.suid_dumpable = 0
+EOT
+#
+sysctl -w fs.suid_dumpable=0
+#
+# 1.5.3 Ensure address space layout randomization (ASLR) is enabled
+#
+touch /etc/sysctl.d/CIS.conf
+cat >>/etc/sysctl.d/CIS.conf <<EOT
+# 1.5.3
+kernel.randomize_va_space = 2
+EOT
+#
+sysctl -w kernel.randomize_va_space=2
+#
+# 1.6.2.1 Ensure AppArmor is enabled in the bootloader configuration
+#
+apt-get -y install apparmor apparmor-profiles apparmor-utils
+#
+sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& apparmor=1 security=apparmor/' /etc/default/grub
+update-grub
+#
+# 1.7.1.1 Ensure message of the day is configured properly
+#
+sed -i 's/^Debian GNU\/Linux/The system/' /etc/motd
+sed -i 's/ Debian GNU\/Linux//' /etc/motd
+#
+# 2.1.2 Ensure openbsd-inetd is not installed
+#
+apt-get -y remove openbsd-inetd
+apt-get -y purge  openbsd-inetd
+#
+# 2.2.1.2 Ensure ntp is configured
+#
+# actually makes it less secure
+#
+sed -i 's/ignore # was: \(.*\)limited/\1/' /etc/ntp.conf 
+#
+# 2.2.7 Ensure NFS and RPC are not enabled
+#
+## systemctl disable nfs-server
+## systemctl disable rpcbind
+#
+# 2.2.16 Ensure rsync service is not enabled
+#
+systemctl disable rsync
+#
+# 2.3.4 Ensure telnet client is not installed
+#
+apt-get -y remove telnet
+apt-get -y purge  telnet
+#
+# 3.1 Network Parameters (Host Only)
+#
+touch /etc/sysctl.d/CIS.conf
+cat >>/etc/sysctl.d/CIS.conf <<EOT
+# 3.1.1
+net.ipv4.ip_forward = 0
+net.ipv6.conf.all.forwarding = 0
+# 3.1.2
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+EOT
+# 3.1.1
+sysctl -w net.ipv4.ip_forward=0
+sysctl -w net.ipv6.conf.all.forwarding=0
+sysctl -w net.ipv4.route.flush=1
+sysctl -w net.ipv6.route.flush=1
+# 3.1.2
+sysctl -w net.ipv4.conf.all.send_redirects=0
+sysctl -w net.ipv4.conf.default.send_redirects=0
+sysctl -w net.ipv4.route.flush=1
+#
+# 3.2 Network Parameters (Host and Router)
+#
+touch /etc/sysctl.d/CIS.conf
+cat >>/etc/sysctl.d/CIS.conf <<EOT
+# 3.2.1
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+# 3.2.2
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+# 3.2.3
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
+# 3.2.4
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+# 3.2.5
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+# 3.2.6
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+# 3.2.7
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+# 3.2.8
+net.ipv4.tcp_syncookies = 1
+# 3.2.9
+net.ipv6.conf.all.accept_ra = 0
+net.ipv6.conf.default.accept_ra = 0
+EOT
+#
+# 3.2.4
+# needed because above doesn't work after boot for some reason
+# create a startup to fix this
+systemctl disable CISfix || :
+rm -f /etc/systemd/system/CISfix.service
+touch /etc/systemd/system/CISfix.service
+cat >>/etc/systemd/system/CISfix.service <<EOT
+[Unit]
+Description=CIS fix on startup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/CISfix
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOT
+rm -f /usr/local/sbin/CISfix
+touch /usr/local/sbin/CISfix
+cat >> /usr/local/sbin/CISfix <<EOT
+#!/bin/bash
+set -e
+# CIS 3.2.4
+sysctl -w net.ipv4.conf.all.log_martians=1
+sysctl -w net.ipv4.conf.default.log_martians=1
+sysctl -w net.ipv4.route.flush=1
+exit 0
+EOT
+chmod u+x /usr/local/sbin/CISfix
+systemctl enable CISfix.service
+#
+# 3.2.1
+sysctl -w net.ipv4.conf.all.accept_source_route=0
+sysctl -w net.ipv4.conf.default.accept_source_route=0
+sysctl -w net.ipv6.conf.all.accept_source_route=0
+sysctl -w net.ipv6.conf.default.accept_source_route=0
+sysctl -w net.ipv4.route.flush=1
+sysctl -w net.ipv6.route.flush=1
+# 3.2.2
+sysctl -w net.ipv4.conf.all.accept_redirects=0
+sysctl -w net.ipv4.conf.default.accept_redirects=0
+sysctl -w net.ipv6.conf.all.accept_redirects=0
+sysctl -w net.ipv6.conf.default.accept_redirects=0
+sysctl -w net.ipv4.route.flush=1
+sysctl -w net.ipv6.route.flush=1
+# 3.2.3
+sysctl -w net.ipv4.conf.all.secure_redirects=0
+sysctl -w net.ipv4.conf.default.secure_redirects=0
+sysctl -w net.ipv4.route.flush=1
+# 3.2.4
+sysctl -w net.ipv4.conf.all.log_martians=1
+sysctl -w net.ipv4.conf.default.log_martians=1
+sysctl -w net.ipv4.route.flush=1
+# 3.2.5
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sysctl -w net.ipv4.route.flush=1
+# 3.2.6
+sysctl -w net.ipv4.icmp_ignore_bogus_error_responses=1
+sysctl -w net.ipv4.route.flush=13.2.6
+# 3.2.7
+sysctl -w net.ipv4.conf.all.rp_filter=1
+sysctl -w net.ipv4.conf.default.rp_filter=1
+sysctl -w net.ipv4.route.flush=1
+# 3.2.8
+sysctl -w net.ipv4.tcp_syncookies=1
+sysctl -w net.ipv4.route.flush=1
+# 3.2.9
+sysctl -w net.ipv6.conf.all.accept_ra=0
+sysctl -w net.ipv6.conf.default.accept_ra=0
+sysctl -w net.ipv6.route.flush=1
+#
+# 3.5 Firewall Configuration
+#
+apt -y install ufw
+ufw allow OpenSSH
+ufw logging on
+ufw --force enable
+#
+# 3.5.2 Configure IPv6 ip6tables
+# disable ipv6
+#breaks 3.1 ipv6 checks
+#sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& ipv6.disable=1/' /etc/default/grub
+#update-grub
+#
+# 4.1 Configure System Accounting (auditd)
+#
+apt -y install auditd
+#
+#
+#
+sed -i 's/^\(space_left_action =\).*/# CIS 4.1.1.2\n#&\n\1 email\n#/' /etc/audit/auditd.conf
+sed -i 's/^\(admin_space_left_action =\).*/# CIS 4.1.1.2\n#&\n\1 halt\n#/' /etc/audit/auditd.conf
+#
+# 4.1.1.3 Ensure audit logs are not automatically deleted
+#
+sed -i 's/^\(max_log_file_action =\).*/# CIS 4.1.1.3\n#&\n\1 keep_logs\n#/' /etc/audit/auditd.conf
+#
+# 4.1.3 Ensure auditing for processes that start prior to auditd is enabled
+#
+sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& audit=1/' /etc/default/grub
+update-grub
+#
+# 4.1.4-4.1.11
+#
+touch /etc/audit/rules.d/CIS.rules
+cat >>/etc/audit/rules.d/CIS.rules <<EOT
+# CIS 4.1.4
+-a always,exit -F arch=b64 -S adjtimex -S settimeofday -k time-change
+-a always,exit -F arch=b32 -S adjtimex -S settimeofday -S stime -k time-change
+-a always,exit -F arch=b64 -S clock_settime -k time-change
+-a always,exit -F arch=b32 -S clock_settime -k time-change
+-w /etc/localtime -p wa -k time-change
+# CIS 4.1.5
+-w /etc/group -p wa -k identity
+-w /etc/passwd -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/security/opasswd -p wa -k identity
+# CIS 4.1.6
+-a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale
+-a always,exit -F arch=b32 -S sethostname -S setdomainname -k system-locale
+-w /etc/issue -p wa -k system-locale
+-w /etc/issue.net -p wa -k system-locale
+-w /etc/hosts -p wa -k system-locale
+-w /etc/network -p wa -k system-locale
+# CIS 4.1.7
+-w /etc/apparmor/ -p wa -k MAC-policy
+-w /etc/apparmor.d/ -p wa -k MAC-policy
+# CIS 4.1.8
+-w /var/log/faillog -p wa -k logins
+-w /var/log/lastlog -p wa -k logins
+-w /var/log/tallylog -p wa -k logins
+# CIS 4.1.9
+-w /var/run/utmp -p wa -k session
+-w /var/log/wtmp -p wa -k logins
+-w /var/log/btmp -p wa -k logins
+# CIS 4.1.10
+-a always,exit -F arch=b64 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chmod -S fchmod -S fchmodat -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S chown -S fchown -S fchownat -S lchown -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b64 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+-a always,exit -F arch=b32 -S setxattr -S lsetxattr -S fsetxattr -S removexattr -S lremovexattr -S fremovexattr -F auid>=1000 -F auid!=4294967295 -k perm_mod
+# CIS 4.1.11
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EACCES -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b64 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+-a always,exit -F arch=b32 -S creat -S open -S openat -S truncate -S ftruncate -F exit=-EPERM -F auid>=1000 -F auid!=4294967295 -k access
+EOT
+#
+# 4.1.12 Ensure use of privileged commands is collected
+#
+touch /etc/audit/rules.d/CIS-suid.rules
+cat >>/etc/audit/rules.d/CIS-suid.rules <<EOT
+# CIS 4.1.12
+EOT
+find / -xdev \( -perm -4000 -o -perm -2000 \) -type f | awk '{print \
+"-a always,exit -F path=" $1 " -F perm=x -F auid>=1000 -F auid!=4294967295 \
+-k privileged" }' >> /etc/audit/rules.d/CIS-suid.rules
+#
+# 4.1.13-4.1.8
+#
+touch /etc/audit/rules.d/CIS.rules
+cat >>/etc/audit/rules.d/CIS.rules <<EOT
+# CIS 4.1.13
+-a always,exit -F arch=b64 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+-a always,exit -F arch=b32 -S mount -F auid>=1000 -F auid!=4294967295 -k mounts
+# CIS 4.1.14
+-a always,exit -F arch=b64 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete
+-a always,exit -F arch=b32 -S unlink -S unlinkat -S rename -S renameat -F auid>=1000 -F auid!=4294967295 -k delete
+#CIS 4.1.15
+-w /etc/sudoers -p wa -k scope
+-w /etc/sudoers.d/ -p wa -k scope
+# CIS 4.1.16
+-w /var/log/sudo.log -p wa -k actions
+# CIS 4.1.17
+-w /sbin/insmod -p x -k modules
+-w /sbin/rmmod -p x -k modules
+-w /sbin/modprobe -p x -k modules
+-a always,exit -F arch=b64 -S init_module -S delete_module -k modules
+-a always,exit -F arch=b32 -S init_module -S delete_module -k modules
+# CIS 4.1.18
+-e 2
+EOT
+# 4.1 Configure System Accounting (auditd)
+#
+# activate rules
+#
+systemctl reload auditd
+#
+# 4.2.4 Ensure permissions on all logfiles are configured
+#
+chmod -R g-wx,o-rwx /var/log/*
+#
+# 5.1.2 Ensure permissions on /etc/crontab are configured
+#
+chown root:root /etc/crontab
+chmod og-rwx /etc/crontab
+#
+# 5.1.3 Ensure permissions on /etc/cron.hourly are configured
+#
+chown root:root /etc/cron.hourly
+chmod og-rwx /etc/cron.hourly
+#
+# 5.1.4 Ensure permissions on /etc/cron.daily are configured
+#
+chown root:root /etc/cron.daily
+chmod og-rwx /etc/cron.daily
+#
+# 5.1.5 Ensure permissions on /etc/cron.weekly are configured
+#
+chown root:root /etc/cron.weekly
+chmod og-rwx /etc/cron.weekly
+#
+# 5.1.6 Ensure permissions on /etc/cron.monthly are configured
+#
+chown root:root /etc/cron.monthly
+chmod og-rwx /etc/cron.monthly
+#
+# 5.1.7 Ensure permissions on /etc/cron.d are configured
+#
+chown root:root /etc/cron.d
+chmod og-rwx /etc/cron.d
+#
+# 5.1.8 Ensure at/cron is restricted to authorized users
+#
+rm -f /etc/cron.deny
+rm -f /etc/at.deny
+touch /etc/cron.allow
+touch /etc/at.allow
+chmod og-rwx /etc/cron.allow
+chmod og-rwx /etc/at.allow
+chown root:root /etc/cron.allow
+chown root:root /etc/at.allow
+#
+# 5.2.1 Ensure permissions on /etc/ssh/sshd_config are configured
+#
+chown root:root /etc/ssh/sshd_config
+chmod og-rwx /etc/ssh/sshd_config
+#
+# 5.2.4-5.2.18
+#
+touch /etc/ssh/sshd_config
+cat >>/etc/ssh/sshd_config <<EOT
+# CIS 5.2.4
+Protocol 2
+# CIS 5.2.7
+MaxAuthTries 4
+# 5.2.10
+PermitRootLogin no
+# 5.2.13
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+# 5.2.14
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,hmac-sha2-512,hmac-sha2-256
+# 5.2.15
+#KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group14-sha256,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,ecdh-sha2-nistp521,ecdh-sha2-nistp384,ecdh-sha2-nistp256,diffie-hellman-group-exchange-sha256
+# 5.2.16
+ClientAliveInterval 300
+ClientAliveCountMax 0
+# 5.2.17
+LoginGraceTime 60
+# 5.2.18
+DenyGroups rtx
+EOT
+#
+# 5.2.19 Ensure SSH warning banner is configured
+#
+sed -i 's/^\(Banner\).*/# CIS 5.2.19\n#&\n\1 \/etc\/issue.net\n#/' /etc/ssh/sshd_config
+#
+# 5.2 SSH Server Configuration
+#
+# activate changes
+#
+systemctl reload sshd
+#
+# 5.3.1 Ensure password creation requirements are configured
+#
+apt -y remove libpam-cracklib
+apt -y purge libpam-cracklib
+apt -y install libpam-pwquality
+#
+#already present
+##apt -y install libpam-cracklib
+##touch /etc/pam.d/common-password
+##cat >>/etc/pam.d/common-password <<EOT
+###
+### CIS 5.3.1
+##password requisite pam_pwquality.so retry=3
+##EOT
+#
+touch /etc/security/pwquality.conf 
+cat >>/etc/security/pwquality.conf <<EOT
+#
+# CIS 5.3.1
+minlen = 14
+dcredit = -1
+ucredit = -1
+ocredit = -1
+lcredit = -1
+#
+EOT
+#
+# 5.3.2 Ensure lockout for failed password attempts is configured
+#
+touch /etc/pam.d/common-auth
+cat >>/etc/pam.d/common-auth <<EOT
+auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900
+EOT
+#
+# 5.3.3 Ensure password reuse is limited
+#
+touch /etc/pam.d/common-password
+cat >>/etc/pam.d/common-password <<EOT
+password required pam_pwhistory.so remember=5
+EOT
+#
+# 5.4.1.1 Ensure password expiration is 365 days or less
+#
+sed -i 's/^\(PASS_MAX_DAYS\).*/# CIS 5.4.1.1\n#&\n\1 90\n#/' /etc/login.defs
+chage --maxdays 90 desktop
+chage --maxdays 90 root
+#
+# 5.4.1.2 Ensure minimum days between password changes is 7 or more
+#
+sed -i 's/^\(PASS_MIN_DAYS\).*/# CIS 5.4.1.2\n#&\n\1 7\n#/' /etc/login.defs
+chage --mindays 7 desktop
+chage --mindays 7 root
+#
+# 5.4.1.3 Ensure password expiration warning days is 7 or more
+#
+#already there
+#sed -i 's/^\(PASS_WARN_DAYS\).*/# CIS 5.4.1.3\n#&\n\1 7\n#/' /etc/login.defs
+chage --warndays 7 desktop
+chage --warndays 7 root
+#
+# 5.4.1.4 Ensure inactive password lock is 30 days or less
+#
+useradd -D -f 30
+chage --inactive 30 desktop
+# don't know if can do this root, but it seems like a bad idea
+#
+# 5.4.2 Ensure system accounts are non-login
+#
+for user in `awk -F: '($3 < 1000) {print $1 }' /etc/passwd`; do
+	if [ $user != "root" ]; then
+		usermod -L $user
+		if [ $user != "sync" ] && [ $user != "shutdown" ] && [ $user != "halt" ] && [ $user != "oper" ] && [ $user != "prog" ] ; then
+			usermod -s /usr/sbin/nologin $user
+		fi
+	fi
+done
+#
+# 5.4.4 Ensure default user umask is 027 or more restrictive
+#
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/profile
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/bash.bashrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/profile.d/bash_completion.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/profile.d/vte-2.91.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/csh.cshrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.4\numask 027\n#\n/' /etc/csh.login
+#
+# 5.4.5 Ensure default user shell timeout is 900 seconds or less
+#
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nTMOUT=900\n#\n/' /etc/profile
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nTMOUT=900\n#\n/' /etc/bash.bashrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nTMOUT=900\n#\n/' /etc/profile.d/bash_completion.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nTMOUT=900\n#\n/' /etc/profile.d/vte-2.91.sh
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nset autologout = 15\n#\n/' /etc/csh.cshrc
+sed -i '0,/^ *$/s/^ *$/\n# CIS 5.4.5\nset autologout = 15\n#\n/' /etc/csh.login
+#
+# 5.6 Ensure access to the su command is restricted
+#
+touch /etc/pam.d/su
+cat >>/etc/pam.d/su <<EOT
+auth required pam_wheel.so
+EOT
+#
+# 6.1.7 Ensure permissions on /etc/shadow- are configured
+#
+chown root:shadow /etc/shadow-
+chmod o-rwx,g-rw /etc/shadow-
+#
+# 6.1.9 Ensure permissions on /etc/gshadow- are configured
+#
+chown root:shadow /etc/gshadow-
+chmod o-rwx,g-rw /etc/gshadow-
+#
+# 6.2.6 Ensure root PATH Integrity
+#
+chmod go-w /usr/local/sbin
+chmod go-w /usr/local/bin
+#
+# 6.2.8 Ensure users' home directories permissions are 750 or more restrictive
+#
+chmod o-rx /home/desktop
+chmod o-rx /usr2/oper
+chmod o-rx /usr2/prog
+#
+# 1.4.1 Ensure permissions on bootloader config are configured
+#
+# must be after all grub-update usage
+#
+chown root:root /boot/grub/grub.cfg
+chmod og-rwx /boot/grub/grub.cfg

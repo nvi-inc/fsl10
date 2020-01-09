@@ -1,0 +1,4 @@
+#
+if ! [ -z "$XCOOKIE" ]; then
+   xauth add $XCOOKIE
+fi
