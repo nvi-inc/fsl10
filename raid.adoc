@@ -1,0 +1,296 @@
+= FS Linux 10 RAID Notes
+W.E. Himwich, J.F.H. Quick,and D.E. Horsley
+Draft 0.1  Jan 2020
+
+:sectnums:
+:experimental:
+:downarrow: &darr;
+
+== Introduction
+
+These notes are intended cover, albeit tersely, the major issues for
+RAID operations with FSL10. The disk lay-out has changed significantly
+since FSL9, which required updating the scripts that are used. In
+addition, the scripts have been extensively revised to provide more
+protection from possible errors in how they are used.
+
+This document is organized in these major sections:
+
+. Introduction
+. Guidelines for RAID operations
+. Disk rotation procedure
+. Update test procedure
+. Script descriptions
+. Useful commands
+
+== Guidelines for RAID operations
+
+The FSL10 RAID configuration normally uses two disks configured according to the FSL10 instructions. Below are mandatory and recommended guidelines.
+
+=== Mandatory practices
+
+These practices are fundamental to the operation of the RAID.
+
+. Never mix disks from different computers in one computer.
+. Never split up a RAID pair unless already synced (check with *mdstat*)
+ 
+A RAID pair can be moved together between computers if need be. A disk
+rotation or applying updates are probably the only reasons to split a
+pair.
+
+=== Recommended practices
+
+These recommendations are intended to provide consistent procedures and make it easier to understand any issues, if they occur.
+
+. Always use the lower number controller (slot) as the primary, label it as such, and the other slot as secondary
+. Make the upper (or left) slot the primary, the lower (or right) slot the secondary
+. Always boot for a refresh/blank with the primary slot turn-on and the secondary slot turned off: so it is clear which is the active disk
+. Label the disks (so visible when in use) with the system name and number them 1, 2, and 3, ...
+. Label the disks (so visible when in use) with their serial number, either from *lsblk --nodeps -no serial /dev/sda* when it is the only disk inserted or by examining the disk
+. When rotating disks, keep the disks in cyclical order (primary, secondary, shelf): 1, 2, 3; then 2, 3, 1;, then 3, 1, 2, then 1, 2, 3; and so on
+. Rotate disks for a given computer at least once a month, and before any updates
+. If you have a spare computer (and/or additional systems), keep the order of disks in sync between all the computers
+
+== Disk Rotation
+
+The section describes the disk rotation procedure.
+
+NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the secondary controller,
+
+. When the RAID is not recovering (check with *mdstat*): shutdown
+. Take disk from primary slot, put on shelf
+. Move disk from secondary slot to primary slot, keyed on
+. Move old shelf disk to secondary slot, keyed off
+. Boot (primary keyed on, secondary keyed off)
+. Login in as root
+. Run *refresh_secondary*
+. Key on secondary slot when prompted
+. If the script rejects the disk or prompts to continue, seek expert advice. Be sure to note any messages so they can be reported.
+. Let the refresh run to completion. The system can be used in the meantime, but may be a little slow.
+
+== Test upgrade of FS, system updates, or other changes
+
+Seek expert advice for this, but the basic plan is given below:
+
+. Perform a rotation (as an extra backup)
+. Wait for the refresh to finish (check with *mdstat*)
+. *mdadm /dev/md0 -f /dev/sda2*
+. *mdadm /dev/md0 -r /dev/sda2*
+. Install and test the update
+
+If the update is deemed successful:
+
+. Run *recover_raid*
+
+If the update is deemed to have failed:
+
+. Shutdown the computer
+. Key off the secondary slot
+. Reboot (primary keyed on, secondary keyed off)
+. Run *blank_secondary*
+. Key on secondary slot when prompted
+. Answer *y* to blank
+. Run *refresh_secondary*
+. Once the refresh is complete, you have recovered to the pre-test state
+
+== Script descriptions
+
+This section describes the several scrips that are used for RAID maintenance.
+
+=== *mdstat*
+
+This script can be used to check the status of the RAID. It is most useful for checking
+whether  recovery is process or has ended, but is also useful for showing the current state
+of the RAID, including any anomalies.
+
+=== *refresh_secondary*
+
+This can be used to refresh a shelf disk for the RAID as a new
+secondary disk (*sdb*) as part of a standard three (or more) disk
+rotation.
+
+Initially, some sanity checks are performed to confirm that the content the script intends to copy is
+where it expects it to be and has the right form.  Any primary disk (*sda*) will be rejected that:
+
+. Is not part of the RAID (*md0*)
+. Is removable (USB)
+. Has a boot scheme other than BIOS or UEFI
+
+For safety reasons, to ensure that only an old shelf disk is overwritten,
+any secondary disk (*sdb*) will be rejected that:
+
+. Was loaded (slot keyed on) before starting the script
++
+Unless overridden by *-A* or previously by this or the *blank_secondary* script.
+
+. Is removable (USB)
+. Is already part of RAID *md0*
+
++
+Which could only happen when run incorrectly with *-A* (or other
+interfering commands have been executed).
+
+. Has a RAID from a different computer, i.e., foreign
++
+Technically this could also be another RAID from the same computer, but not of a
+properly set up FSL10 computer, which should have only the one RAID
+
+. Has any part already mounted
++
+Again catching misuse of the *-A* option.
+
+. Has a different boot scheme than the primary
++
+And hence is probably from a different computer.
+
+. Has a different RAID UUID
++
+This would be a disk from a different computer. Though whether this
+check can actually trigger after the test for a foreign RAID above
+remains to be seen.
+
+. Was last booted at a future time (possibly due to mis-set clock or clocks)
+. Has had more write activity, i.e., is newer (if the primary was just booted, see below)
+. Has been booted by itself
+. Has a different partition layout than the primary
+
+Additionally, the script will give an opportunity to abort if the RAID
+partition on the secondary is smaller than the one on the primary.
+
+Except for the size check, if any of the checks reject the disk, we
+recommend you seek expert advice; please record the error report. If
+the size check issues a warning, it should be okay to proceed, if you have
+set-up a larger disk as replacement for a failed disk and it is the
+primary disk.
+
+The checks are included to make the refresh process as safe as
+possible, particular at a station with more than one FSL10 computer.
+We believe all the most common errors are trapped, but the script
+should still be used with care.
+
+The check on write activity is intended to prevent accidentally using
+the shelf to overwrite a newer disk from the RAID.  This check can be
+over-run if the primary has run for a considerable period of time
+before the refresh is attempted.  This should not be an issue if the
+refresh is attempted shortly after the shelf disk is booted for the
+first time by itself and the RAID was run for more than a trivial
+amount of time beforehand.
+
+If the disk being refreshed is from the same computer and has just been
+on the shelf unused since it was last rotated, it is safe to refresh
+and should be accepted by all the checks.
+
+The refresh will take several hours. The script provides a progress
+indicator that can safely be aborted (using kbd:[Ctrl+C] as described
+    by the on-screen instructions) if that is preferred.  An active
+screen saver may make it difficult to see the progress after awhile,
+       but pressing kbd:[shift] or some other key should make it
+       visible again.  If you abort the progress indicator, you can
+       check the progress later with *mdstat*. The system can be used
+       normally while it refreshing, but it may be a little slow.
+
+This script requires the secondary disk (*sdb*) to not be loaded, i.e.,
+the slot turned off, when the script is started. However, it has an
+option, *-A* (use only with expert advice), to "Allow" an already
+loaded disk to be used. It is intended to make remote operation
+possible and must be used with extra care. Once the disk has been
+either turned on (when prompted by the script) or "Allowed" with the
+*-A* option, it will be "Allowed" by both this script and
+*blank_secondary* which also supports this feature.
+
+=== *blank_secondary*
+
+This script should only be used with expert advice.
+
+It can be used to make *any* secondary disk (*sdb*) refreshable. It must
+be used with care and only on a secondary disk that you know is safe
+to erase. It will always ask you to confirm at least once before
+erasing.
+
+It will reject any secondary disk (*sdb*) that:
+
+. Was loaded (slot keyed on) before starting the script
++
+Unless you have just loaded it through *refresh_secondary*'s auspices or used
+the *-A* option to "Allow" it (see below).
+
+. Is already part of the RAID *md0*
+. Has any partition already mounted
+. Has a partition that is in RAID *md0*
++
+This is essentially redundant with the first point, but is included
+out of an abundance of caution.
+
+. Has a partition that is mounted in any RAID in common with *sda*
+
+If the disk to be erased is smaller than the primary, a warning will
+be printed.
+
+If the *-v* "verbose" option is used, relevant information for the following
+issues will displayed and an opportunity given to abort or continue:
+
+. Has a RAID from a different computer, i.e., foreign (no UUID check though!)
+. Based on the detected boot scheme, BIOS vs UEFI
+. Has a Linux filesystem partition (???)
+. Has an unused RAID component
+. Contains a raw LVM partition
+. Contains an unrecognized partition type
+. Before overwriting the partition table
+
+If you are sure the disk can be erased, these prompts can all be
+replied to with a ubd:[return] to continue (kbd:[Ctrl-C] aborts).
+
+With no *-v*, the script simply asks once for confirmation:
+
+....
+Are you sure you wish to blank "Secondary" disk /dev/sdb (y=yes, n=no)?
+....
+
+and then does all the necessary steps without displaying the
+information and prompts provided for *-v*..
+
+This script requires the secondary disk (*sdb*) to not be loaded, i.e.,
+the slot turned off, when the script is started. However, it has an
+option, *-A* (use only with expert advice), to "Allow" an already
+loaded disk to be used. It is intended to make remote operation
+possible and must be used with extra care. Once the disk has been
+either turned on (when prompted by the script) or "Allowed" with *-A*
+option, it will be "Allowed" by both this script and
+*refresh_secondary* which also supports this feature.
+
+=== *recover_raid*
+
+This script is only for use with expert advice.
+
+It can be used to recover a disk (*sda* or *sdb*) that has fallen out of RAID
+or been marked as faulty either by hand or due to disk errors.
+
+It normally works on *md0*, but a different *md* device can be specified as the first argument.
+
+It will reject disks if the RAID:
+
+. Does not need recovery
+. Is not in a recoverable state
+
+The recovery may be fairly quick, as short as a few minutes, if the
+disk is relatively fresh. You can check the progress with *mdstat*. The
+system can be used normally while it recovering, but it may be a
+little slow.
+
+== Useful commands
+
+=== Determine which disk is the primary/secondary
+
+Sometimes it may be helpful to determine which slot has the primary (*sda*) and/or secondary (*sdb*) disk.
+
+You can list the serial number of the primary disk with:
+
+*lsblk --nodeps -no serial /dev/sda*
+
+For the secondary:
+
+*lsblk --nodeps -no serial /dev/sdb*
+
+You can then compare the result to physical disk or label.
+
+#TODO: (make serial_primary/secondary scripts?)#
