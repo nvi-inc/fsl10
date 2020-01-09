@@ -31,9 +31,13 @@ if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -O $lockf ] || [ "$(cat $lockf)
 fi
 if [ ! -b $disk ]; then
 	while [ ! -b $disk ]; do
-		echo  -n -e "\rWaiting for disk $disk to be loaded, use 'Control-C' to safely abort ..."
+		echo  -n -e "\rWaiting for disk $disk to be loaded, use 'Control-C' to safely abort ... "
 		sleep 1
 	done
+	echo  -n -e "\r                                                                              "
+	echo  -n -e "\rWaiting for disk $disk to settle ... "
+	udevadm settle
+	sleep 2
 	echo $(lsblk --nodeps -no serial $disk) > $lockf
 	echo -e "done.\n"
 fi
@@ -56,13 +60,27 @@ fi
 
 if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
 	echo "WARNING: \"Secondary\" device $devname is smaller than sda"
-	echo -n "Continue anyway (Control-C aborts)?"
-	read $ans
+fi
+
+if [ $VERBOSE -eq 0 ]; then
+	echo -n "Are you sure you wish to blank \"Secondary\" disk $disk (y=yes, n=no)? "
+	badans=true
+	while [ "$badans" = "true" ]; do
+		read ans
+		case "$ans" in
+		y|yes)	badans=false
+			;;
+		n|no)	echo -e "Aborting."
+			exit 0
+			;;
+		*)	echo -e "Please answer with y=yes or n=no : \c"
+		esac
+	done
 fi
 
 for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 	partnum=$(echo $part | sed -e "s/$devname//")
-	[ $VERBOSE == 1 ] && sgdisk -i$partnum $disk | head -n 1
+	[ $VERBOSE -ne 0 ] && sgdisk -i$partnum $disk | head -n 1
 	raid=$(grep $part /proc/mdstat | cut -d' ' -f1)
 	if [ "$raid" = "md0" ]; then 
 		# Belt _and_ braces!
@@ -75,10 +93,10 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			exit 1
 		fi
 		# Part of a foreign RAID volume
-		if [ $VERBOSE == 1 ]; then
+		if [ $VERBOSE -ne 0 ]; then
 			echo -n "Detected /dev/$part in \"foreign\" RAID array: "
 			mdadm --detail /dev/$raid
-			echo -n "Enter to continue (Control-C aborts):"
+			echo -n "Delete RAID contents (Control-C aborts)? "
 			read $ans
 		fi
 		pvremove -ff -y /dev/$raid 2>/dev/null
@@ -86,38 +104,38 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 		mdadm --zero-superblock --force /dev/$part 2>/dev/null
 	else
 		# Standalone partition or part of a local RAID volume
-		if [ $VERBOSE == 1 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
+		if [ $VERBOSE -ne 0 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
 			echo "Detected BIOS boot partition: /dev/$part"
-			echo -n "Enter to continue (Control-C aborts):"
+			echo -n "Blank partition (Control-C aborts)? "
 			read $ans
-		elif [ $VERBOSE == 1 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'EFI System')" ]; then
+		elif [ $VERBOSE -ne 0 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'EFI System')" ]; then
 			echo "Detected EFI System partition: /dev/$part"
-			echo -n "Enter to continue (Control-C aborts):"
+			echo -n "Blank partition (Control-C aborts)? "
 			read $ans
-		elif [ $VERBOSE == 1 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'Linux filesystem')" ]; then
+		elif [ $VERBOSE -ne 0 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'Linux filesystem')" ]; then
 			echo "Detected Linux filesystem partition: /dev/$part"
 			tune2fs -l /dev/$part
-			echo -n "Enter to continue (Control-C aborts):"
+			echo -n "Blank partition (Control-C aborts)? "
 			read $ans
 		elif mdadm -b --examine /dev/$part 2>&1 | grep -q ARRAY ; then
-			if [ $VERBOSE == 1 ]; then
+			if [ $VERBOSE -ne 0 ]; then
 				echo -n "Detected (unused) RAID component: "
 				mdadm --examine /dev/$part
-				echo -n "Enter to continue (Control-C aborts):"
+				echo -n "Delete RAID contents (Control-C aborts)? "
 				read $ans
 			fi
 			mdadm --zero-superblock --force /dev/$part 2>/dev/null
 		elif pvdisplay /dev/$part 2>/dev/null | grep -q "/dev/$part" ; then
 			VG=$(pvs --noheadings -o vg_name /dev/$part | tr -d " ")
 			LVS=$(pvs --noheadings -o lv_name /dev/$part | tr -d " " | sort -u)
-			if [ $VERBOSE == 1 ]; then
+			if [ $VERBOSE -ne 0 ]; then
 				echo "Detected raw LVM physical volume:"
 				pvdisplay /dev/$part
 				echo -n "Which contains LV(s):"
 				for lv in $LVS; do
 					echo -n " $VG/$lv"
 				done; echo
-				echo -n "Enter to continue (Control-C aborts):"
+				echo -n "Delete LVM contents (Control-C aborts)? "
 				read $ans
 			fi
 			for lv in $LVS; do
@@ -125,27 +143,29 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			done
 			vgreduce -f $VG /dev/$part
 			pvremove -ff -y /dev/$part
-		elif [ $VERBOSE == 1 ]; then
+		elif [ $VERBOSE -ne 0 ]; then
 			echo "Detected unrecognised partition: /dev/$part"
-			echo -n "Enter to continue (Control-C aborts):"
+			echo -n "Blank partition (Control-C aborts)? "
 			read $ans
 		fi
 	fi
 	if [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
-		echo "Overwriting first ~1MB of partition /dev/$part ..."
+		[ $VERBOSE -ne 0 ] && echo -n "Overwriting first ~1MB of partition /dev/$part ... "
 		dd if=/dev/zero of=/dev/$part bs=4k count=240 2>/dev/null
 	else
-		echo "Overwriting first ~1GB of partition /dev/$part ..."
+		[ $VERBOSE -ne 0 ] && echo -n "Overwriting first ~1GB of partition /dev/$part ... "
 		dd if=/dev/zero of=/dev/$part bs=4k count=240000 2>/dev/null
 	fi
-	echo -e "done.\n"
+	[ $VERBOSE -ne 0 ] && echo -e "done.\n"
 done
-if [ $VERBOSE == 1 ]; then
-	echo -n "Erase partition table of disk $disk (Control-C aborts)?"
+if [ $VERBOSE -ne 0 ]; then
+	echo -n "Erase partition table of disk $disk (Control-C aborts)? "
 	read $ans
+	sgdisk -Z -o $disk
+else
+	sgdisk -Z -o $disk > /dev/null
 fi
-sgdisk -Z -o $disk
 partprobe $disk
-echo -e "\nDone."
+echo -e "\n\"Secondary\" disk $disk is now blank!"
 
 exit 0
