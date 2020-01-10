@@ -90,7 +90,7 @@ boot menu, which is typically accessed by pressing kbd:[F11] or kbd:[F12].
 
 === Set boot options and boot installer
 
-At the 'Installer boot menu':
+At the *Installer boot menu*:
 
 . _Highlight_ *Install* (or *Graphical install* -- only the installer
   interface differs -- but this may not work on some video hardware)
@@ -154,7 +154,7 @@ Backspace over the default hostname *debian* and type in the name
 you require (if not already retrieved vis DNS), then press  kbd:[Enter].
 Enter the required Internet Domain name (if not found) and press  kbd:[Enter].
 
-=== Enter a suitable 'root' password
+=== Enter a suitable *root* password
 
 Twice as prompted.
 
@@ -398,7 +398,7 @@ Enter *root* and press kbd:[Enter], then enter the *root* password you set
 earlier.
 
 
-=== Remove the dummy 'Desktop User' (optional)
+=== Remove the dummy *Desktop User* (optional)
 
 Unless you want another account that that is set up to use the default
 desktop environment, delete *desktop* with:
@@ -433,7 +433,7 @@ create the new file */etc/apt/apt.conf.d/00proxies* using *vi* containing:
 
 to use a proxy *proxy.some.where* at port 8080 for example.
 
-=== Edit '/etc/apt/sources.list'
+=== Edit */etc/apt/sources.list*
 
 Using your favourite text editor, eg *vi*, and comment out all *cdrom* entries
 (unless you don't have a decent Internet connection and need to use DVDs,
@@ -516,7 +516,7 @@ So that the update mechanism will work correctly, run
 
 == Third Stage Installation 
 
-=== 'fsadapt'
+=== *fsadapt*
 
 In the */root/fsl10* directory, start *fsadapt* with
 
@@ -602,7 +602,7 @@ More information RAID operation can be found at <<raid.adoc#,RAID notes for FSL1
     cd /usr2
     git clone https://github.com/nvi-inc/fs fs-git
 
-=== Set '/usr2/fs' link, set '/usr2/fs-git' permissions, and install default copies of all the FS related directories
+=== Set */usr2/fs* link, set */usr2/fs-git* permissions, and install default copies of all the FS related directories
 
    cd /usr2/fs-git
    make install
@@ -1074,7 +1074,7 @@ to update your data as described in that sub-section.
 
 When finished, reboot.
 
-=== Disable 'Desktop User'
+=== Disable *Desktop User*
 
 If you do not need the functionality available in the Desktop
 environment, you can disable the *desktop* account. You can re-enable
@@ -1103,7 +1103,7 @@ You can undo the *ssh* block  be removing the line (if it only has
 *desktop*) or removing *desktop* from the line and then restarting
 *sshd*.
 
-=== Remove 'ModemManager'
+=== Remove *ModemManager*
 
 If you use serial ports, it is strongly advised that you remove the
 ModemManager package to avoid conflicts over access to the ports.
@@ -1130,7 +1130,7 @@ ufw allow in proto udp to 239.0.2.0/24 from 128.171.102.0/24
 
 === Configure e-mail
 
-As "root", enter:
+As *root*, enter:
 
    dpkg-reconfigure exim4-config
 
@@ -1429,23 +1429,23 @@ systemctl daemon-reload
 +
 or reboot.
 
-=== Use "KeepAlive" to prevent VLAN firewall inactivity time-out
+=== Use *KeepAlive* to prevent VLAN firewall inactivity time-out
 
 If there is a VLAN firewall in use on the local network, it may be
-necessary to use "KeepAlive" for TCP connections to prevent inactivity
+necessary to use *KeepAlive* for TCP connections to prevent inactivity
 time-outs for network connections from the FS to the VLBI equipment
 when not activity is occurring with the system. For some devices, having
 the time-out break the connect may cause an issue with the number of
 connections available.
 
-To use "KeepAlive" to prevent the inactivity time-outs, first install
+To use *KeepAlive* to prevent the inactivity time-outs, first install
 the package *libkeepalive0*:
 
 ....
 apt-get install libkeepalive0
 ....
 
-Then add the follow lines *oper* 's (and *prog* 's) *.profile* file:
+Then add the follow lines *oper*'s (and *prog*'s) *.profile* file:
 
 ....
 export LD_PRELOAD=libkeepalive.so
@@ -1456,7 +1456,7 @@ export KEEPINTVL=60
 
 If you get an error message about preloading *libkeepalive.so* when
 you use *ssh*, something that may help is to *unset LD_PRELOAD* before
-using *ssh* with the following added to *oper* 's (and *prog* 's)
+using *ssh* with the following added to *oper*'s (and *prog*'s)
 *.ssh/config* file:
 
 ....
@@ -1588,7 +1588,7 @@ is the name or IP of your operational computer.
 ----
 usermod -L spare
 ----
-#TODO: It may be necessary to disable password update policies for thw operation computer *spare*  account to avoid *ssh* being locked out#
+#TODO: It may be necessary to disable password update policies for the operation computer *spare*  account to avoid *ssh* being locked out#
 
 #TODO: Test if a user with a home directory on */usr2* on the *spare* computer can run the script by *cd*-ing to a directory on a different partition first#
 
