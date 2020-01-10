@@ -1,8 +1,11 @@
 = CIS hardening FSL10, take 2
 Dave Horsley and Ed Himwich
-Oct 2019
+Jan 2020
 
 :experimental:
+:toc:
+
+== Introduction
 
 These notes detail adding extra security features to Field System
 Linux 10 as advised by Center for Internet Security (CIS). With the

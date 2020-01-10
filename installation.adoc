@@ -1,10 +1,14 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Draft 0.5  Nov 2019
+Version 2 - Jan 2020
 
 :sectnums:
 :experimental:
 :downarrow: &darr;
+
+:toc:
+
+== Introduction
 
 Please note that for each step in this guide, we recommend you
 carefully read all the included caveats and notes as the material is
@@ -69,7 +73,7 @@ single disk (for a test install etc.) is also annotated below.
 TIP: Installing to a single disk is recommended and has some
 advantages. It is faster and you can control when the syncing for the
 second disk occurs, such as when you leave for the evening.  The
-set-up of the second (and third) disk is covered in the "Post Install"
+set-up of the second (and third) disk is covered in the <<Post Install>>
 section. As mentioned in the warning above, you should start with the
 smallest disk.
 
@@ -372,10 +376,9 @@ You can now boot to your new OS.
 NOTE: If the login screen is painfully slow and your CPU does not
 include a GPU, you can probably fix the slowness by disabling
 *Wayland* in *gdm3*. However, the result may be that rebooting or
-shutting down will typically have an enforced 90-120 second delay. You
-may find the slow login screen preferable. (Please see the Optional
-    Items section for a method to fix slow reboots/shutdowns
-    with *Wayland* disabled.) To disable
+shutting down will typically have an enforced 90-120 second delay
+(<<Fix for slow reboot/shutdown with *Wayland* disabled,possible fix>>). You
+may find the slow login screen preferable. To disable
 *Wayland*, edit */etc/gdm3/daemon.conf* and uncomment the line
 *WaylandEnable=false*.  Then *gdm3* will need to be restarted either
 by rebooting or entering *systemctl restart gdm3*.  You can restart an
@@ -592,6 +595,8 @@ been installed.  The four tools are:
    * *blank_secondary* allows *root* to initialize a secondary disk, must be used with extreme care
    * *recover_raid* allows *root* to re-add a disk that fell out of the RAID back into it
 
+More information RAID operation can be found at <<raid.adoc#,RAID notes for FSL10>>.
+
 === Download the Field System
 
     cd /usr2
@@ -646,8 +651,7 @@ disk already in use in the RAID.
 
 NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
 
-NOTE: This sub-section assumes you have installed the "Tools for RAID"
-above.
+NOTE: This sub-section assumes you have <<Install tools for RAID (Optional),installed the Tools for RAID>>.
 
 Ensure the RAID is synced by checking that
 
@@ -673,10 +677,10 @@ Boot with just the primary disk installed. Use the script:
 
 The script will wait for the new disk to be turned on. Insert a new
 disk in the secondary slot. Turn the key to turn the disk on. There
-will be a few prompts asking to continue. If it is a new disk or you
-are sure it safe to erase this disk, it is safe to press return at
-each prompt. If you are unsure about this or otherwise need to abort
-use kbd:[Ctrl+C] as described in the prompts.
+will be a prompts asking if wish to proceed. If it is a new disk or you
+are sure it safe to erase this disk, it is safe to answer *y*.
+If you are unsure about this or otherwise need to abort
+answer *n*.
 
 ==== Refresh secondary disk
 
@@ -689,7 +693,7 @@ RAID (i.e., system) or has a different structure (i.e., was previously
 script will detect these conditions and stop with an appropriate
 message. In that case, consider carefully if it is safe to erase the
 disk (probably not). If you determine it is safe, follow the
-instructions in the previous sub-section for running *blank_secondary*.
+instructions for <<Initialize new disk>>.
 
 Boot with only the primary disk installed. The new secondary disk must
 be keyed off or removed. The script will refuse to run if there is a
@@ -816,6 +820,14 @@ To allow *operators* to use *refresh_secondary*, *shutdown*, and *reboot*, add (
    %operators      ALL=(ALL) /usr/local/sbin/refresh_secondary
    %operators      ALL=(ALL) /usr/sbin/shutdown
    %operators      ALL=(ALL) /usr/sbin/reboot
+
+To use these commands the *operators* will need to enter (respectively) from their AUID accounts:
+
+   sudo refresh_secondary
+   sudo shutdown
+   sudo reboot
+
+A password will be required. Trailing options can be used with the commands, as appropriate.
 
 If the  user can elevate to *root*, also add:
 
@@ -1057,7 +1069,7 @@ Look for *hostnames=*, use fully qualified name.
 ./etc/exim4/update-exim4.conf.conf
 +
 If you have hardcoded your the mail *HELO* message data as descibed in
-the sub-section "Generate FQDN in HELO for outgoing mail", you will need
+the sub-section <<Generate FQDN in *HELO* for outgoing mail>>, you will need
 to update your data as described in that sub-section.
 
 When finished, reboot.
@@ -1245,10 +1257,10 @@ the line below is the account name) that has received mail
 
     mail -f /var/mail/user
 
-=== Generate FQDN in 'HELO' for outgoing mail
+=== Generate FQDN in *HELO* for outgoing mail
 
 If mail from your system is being rejected by some servers because
-*exim4* is not providing a Fully Qualified Domain Name in its *HELO*
+*exim4* is not providing a Fully Qualified Domain Name (FQDN) in its *HELO*
 message, one way to fix this is to comment out the following lines
 in */etc/exim4/exim4.conf.template*:
 
@@ -1453,10 +1465,18 @@ Host *
     ServerAliveCountMax 2
 ....
 
-=== refresh_spare_usr2 with AUID accounts
+If not already set correctly, set the file's permissions and ownership for *oper* (analogously for *prog*) with:
 
-If you have a spare FS computer, the *refresh_spare_usr2* script can be  used
-to copy the operational computer's */usr2* partition to the spare
+....
+chmod 600 ~oper/.ssh/config
+chown oper.rtx ~oper/.ssh/config
+....
+
+=== *refresh_spare_usr2 with* AUID accounts
+
+If you have a spare FS computer, the
+<<raid.adoc#_refresh_spare_usr2,*refresh_spare_usr2*>> script can be
+used to copy the operational computer's */usr2* partition to the spare
 computer.  Normally this partition holds all the operational FS
 programs and data. For this to work, the operational and spare
 computers must have the same set-up including particularly the same
@@ -1568,6 +1588,8 @@ is the name or IP of your operational computer.
 ----
 usermod -L spare
 ----
-#TODO: It may be necessary to disable password update policies for this account to avoid ssh being locked out#
+#TODO: It may be necessary to disable password update policies for thw operation computer *spare*  account to avoid *ssh* being locked out#
+
+#TODO: Test if a user with a home directory on */usr2* on the *spare* computer can run the script by *cd*-ing to a directory on a different partition first#
 
 IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.

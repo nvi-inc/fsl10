@@ -6,5 +6,5 @@ raid.html: raid.adoc
 
 
 %.html: %.adoc
-	asciidoctor $^
+	asciidoctor -a toc $^
 
