@@ -1,7 +1,7 @@
 #!/bin/bash
 # For systems with GPT LVM RAID arrays, tries to reset everything on second disk
 
-usage() { echo "Usage: $0 [-A][-h]"; echo -e "  where\t-A\tAllow \"Secondary\" disk to be loaded at start"; echo -e " \t-v\tverbose (prompted) operation"; echo -e "  \t-h\tdisplay this help and exit"; }
+usage() { echo "Usage: $0 [-A][-h]"; echo -e "  where\t-A\tAllow \"Secondary\" disk to be loaded at start"; echo -e "  \t-h\tdisplay this help and exit"; }
 
 ACCEPT_LOAD=0
 VERBOSE=0
@@ -48,18 +48,22 @@ if grep "/boot/efi" /proc/mounts | grep -q "$disk"; then
 	mount /dev/sda1 /boot/efi
 fi
 
+# Perform sanity checks on secondary disk now that it's available
+if [ "$(cat /sys/block/$devname/removable)" != "0" ]; then
+	echo "ERROR: \"Secondary\" disk $disk is removable, check USB devices!!"
+	exit 1
+fi
 if mdadm --detail /dev/md0 | grep -q $disk; then
 	echo "ERROR: \"Secondary\" disk $disk is currently part of RAID /dev/md0!!"
 	exit 1
 fi
-
 if grep -q ^$disk /proc/mounts; then
 	echo "ERROR: Some part of \"Secondary\" disk $disk is mounted!!"
 	exit 1
 fi
-
-if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
-	echo "WARNING: \"Secondary\" device $devname is smaller than sda"
+if [ $(cat /sys/block/md0/size) -gt $(cat /sys/block/$devname/size) ]; then
+	echo "ERROR: \"Secondary\" device $devname is too small to house RAID /dev/md0"
+	exit 1
 fi
 
 if [ $VERBOSE -eq 0 ]; then

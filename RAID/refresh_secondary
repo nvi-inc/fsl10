@@ -78,10 +78,10 @@ if grep -q ^$disk /proc/mounts; then
 	echo "ERROR: Some part of \"Secondary\" disk $disk is mounted!!"
 	exit 1
 fi
-if [ $(cat /sys/block/sda/size) -gt $(cat /sys/block/$devname/size) ]; then
-	echo "WARNING: \"Secondary\" device $devname is smaller than sda"
-	echo -n "Continue anyway (Control-C aborts)?"
-	read $ans
+if [ $(cat /sys/block/md0/size) -gt $(cat /sys/block/$devname/size) ] ||
+    ([ -b $part2 ] && [ $(cat /sys/block/md0/size) -gt $(cat /sys/block/$devname/"$devname"2/size) ]); then
+	echo "ERROR: \"Secondary\" device $devname is too small to house RAID /dev/md0"
+	exit 1
 fi
 if ( [ $boot = "BIOS" ] && [ ! -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] ) ||
    ( [ $boot = "EFI" ] && [ ! -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] ); then
