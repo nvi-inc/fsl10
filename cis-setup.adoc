@@ -14,10 +14,6 @@ performed post-installation. All tests that failed, topics that need
 to be discussed, and issues with the benchmark remediations are
 provided in separate sections at the end of this document.
 
-A useful minimum set of features to apply would be the `ufw` section
-from the `remediate` script and to implement the `/etc/hosts.deny` and
-`/etc/hosts.allow` policies given below.
-
 This document  is based on the results for the CIS Debian Linux 9
 Benchmark v1.0.0 - Level 2 - Server.
 
@@ -213,7 +209,9 @@ System accounts (i.e., accounts with user ID less than 1000) `oper`
 and `prog` are needed for compatabilty with the wider VLBI community
 and are only used as service accounts from AUID accounts. They require
 a valid shell, but direct local login and `ssh` login (including with
-keys) are disabled for these two accounts.
+    keys) are disabled for these two accounts. Note that *oper* and
+*prog* have no password expiration (they has no passwords) or
+inactivity time-out, like other system accounts.
 
 == CIS issues that need to be addressed
 

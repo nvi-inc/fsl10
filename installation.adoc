@@ -736,8 +736,12 @@ section require *root* permissions.
 
 === Additional security and CIS Benchmarks
 
-For stations that wish to conform to the additional security recommendations of the
-Center for Internet Security (CIS), move on to the <<cis-setup.adoc#,CIS hardening FSL10>> document.
+For stations that wish to conform to the additional security
+recommendations of the Center for Internet Security (CIS), move on to
+the <<cis-setup.adoc#,CIS hardening FSL10>> document. Please also
+review the sub-sections below.
+
+==== Needed fix-ups
 
 There are two issues that need to be corrected after the CIS hardening.
 
@@ -756,9 +760,9 @@ systemctl restart cron
 2. The CIS hardening configuration of PAM causes uses of *sudo* that
 require a password to increment the failure count when a correct
 password is accepted, leading to eventual lock-out of the user using
-*sudo* when the *deny* tally count is reached.  To make sure the
+*sudo* when the *deny* lock-out failure count is reached.  To make sure the
 *tally2* failure count is reset after a successful *sudo* that
-required a passowd, add to:
+required a password, add to:
 
 +
 ./etc/pam.d/common-account
@@ -767,13 +771,45 @@ required a passowd, add to:
 account required pam_tally2.so
 ```
 +
-To reset a locked-out user after CIS hardening, use:
-+
+NOTE: To reset a locked-out user after CIS hardening, use */sbin/pam_tally2 -u <user> --reset*
+where *<user>* is the user account. Leave off the *--reset* to see what the current tally is.
+
+==== Alternate approach
+
+If you don't want the complete CIS hardening, which creates some
+inconveniences and is only required in certain environments, you may
+still be interested in applying a subset of the remediations. You can
+pick and choose those from the <<cis-setup.adoc#,CIS hardening FSL10>>
+document and its script.
+
+A useful minimum set of features to apply would be to install *ufw*
+and block everything except *ssh* and further restrict *ssh* access with
+TCP Wrappers.
+
+To install and configure *ufw* to only allow *ssh* for incoming conections, use the commands:
+
 ....
-/sbin/pam_tally2 -u <user> --reset
+apt -y install ufw
+ufw allow OpenSSH
+ufw --force enable
 ....
-+
-where *<user>* is the user name.
+
+A base set-up for TCP Wrappers is
+
+./etc/hosts.deny
+----
+ALL:ALL
+----
+
+./etc/hosts.allow
+----
+sshd:ALL
+----
+
+It is recommend that you further restrict *sshd* by using specific
+hosts and/or sub-domains instead of *ALL*. Please see
+*man{nbsp}hosts_access* for more information about configuring TCP
+Wrappers
 
 === Customize *root*'s *.bashrc* file
 
@@ -1445,32 +1481,44 @@ the package *libkeepalive0*:
 apt-get install libkeepalive0
 ....
 
-Then add the follow lines *oper*'s (and *prog*'s) *.profile* file:
+Then add the follow lines for *oper* (and *prog*):
 
+.~/.profile
+[source,bash]
 ....
-export LD_PRELOAD=libkeepalive.so
 export KEEPCNT=20
 export KEEPIDLE=180
 export KEEPINTVL=60
 ....
 
-If you get an error message about preloading *libkeepalive.so* when
-you use *ssh*, something that may help is to *unset LD_PRELOAD* before
-using *ssh* with the following added to *oper*'s (and *prog*'s)
-*.ssh/config* file:
+Then add the following alias for *oper* (and *prog*):
 
-....
+.~/.bash_aliases
+[source,bash]
+----
+alias fs='LD_PRELOAD=libkeepalive.so fs'
+----
+
+You will need to termimate the FS, log out, and log back in to activate these changes.
+
+If you need to have a persistent *ssh* connection, add the follow for *oper* (and *prog*):
+
+.~/.ssh/config file:
+[source]
+----
 Host *
     ServerAliveInterval 300
     ServerAliveCountMax 2
-....
+----
 
-If not already set correctly, set the file's permissions and ownership for *oper* (analogously for *prog*) with:
+If not already set correctly, set the *~/.ssh/config* file's
+permissions and ownership for *oper* (analogously for *prog*) with:
 
-....
+[source,bash]
+----
 chmod 600 ~oper/.ssh/config
 chown oper.rtx ~oper/.ssh/config
-....
+----
 
 === *refresh_spare_usr2 with* AUID accounts
 
@@ -1521,6 +1569,13 @@ Permissions: *rwxr-xr--*, ownership *root:root*.
 
 ----
 adduser --uid 503 --gid 990 spare
+----
+
+===== Disable password aging and inactivity time-out for this account:
+
+(Using a password will be disable further below.)
+----
+chage -I -1 -M 99999 spare
 ----
 
 ==== On *spare* computer
@@ -1588,7 +1643,6 @@ is the name or IP of your operational computer.
 ----
 usermod -L spare
 ----
-#TODO: It may be necessary to disable password update policies for the operation computer *spare*  account to avoid *ssh* being locked out#
 
 #TODO: Test if a user with a home directory on */usr2* on the *spare* computer can run the script by *cd*-ing to a directory on a different partition first#
 
