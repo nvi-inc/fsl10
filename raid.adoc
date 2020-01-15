@@ -10,7 +10,7 @@ Draft 0.3 - Jan 2020
 
 == Introduction
 
-These notes are intended cover, albeit tersely, the major issues for
+These notes are intended to cover, albeit tersely, the major issues for
 RAID operations with FSL10. The disk lay-out has changed significantly
 since FSL9, which required updating the scripts that are used. In
 addition, the scripts have been extensively revised to provide more
@@ -30,7 +30,7 @@ and recommended guidelines.
 These practices are fundamental to the operation of the RAID.
 
 . Never mix disks from different computers in one computer.
-. Never split up a RAID pair unless already synced (check with *mdstat*)
+. Never split up a RAID pair unless already synced, check with *mdstat*
  
 A RAID pair (kept in order) can be removed or moved between computers
 if need be. A disk rotation or applying updates are probably the only
@@ -44,7 +44,7 @@ These recommendations are intended to provide consistent procedures and make it 
 . Make the upper (or left) slot the *primary*, the lower (or right) slot the *secondary*
 . Always boot for a refresh/blank with the *primary* slot turned on and the *secondary* slot turned off: so it is clear which is the active disk
 . Label the disks (so visible when in use) with the system name and number them 1, 2, and 3, ...
-. Label the disks (so visible when in use) with their serial number, either from *lsblk --nodeps -no serial /dev/sda* when it is the only disk inserted or by examining the disk
+. Label the disks (so visible when in use) with their serial numbers, either from *mdstat* when only one disk inserted or by examining the disk
 . For reference, place the disk serial numbers in a file with their corresponding numbers, e.g.:
 
 +
@@ -67,7 +67,8 @@ The section describes the disk rotation procedure.
 
 NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the *secondary* controller,
 
-. When the RAID is not recovering (check with *mdstat*): shutdown
+. Wait until the RAID is not recovering, check with *mdstat*
+. Shutdown the system, e.g., *shutdown -h now*
 . Take disk from *primary* slot, put on *shelf*
 . Move disk from *secondary* slot to *primary* slot, keyed on
 . Move old *shelf* disk to *secondary* slot, keyed off
@@ -75,26 +76,33 @@ NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the
 . Login in as root
 . Run *refresh_secondary*
 . Key on *secondary* slot when prompted
-. If the script rejects the disk or prompts to continue, seek expert advice. Be sure to note any messages so they can be reported.
-. Let the refresh run to completion. The system can be used in the meantime, but may be a little slow.
+. If the script rejects the disk (and stops with an error), seek expert advice. Be sure to note any messages so they can be reported.
+. If the disk is accepted, let the refresh run to completion (the progress report can be aborted as indicated). The system can be used in the meantime, but may be a little slow.
 
 == Test upgrade of FS - system updates - or other changes
 
 Seek expert advice for this, but the basic plan is given below:
 
-. If a rotation hasn't just be completed, perform one (as an extra backup)
-. Wait for the refresh to finish (check with *mdstat*)
-. *mdadm /dev/md0 -f /dev/sda2*
-. *mdadm /dev/md0 -r /dev/sda2*
+. If a rotation hasn't just been completed, perform one (as an extra backup)
+. Before proceeding verify that there is no recovery in progress, check with *mdstat*
+. Drop the primary disk out of the RAID (as a backup) using the commands:
++
+....
+mdadm /dev/md0 -f /dev/sda2
+mdadm /dev/md0 -r /dev/sda2
+....
 . Install and test the update
 
-If the update is deemed successful:
+If the update is deemed *successful*:
 
-. Run *recover_raid*
+[start=5]
+. Run *recover_raid* to add the primary disk back into the RAID.
 . Once the recover completes, the system has been successfully updated.
 
-If the update is deemed to have failed:
+Alternatively, If the update is deemed to have *failed*, the system can be
+ recovered as follows:
 
+[start=5]
 . Shutdown the computer
 . Key off the *secondary* slot
 . Reboot (*primary* keyed on, *secondary* keyed off)
@@ -106,14 +114,17 @@ If the update is deemed to have failed:
 
 == Script descriptions
 
-This section describes the several scrips that are used for RAID maintenance.
+This section describes the various scripts that are used for RAID maintenance.
 
 === *mdstat*
 
 This script can be used by any user (not just *root*) to check the
-status of the RAID. It is most useful for checking whether  recovery
-is process or has ended, but is also useful for showing the current
+status of the RAID. It is most useful for checking whether a recovery
+is in process or has ended, but is also useful for showing the current
 state of the RAID, including any anomalies.
+
+The script also lists the serial number for all disks that are
+present.
 
 === *refresh_secondary*
 
@@ -133,7 +144,7 @@ any *secondary* disk (*sdb*) will be rejected that:
 
 . Was loaded (slot keyed on) before starting the script
 +
-Unless overridden by *-A* or previously by this or the *blank_secondary* script.
+Unless overridden by *-A* or previously loaded by this or the *blank_secondary* script.
 
 . Is removable (USB)
 . Is already part of RAID *md0*
@@ -163,17 +174,12 @@ remains to be seen.
 
 . Was last booted at a future time (possibly due to a mis-set clock or clocks)
 . Has had more write activity, i.e., is newer (if the *primary* was just booted, see below)
-. Has been booted by itself
-. Has a different partition layout than the *primary*
+. Has been booted separately by itself
+. Has a different partition layout from the *primary*
+. Is smaller than the size of the RAID on the primary disk.
 
-Additionally, the script will give an opportunity to abort if the RAID
-partition on the *secondary* is smaller than the one on the *primary*.
-
-Except for the size check, if any of the checks reject the disk, we
-recommend you seek expert advice; please record the error report. If
-the size check issues a warning, it should be okay to proceed, if you have
-set-up a larger disk as a replacement for a failed disk and it is the
-*primary* disk.
+If any of the checks reject the disk, we recommend you seek expert
+advice; please record the error report.
 
 The checks are included to make the refresh process as safe as
 possible, particular at a station with more than one FSL10 computer.
@@ -217,12 +223,12 @@ without having to reboot and cycle the disk off and on for each.
 
 This script should only be used with expert advice.
 
-It can be used to make _any_ *secondary* disk (*sdb*) refreshable. It
-must be used with care and only on a *secondary* disk that you know is
-safe to erase. Generally speaking you don't want to use it with a disk
-from a different FSL10 computer, except for very unusual circumstances, see
-<<Recovery scenarios>> for some example cases. It will always ask you to
-confirm at least once before erasing.
+It can be used to make _any_ *secondary* disk (*sdb*) refreshable, if
+it is big enough. It must be used with care and only on a *secondary*
+disk that you know is safe to erase. Generally speaking you don't want
+to use it with a disk from a different FSL10 computer, except for very
+unusual circumstances, see <<Recovery scenarios>> for some example
+cases. It will ask you to confirm before blanking.
 
 It will reject any *secondary* disk (*sdb*) that:
 
@@ -231,6 +237,7 @@ It will reject any *secondary* disk (*sdb*) that:
 Unless you have just loaded it through *refresh_secondary*'s auspices or used
 the *-A* option to "Allow" it (see below).
 
+. Is removable (USB)
 . Is already part of the RAID *md0*
 . Has any partition already mounted
 . Has a partition that is in RAID *md0*
@@ -240,50 +247,38 @@ out of an abundance of caution.
 
 . Has a partition that is mounted in any RAID in common with *sda*
 
-If the disk to be erased is smaller than the *primary*, a warning will
-be printed.
-
-If the *-v* "verbose" option is used, relevant information for the following
-issues will displayed and an opportunity given to abort or continue:
-
-. Has a RAID from a different computer, i.e., foreign (no UUID check though!)
-. Based on the detected boot scheme, BIOS vs UEFI
-. Has a Linux filesystem partition (???)
-. Has an unused RAID component
-. Contains a raw LVM partition
-. Contains an unrecognized partition type
-. Before overwriting the partition table
-
-If you are sure the disk can be erased, these prompts can all be
-replied to with a kbd:[return] to continue (kbd:[Ctrl-C] aborts).
-
-With no *-v*, the script simply asks once for confirmation:
-
-....
-Are you sure you wish to blank "Secondary" disk /dev/sdb (y=yes, n=no)?
-....
-
-and then does all the necessary steps without displaying the
-information and prompts provided for *-v*.
-
 This script requires the *secondary* disk (*sdb*) to not be loaded, i.e.,
 the slot turned off, when the script is started. However, it has an
 option, *-A* (use only with expert advice), to "Allow" an already
 loaded disk to be used. It is intended to make remote operation
 possible and must be used with extra care.
 
-If the disk is turned on (when prompted) during the script, it
-will automatically be "Allowed" by both this script and
+If the disk is turned on (when prompted) during the script, it will
+automatically be "Allowed" by both this script and
 *refresh_secondary*, which also supports this feature.  This allows
-you to then run *refresh_secondary* without having to cycle the disk off
-and on.
+you to then run *refresh_secondary* without having to reboot and
+cycle the disk off and on.
 
 === *recover_raid*
 
 This script is only for use with expert advice.
 
-It can be used to recover a disk (*sda* or *sdb*) that has fallen out of RAID
-or been marked as faulty either by hand or due to disk errors.
+This script can be used to recover a disk (*sda* or *sdb*) that has
+fallen out of RAID or been marked as faulty either by hand or due to
+disk errors.
+
+This script must only be used with a pair of disks that were most
+recently used _together_ in an active RAID. It is okay to use it in
+this case even if the *failed* disk fell out the RAID a long time ago
+and/or there have been extensive changes on the *working* disk.  It is
+okay to use if the system was rebooted (even multiples times) or the
+*working* disking was booted by itself since the *failed* disk fell
+out of the RAID.  However, this script must not be used if the
+*failed* disk was booted by itself or to refresh a *shelf* disk from
+the *working* disk. It is recommended to only use this script if the
+key switches for the disks have not been manipulated since the
+*failed* disk fell out of the RAID; in this case it should always be
+safe.
 
 It normally works on *md0*, but a different *md* device can be specified as the first argument.
 
@@ -317,6 +312,8 @@ It is recommended that the script be used (including initial test)
   testing the procedure in the <<Test upgrade of FS - system updates - or other changes>>
   section should be used.
 
+#TODO: modify script to echo mke2fs command to aid recovery from inadvertent Control-C and comment here.#
+
 == Multiple computer set-up
 
 You may have more than one FSL10 computer at a site, either an
@@ -340,8 +337,8 @@ the disks and not the computers. For information on how to configure this,
 
 The configuration of the system outside of the */usr2* partition
 between *operational* and *spare* computers should be maintained in
-parallel so the same capabilities are available on both. In
-particular, the any packages installed on one should also be installed
+parallel so that the same capabilities are available on both. In
+particular, any packages installed on one should also be installed
 on the other.  In addition, it is important that the user and group
 IDs of all users on the operational and spare computers be same. It
 should not be necessary to maintain parallelism with patches, but that
@@ -461,21 +458,3 @@ necessary to move connections for any serial/GPIB devices to the
 *metclient* are needed, they will need to be enabled. All needed
 volatile operational files that were created/modified after the last
 *refresh_spare_usr2* will need to be recreated.
-
-== Useful commands
-
-=== Determine which disk is the *primary*/*secondary*
-
-Sometimes it may be helpful to determine which slot has the *primary* (*sda*) and/or *secondary* (*sdb*) disk.
-
-You can list the serial number of the *primary* disk with (any user can execute these commands):
-
-*lsblk --nodeps -no serial /dev/sda*
-
-For the *secondary*:
-
-*lsblk --nodeps -no serial /dev/sdb*
-
-You can then compare the result to physical disk or label.
-
-#TODO: (make sn_*primary*/*secondary* scripts?)#
