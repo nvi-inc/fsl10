@@ -18,10 +18,16 @@ explanations that impact what you actually type.
 
 == Choosing architecture and creating installation media
 
-As of Field System version 10.0, both *i386* and *amd64* architecture are
-supported natively. However, some work may be required to port your station code
-from a 32-bit to a 64-bit OS. Some automatic tools have been developed for this,
-and can be provided upon request.
+As of Field System version 10.0, both *i386* and *amd64* architecture
+are supported natively. The *amd64* architecture is preferred and
+should be used if possible (it should be unless the processor is very
+old,
+~10+
+years). However, some work may be required to port your station
+code from a 32-bit to a 64-bit OS. Some automatic tools have been
+developed for this, and can be provided upon request. Usually the
+*i386* architecture will work on any processor. The *amd64*
+installation media will fail to boot on a system that is 32-bit only.
 
 To install Debian 9, you can either use a DVD or USB drive. The latter is
 faster, and also necessary if you wish to use UEFI. Directions for creating your
@@ -30,7 +36,7 @@ installation media can be found online.
 NOTE: Don't be confused by the *amd64* name, this architecture is supports both
 AMD and Intel manufactured x86-64 processors. This includes CPU lines such as
 Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel had a
-completing and incompatible 64 bit architecture.
+competing and incompatible 64-bit architecture.
 
 You can install a DVD drive, USB device, or over the network. Any revision of
 9.x installation's should work fine, but older revisions will want to download
@@ -49,9 +55,10 @@ https://www.debian.org/releases/stretch/installmanual
 
 == Motherboard setup
 
-Modern motherboards offer two forms of booting: native UEFI or BIOS emulation
-("Legacy"). Either modes of boot are supported by this installation guide, and
-you will be given alternatives when the instructions differ.
+Modern motherboards offer two forms of booting: native UEFI or BIOS
+emulation ("Legacy"). UEFI is the preferred approach.  Either mode of
+boot is supported by this installation guide, and you will be given
+alternatives when the instructions differ. 
 
 Decide which boot mode you wan to use and select it through the motherboard
 setup menu (typically by pressing kbd:[DEL] during POST).
@@ -96,6 +103,10 @@ At the *Installer boot menu*:
   interface differs -- but this may not work on some video hardware)
     * BIOS: press kbd:[Tab]; or
     * UEFI: kbd:[e], kbd:[{downarrow}] three times (*vmlinuz*), then kbd:[End]
+
+NOTE: If kbd:[e] doesn't work, UEFI is not available.
+
+[start=2]
 . To the end of the displayed command, add the additional options:
 
    locale=en_US.UTF8 netcfg/disable_dhcp=true time/zone=UTC
@@ -1501,6 +1512,13 @@ alias fs='LD_PRELOAD=libkeepalive.so fs'
 
 You will need to termimate the FS, log out, and log back in to activate these changes.
 
+A similar alias can used to allow other individual applications,
+to avoid the inactivity time-outs. A better
+solution is available for *ssh*, discussed below. It is also possible to put'
+*export{nbsp}LD_PRELOAD=libkeepalive.so* in *~/.profile* to enable it for all
+applications, but this may generate some error messages (in the case of
+*xterm* the error is apparently benign).
+
 If you need to have a persistent *ssh* connection, add the follow for *oper* (and *prog*):
 
 .~/.ssh/config file:
@@ -1526,14 +1544,15 @@ If you have a spare FS computer, the
 <<raid.adoc#_refresh_spare_usr2,*refresh_spare_usr2*>> script can be
 used to copy the operational computer's */usr2* partition to the spare
 computer.  Normally this partition holds all the operational FS
-programs and data. For this to work, the operational and spare
-computers must have the same set-up including particularly the same
-user accounts with same UIDs and GIDs for all account that have home
-directories on */usr2*, as well as other OS set-up information the FS
-may depends such as */etc/hosts* and */etc/ntp.conf*.
+programs and data. For this to work correctly, the operational and
+spare computers should have the same set-up including particularly the
+same user accounts with same UIDs and GIDs in parallel for all accounts,
+     particularly for those that have home directories on */usr2*, as
+     well as other OS set-up information the FS may depends such as
+     */etc/hosts* and */etc/ntp.conf*.
 
 The script is used on the spare computer. Neither computer should have anyone logged in
-logged in with a home directory on */usr2* nor should there be any activity occuring that
+with a home directory on */usr2* nor should there be any activity occuring that
 will affect */usr2*.
 
 Normally, the script is run by *root* and requires direct login on the
