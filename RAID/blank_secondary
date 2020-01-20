@@ -27,6 +27,7 @@ lockf=/tmp/.accept_load
 # Now get the user to load the Secondary disk
 if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -O $lockf ] || [ "$(cat $lockf)" != "$(lsblk --nodeps -no serial $disk)" ]); then
 	echo "ERROR:\"Secondary\" disk $disk must not be loaded before start of script"
+	echo "(You may want to use the '-A' option to [A]llow if this is intentional)"
 	exit 1
 fi
 if [ ! -b $disk ]; then
@@ -49,10 +50,6 @@ if grep "/boot/efi" /proc/mounts | grep -q "$disk"; then
 fi
 
 # Perform sanity checks on secondary disk now that it's available
-if [ "$(cat /sys/block/$devname/removable)" != "0" ]; then
-	echo "ERROR: \"Secondary\" disk $disk is removable, check USB devices!!"
-	exit 1
-fi
 if mdadm --detail /dev/md0 | grep -q $disk; then
 	echo "ERROR: \"Secondary\" disk $disk is currently part of RAID /dev/md0!!"
 	exit 1
@@ -64,6 +61,13 @@ fi
 if [ $(cat /sys/block/md0/size) -gt $(cat /sys/block/$devname/size) ]; then
 	echo "ERROR: \"Secondary\" device $devname is too small to house RAID /dev/md0"
 	exit 1
+fi
+if [ "$(cat /sys/block/$devname/removable)" != "0" ]; then
+	echo "WARNING: \"Secondary\" disk $disk is removable:"
+	echo -n " $disk: "$(lsblk --nodeps -no tran $disk | tr [:lower:] [:upper:])
+	echo -n " "$(lsblk --nodeps -no type $disk)
+	echo -n ", model" $(lsblk --nodeps -no model $disk)
+	echo ", s/n "$(lsblk --nodeps -no serial $disk)
 fi
 
 if [ $VERBOSE -eq 0 ]; then
@@ -110,16 +114,16 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 		# Standalone partition or part of a local RAID volume
 		if [ $VERBOSE -ne 0 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
 			echo "Detected BIOS boot partition: /dev/$part"
-			echo -n "Blank partition (Control-C aborts)? "
+			echo -n "Wipe partition (Control-C aborts)? "
 			read $ans
 		elif [ $VERBOSE -ne 0 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'EFI System')" ]; then
 			echo "Detected EFI System partition: /dev/$part"
-			echo -n "Blank partition (Control-C aborts)? "
+			echo -n "Wipe partition (Control-C aborts)? "
 			read $ans
 		elif [ $VERBOSE -ne 0 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'Linux filesystem')" ]; then
 			echo "Detected Linux filesystem partition: /dev/$part"
 			tune2fs -l /dev/$part
-			echo -n "Blank partition (Control-C aborts)? "
+			echo -n "Wipe partition (Control-C aborts)? "
 			read $ans
 		elif mdadm -b --examine /dev/$part 2>&1 | grep -q ARRAY ; then
 			if [ $VERBOSE -ne 0 ]; then
@@ -149,27 +153,35 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			pvremove -ff -y /dev/$part
 		elif [ $VERBOSE -ne 0 ]; then
 			echo "Detected unrecognised partition: /dev/$part"
-			echo -n "Blank partition (Control-C aborts)? "
+			echo -n "Wipe partition (Control-C aborts)? "
 			read $ans
 		fi
 	fi
-	if [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
-		[ $VERBOSE -ne 0 ] && echo -n "Overwriting first ~1MB of partition /dev/$part ... "
-		dd if=/dev/zero of=/dev/$part bs=4k count=240 2>/dev/null
+	if [ $VERBOSE -ne 0 ]; then
+		echo -n "Wiping partition /dev/$part ... "
+		wipefs -a /dev/$part
+		echo -e "done.\n"
 	else
-		[ $VERBOSE -ne 0 ] && echo -n "Overwriting first ~1GB of partition /dev/$part ... "
-		dd if=/dev/zero of=/dev/$part bs=4k count=240000 2>/dev/null
+		wipefs -aq /dev/$part > /dev/null
 	fi
-	[ $VERBOSE -ne 0 ] && echo -e "done.\n"
 done
 if [ $VERBOSE -ne 0 ]; then
 	echo -n "Erase partition table of disk $disk (Control-C aborts)? "
 	read $ans
-	sgdisk -Z -o $disk
+	if $(partprobe -ds $disk | grep -q msdos); then
+		sfdisk --delete $disk
+	else
+		sgdisk -Z -o $disk
+	fi
+	wipefs -a $disk
 else
-	sgdisk -Z -o $disk > /dev/null
+	if $(partprobe -ds $disk | grep -q msdos); then
+		sfdisk --delete $disk > /dev/null
+	else
+		sgdisk -Z -o $disk > /dev/null
+	fi
+	wipefs -aq $disk > /dev/null
 fi
-partprobe $disk
 echo -e "\n\"Secondary\" disk $disk is now blank!"
 
 exit 0
