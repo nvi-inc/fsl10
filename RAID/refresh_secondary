@@ -24,16 +24,36 @@ part1="$disk"1
 part2="$disk"2
 lockf=/tmp/.accept_load
 
+if [ ! -b /dev/md0 ]; then
+	echo "ERROR: RAID /dev/md0 does not exist!!"
+	exit 1
+fi
+if mdadm --detail /dev/md0 2>&1 | grep -q ": clean $" ; then
+	echo "ERROR: RAID /dev/md0 does not need recovery!!"
+	exit 1
+fi
+if ! mdadm --detail /dev/md0 2>&1 | grep -q ", degraded $" ; then
+	echo "ERROR: RAID /dev/md0 is not in a recoverable state"
+	exit 1
+fi
+
 # Perform sanity checks on primary disk first
 if ! mdadm --detail /dev/md0 | grep -q /dev/sda; then
-        echo "ERROR: \"Primary\" disk /dev/sda is not part of RAID /dev/md0!!"
+	echo "ERROR: \"Primary\" disk /dev/sda is not part of RAID /dev/md0!!"
 	exit 1
 fi
 if [ "$(cat /sys/block/sda/removable)" != "0" ]; then
-	echo "ERROR: \"Primary\" disk /dev/sda is removable, check USB devices!!"
-	exit 1
+	echo "WARNING: \"Primary\" disk /dev/sda is removable:"
+	echo -n " /dev/sda: "$(lsblk --nodeps -no tran /dev/sda | tr [:lower:] [:upper:]) 
+	echo -n " "$(lsblk --nodeps -no type /dev/sda)
+	echo -n ", model" $(lsblk --nodeps -no model /dev/sda)
+	echo ", s/n "$(lsblk --nodeps -no serial /dev/sda)
+	echo -n "Press <Enter> if you wish to continue anyway (Control-C aborts) "
+	read $ans
 fi
-if [ ! -z "$(sgdisk -i1 /dev/sda | grep 'BIOS boot')" ] && [ ! -d /boot/efi ]; then
+if $(partprobe -ds /dev/sda | grep -q msdos) && [ ! -d /boot/efi ]; then
+	boot="MBR"
+elif [ ! -z "$(sgdisk -i1 /dev/sda | grep 'BIOS boot')" ] && [ ! -d /boot/efi ]; then
 	boot="BIOS";
 elif [ ! -z "$(sgdisk -i1 /dev/sda | grep 'EFI System')" ] && [ -d /boot/efi ]; then
 	boot="EFI";
@@ -45,6 +65,7 @@ fi
 # Now get the user to load the Secondary disk
 if [ -b $disk ] && [ $ACCEPT_LOAD == 0 ] && ([ ! -O $lockf ] || [ "$(cat $lockf)" != "$(lsblk --nodeps -no serial $disk)" ]); then
 	echo "ERROR:\"Secondary\" disk $disk must not be loaded before start of script"
+	echo "(You may want to use the '-A' option to [A]llow if this is intended)"
 	exit 1
 fi
 if [ ! -b $disk ]; then
@@ -62,11 +83,17 @@ fi
 
 # Perform sanity checks on secondary disk now that it's available
 if [ "$(cat /sys/block/$devname/removable)" != "0" ]; then
-	echo "ERROR: \"Secondary\" disk $disk is removable, check USB devices!!"
-	exit 1
+	echo "WARNING: \"Secondary\" disk $disk is removable:"
+	echo -n " $disk: "$(lsblk --nodeps -no tran $disk | tr [:lower:] [:upper:])
+	echo -n " "$(lsblk --nodeps -no type $disk)
+	echo -n ", model" $(lsblk --nodeps -no model $disk)
+	echo ", s/n "$(lsblk --nodeps -no serial $disk)
+	echo -n "Press <Enter> if you wish to continue anyway (Control-C aborts) "
+	read $ans
 fi
 if mdadm --detail /dev/md0 | grep -q $disk; then
-        echo "ERROR: \"Secondary\" disk $disk is already part of RAID /dev/md0!!"
+	echo "ERROR: \"Secondary\" disk $disk is still part of RAID /dev/md0!!"
+	echo "(Perhaps you should actually be using 'recover_raid' instead)"
 	exit 1
 fi
 if grep -q " $devname" /proc/mdstat; then
@@ -83,8 +110,10 @@ if [ $(cat /sys/block/md0/size) -gt $(cat /sys/block/$devname/size) ] ||
 	echo "ERROR: \"Secondary\" device $devname is too small to house RAID /dev/md0"
 	exit 1
 fi
-if ( [ $boot = "BIOS" ] && [ ! -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] ) ||
-   ( [ $boot = "EFI" ] && [ ! -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] ); then
+if [ ! -z "$(sgdisk -i1 $disk | grep 'GUID code')" ] &&
+   (( [ $boot = "MBR" ] && ! $(partprobe -ds $disk | grep -q msdos) ) ||
+    ( [ $boot = "BIOS" ] && [ -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] ) ||
+    ( [ $boot = "EFI" ] && [ -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] )); then
 	echo "ERROR: boot scheme on \"Secondary\" disk $disk does not match \"Primary\" disk /dev/sda"
 	echo "(You should use blank_secondary to reset the second disk)"
 	exit 1
@@ -127,8 +156,12 @@ fi
 if [ "$(partprobe -s /dev/sda | cut -d' ' -f2-)" != "$(partprobe -s $disk | cut -d' ' -f2-)" ]; then
 	if [ "$(partprobe -s $disk | cut -d' ' -f3-)" = "partitions" ]; then
 		echo -n "Partitioning blank \"Secondary\" disk $disk ... "
-		sgdisk -R$disk /dev/sda > /dev/null
-		sgdisk -G $disk > /dev/null
+		if [ $boot = "MBR" ]; then
+			sfdisk -d /dev/sda | sfdisk /dev/sdb > /dev/null
+		else
+			sgdisk -R$disk /dev/sda > /dev/null
+			sgdisk -G $disk > /dev/null
+		fi
 		partprobe $disk
 		echo "done."
 	else
@@ -139,7 +172,7 @@ if [ "$(partprobe -s /dev/sda | cut -d' ' -f2-)" != "$(partprobe -s $disk | cut 
 fi
 
 # Next install the bootloader to the Secondary disk
-if [ $boot = "BIOS" ]; then
+if [ $boot = "MBR" ] || [ $boot = "BIOS" ]; then
 	echo -n "Installing GRUB bootloader in BIOS mode on \"Secondary\" disk $disk ... "
 	grub-install $disk
 	echo "done."
