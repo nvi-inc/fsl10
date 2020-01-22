@@ -131,14 +131,14 @@ if [ -b $part2 ] && [ $(mdadm --examine -Y /dev/sda2 | grep TIME | cut -d'=' -f2
 	exit 1
 fi
 if [ -b $part2 ] && [ $(mdadm --examine -Y /dev/sda2 | grep EVENTS | cut -d'=' -f2) -lt $(mdadm --examine -Y $part2 | grep EVENTS | cut -d'=' -f2) ]; then
-	echo "ERROR: \"Secondary\" disk $part2 does not contain an older copy of \"Primary\" disk /dev/sda2"
+	echo "ERROR: \"Secondary\" disk $part2 EVENT count is higher than the \"Primary\" disk /dev/sda2"
 	echo "(You should use blank_secondary to reset the second disk)"
 	exit 1
 fi
 
 # Check if "Secondary" disk has been booted separately
 if [ -b $part2 ] && [ "$(mdadm --examine $part2 | grep "Array State" | cut -d' ' -f7)" != "AA" ]; then
-	echo "ERROR: \"Secondary\" disk $part2 appears to have been booted separately!!"
+	echo "ERROR: \"Secondary\" disk $part2 has been used separately since last in sync"
 	echo "(You should use blank_secondary to reset the second disk)"
 	exit 1
 fi
