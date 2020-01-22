@@ -30,7 +30,7 @@ developed for this, and can be provided upon request. Usually the
 installation media will fail to boot on a system that is 32-bit only.
 
 To install Debian 9, you can either use a DVD or USB drive. The latter is
-faster, and also necessary if you wish to use UEFI. Directions for creating your
+faster, and also easier if you wish to use UEFI. Directions for creating your
 installation media can be found online. 
 
 NOTE: Don't be confused by the *amd64* name, this architecture is supports both
@@ -60,7 +60,7 @@ emulation ("Legacy"). UEFI is the preferred approach.  Either mode of
 boot is supported by this installation guide, and you will be given
 alternatives when the instructions differ. 
 
-Decide which boot mode you wan to use and select it through the motherboard
+Decide which boot mode you want to use and select it through the motherboard
 setup menu (typically by pressing kbd:[DEL] during POST).
 
 Also make sure that the motherboard time is set to the current Universal time, ie.
@@ -117,6 +117,9 @@ NOTE: If kbd:[e] doesn't work, UEFI is not available.
 
 NOTE: You may omit the *netcfg/disable_dhcp=true* if you want to use DHCP to
 configure the network settings of this machine, though this is not advised.
+You can additionally use "partman-partitioning/default_label=gpt" if you wish
+to force the use of a GPT partition table on a disk that is smaller than 2 GB,
+but beware - some older BIOS versions cannot handle GPT formatted disks.
 
 The installer will now boot.
 
@@ -213,11 +216,11 @@ your disk, as above, and get *FREE SPACE*.
 . Select *Create a new partition*
 
 .  Then for
-** BIOS: Enter *1MB* in the size, then select *Beginning* of the disk.
+** BIOS: Enter *1MB* in the size, choose *Primary* (rather than *Logical*) if asked for the partition type, then select *Beginning* of the disk.
 ** UEFI:  Enter *1GB* in the size, then select *Beginning* of the disk.
 
 . Then for
-** BIOS: Select *Use as* then select *Reserved BIOS boot area*
+** BIOS: Select *Use as* then select *Reserved BIOS boot area*, or alternatively *do not use the partition* if the former option is not displayed.
 ** UEFI: Select *Use as* then select *EFI System Partition (ESP)*
 
 . Now press *Done setting up the partition*.
@@ -227,7 +230,7 @@ your disk, as above, and get *FREE SPACE*.
 NOTE: You may see a small *1MB FREE SPACE* at the start of the disk. This is
 fine, just be sure to choose the large *FREE SPACE* at the end of the disk.
 
-. This time choose the whole amount of free space (the default).
+. This time choose the whole amount of free space (the default) and choose *Primary* for the partition type if asked.
 
 . Select *Use as: physical volume for RAID*, then *Done setting up the partition*
 
@@ -295,6 +298,9 @@ optional unless you are applying CIS hardening.
 . Back in the partition screen, select *Finish partitioning and write changes to
 the disks* and select *Yes* to write the changes. For big disks, it may take
 a little time to create the ext4 file systems.
+
+The Debian base system is now installed from the installation media, which
+usually only takes a few minutes.
 
 === Configure the package manager
 
@@ -497,7 +503,7 @@ First install *git* and *deselect* and update *dselect*:
 . Feed the package selections into *dpkg* using the command
 +
    dpkg --set-selections < selections/fsl10_amd64.selections
-   (or dpkg --set-selections < selections/fsl10_i686.selections)
+   (or dpkg --set-selections < selections/fsl10_i386.selections)
 
 
 . Start the additional package installation with
@@ -725,7 +731,7 @@ Run the script:
   
 When the script says it is waiting for the second disk, key it on.
 
-Once your reach the message that it recovering, you can resume using
+Once your reach the message that it is recovering, you can resume using
 the computer as usual. You can stop the updating of the *recoverying*
 message wth kbd:[Ctrl+C] as described in the output. If later you want
 to check the progress of the status of the RAID resync, you can use:
