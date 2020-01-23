@@ -1,10 +1,10 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 2 - Jan 2020
+Version 1.9 - Jan 2020
 
 :sectnums:
 :experimental:
-:downarrow: &darr;
+:downarrow: &downarrow;
 
 :toc:
 
@@ -102,9 +102,12 @@ At the *Installer boot menu*:
 . _Highlight_ *Install* (or *Graphical install* -- only the installer
   interface differs -- but this may not work on some video hardware)
     * BIOS: press kbd:[Tab]; or
-    * UEFI: kbd:[e], kbd:[{downarrow}] three times (*vmlinuz*), then kbd:[End]
+    * UEFI: press kbd:[e], then the *downarrow* three times (*vmlinuz*), then kbd:[End]
 
-NOTE: If kbd:[e] doesn't work, UEFI is not available.
+// The following  does not display properly in asciidoctor-pdf for PDF:
+// * UEFI: press kbd:[e], then kbd:[{downarrow}] three times (*vmlinuz*), then kbd:[End]
+
+NOTE: If kbd:[e] doesn't work, UEFI is not available.  It may be possible to enable it in the BIOS.
 
 [start=2]
 . To the end of the displayed command, add the additional options:
