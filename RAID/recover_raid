@@ -1,5 +1,5 @@
 #!/bin/bash
-# Recover any failed and/or missing disks back into an active raid
+# Recover any failed and/or missing devices back into an active RAID
 
 if [ $# -gt 0 ]; then
 	raid=/dev/$1
@@ -22,10 +22,41 @@ if ! mdadm --detail $raid 2>&1 | grep -q ", degraded $" ; then
 	exit 1
 fi
 
-echo "Re-adding failed / missing disk(s) to RAID array $raid ... "
+# If there are still sufficient devices available, re-adding 'failed' should do the trick
+if [ $(mdadm -D $raid | grep "Raid Devices" | cut -c19-) -eq $(mdadm -D $raid | grep "Total Devices" | cut -c19-) ]; then
+	# This should always be safe as any faulty device must be in this RAID set already
+	echo "Re-adding failed device(s) to RAID array $raid ... "
+	mdadm $raid --re-add failed
+else
+	# Some devices are missing
+	UUID=$(mdadm -D $raid | grep "UUID" | cut -c19-)
+	# Find an active device to compare against
+	for device in $(ls /dev/sd*[0-9]); do
+		mdadm -D $raid | grep "active sync" | grep -q $device && active=$device
+	done
+	# Compare the status of each 'missing' device against the active one
+	for device in $(ls /dev/sd*[0-9]); do
+		# Only devices from the same RAID will be considered
+		if ! mdadm -D $raid | grep -q $device && mdadm -E $device | grep -q $UUID; then
+			if [ $(mdadm -EY $active | grep TIME | cut -d'=' -f2) -lt $(mdadm -EY $device | grep TIME | cut -d'=' -f2) ]; then
+				echo "ERROR: Missing device $device TIME is ahead of active device $active"
+				exit 1
+			fi
+			if [ $(mdadm -EY $active | grep EVENTS | cut -d'=' -f2) -lt $(mdadm -EY $device | grep EVENTS | cut -d'=' -f2) ]; then
+				echo "ERROR: Missing device $device EVENT count is higher than active device $active"
+				exit 1
+			fi
+			if mdadm -E $device | grep "Array State" | cut -c18- | cut -d' ' -f1 | grep -q [.]; then
+				echo "ERROR: Missing device $device has been used separately since last in sync"
+				exit 1
+			fi
+		fi
+	done
+	# All 'missing' devices check out as OK so it should be relatively safe to proceed
+	echo "Re-adding missing device(s) to RAID array $raid ... "
+	mdadm $raid --re-add missing
+fi
 echo "(This may safely be interrupted with 'Control-C' if you don't want to wait)"
-mdadm $raid --re-add failed
-mdadm $raid --re-add missing
 sleep 1
 
 mdadm --detail $raid; echo
