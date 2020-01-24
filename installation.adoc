@@ -36,14 +36,15 @@ installation media can be found online.
 NOTE: Don't be confused by the *amd64* name, this architecture is supports both
 AMD and Intel manufactured x86-64 processors. This includes CPU lines such as
 Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel had a
-competing and incompatible 64-bit architecture.
+competing and incompatible 64-bit architecture *ia64*.
 
-You can install a DVD drive, USB device, or over the network. Any revision of
-9.x installation's should work fine, but older revisions will want to download
+You can install from a DVD drive, USB device, or over the network. Any revision of
+9.x installer from *9.7* onwards should work fine, but older revisions will want to download
 many security patches from the network which may already be included in the
-latest revision. Note also that installing from DVDs as described here is
+latest revision. Revisions before 9.7 had a serious security flaw in the package
+installer. Note also that installing from DVDs as described here is
 recommended mainly for sites with little to poor Internet connectivity (even
-then use of a single DVD may suffice) and the equivalent use of a Debian
+then, use of a single DVD may suffice) and the equivalent use of a Debian
 GNU/Linux 9.x "Stretch" - Official i386/amd64 *netinst* CD would suffice for
 installation at most sites with good connectivity. Disk images for the installer
 ca be found at: https://cdimage.debian.org/cdimage/archive/
@@ -117,7 +118,7 @@ NOTE: If kbd:[e] doesn't work, UEFI is not available.
 
 NOTE: You may omit the *netcfg/disable_dhcp=true* if you want to use DHCP to
 configure the network settings of this machine, though this is not advised.
-You can additionally use "partman-partitioning/default_label=gpt" if you wish
+You can additionally use *partman-partitioning/default_label=gpt* if you wish
 to force the use of a GPT partition table on a disk that is smaller than 2 GB,
 but beware - some older BIOS versions cannot handle GPT formatted disks.
 
@@ -149,18 +150,18 @@ Select the interface you require (usually *eno1*) and press  kbd:[Enter].
 ====
 Unless you are using DHCP (which is not advisable) you will be prompted to:
 Type in the required static IP address in the form *xxx.xxx.xxx.xxx* (where
-*xxx* is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
+*xxx* is any integer from 0 - 255 inclusive) and press  kbd:[Enter].
 Type in the required netmask in the form *255.yyy.yyy.yyy* (where *yyy* is
 typically 0, 64, 128, 192 or 255) and press  kbd:[Enter].
 Type in the required gateway IP address in the form *xxx.xxx.xxx.xxx* (where
-*xxx* is any integer from 1 - 254 inclusive) and press  kbd:[Enter].
+*xxx* is any integer from 0 - 255 inclusive) and press  kbd:[Enter].
 Type in the required nameserver IP addresses, space separated, in the form
-*xxx.xxx.xxx.xxx* (where *xxx* is any integer from 1 - 254 inclusive) and
+*xxx.xxx.xxx.xxx* (where *xxx* is any integer from 0 - 255 inclusive) and
 press  kbd:[Enter].
 
 Alternatively, if you are only using the installer to initialize new disks,
 you may want to use *Go Back* and directly select *Detect disks* from the
-main menu to skip forward to step 11 below.
+main menu to skip forward to step 4.10 below.
 ====
 
 === Set a hostname
@@ -185,9 +186,6 @@ If this is not possible at your site due to your firewall etc. you may need
 to press kbd:[Enter] to cancel this process.
 
 === Setup partitions 
-
-NOTE: These notes assume you have disks larger than 2TB so that GPT will be the partition
-format selected by the installer.
 
 NOTE: If you are using UEFI and the disk was previously used for BIOS, you may need
 to confirm forcing UEFI installation.
@@ -220,7 +218,7 @@ your disk, as above, and get *FREE SPACE*.
 ** UEFI:  Enter *1GB* in the size, then select *Beginning* of the disk.
 
 . Then for
-** BIOS: Select *Use as* then select *Reserved BIOS boot area*, or alternatively *do not use the partition* if the former option is not displayed.
+** BIOS: Select *Use as* then select *Reserved BIOS boot area*, or alternatively *Do not use the partition* if the former option is not available.
 ** UEFI: Select *Use as* then select *EFI System Partition (ESP)*
 
 . Now press *Done setting up the partition*.
@@ -243,7 +241,7 @@ Repeat the process for the second disk, if present.
 . Select *Configure software RAID*, select *Yes* to write the changes
   to the disks.
 
-. Select *Create MD device*, choose *RAID 1* and enter *2* as number
+. Select *Create MD device*, choose *RAID1* and enter *2* as number
 of devices and *0* as number of spare.
 
 . Select the RAID partitions we just created using space -- these
@@ -293,7 +291,7 @@ optional unless you are applying CIS hardening.
 .. Select *Mount point*, press kbd:[Enter], then select the appropriate mount point from the list or use *Enter manually* if not there.
 .. Select *Done setting up this partition*
 
-. For the swap logical volume, select *Use as* then select *swap area*
+. For the swap logical volume, select *Use as* then select *swap area*, followed by *Done setting up this partition*
 
 . Back in the partition screen, select *Finish partitioning and write changes to
 the disks* and select *Yes* to write the changes. For big disks, it may take
@@ -378,7 +376,7 @@ primary disk.
 
 
 === Remove installation media 
-The DVD from the DVD-ROM drive (it should be auto-ejected), or unplug the
+Remove the DVD from the DVD-ROM drive (it should be auto-ejected), or unplug the
 USB drive and press  kbd:[Enter]  to reboot into the newly installed system.
 
 TIP: It would generally be wise to disable booting from DVD-ROM and floppy ie. 
@@ -426,13 +424,13 @@ NOTE: If you do keep this account, you will not be able to run the FS from
 it unless you add this account into the additional hardware access groups
 such as is done for *oper* and *prog* by *fsadapt*.
 
-=== Install GRUB secondary disk (if available)
+=== Install GRUB to the secondary disk (if available)
 
 * If you installed with UEFI boot, run the command
 +
     cp /dev/sda1 /dev/sdb1
 
-* If you installed BIOS boot install GRUB to the Master Boot Record by
+* If you installed with BIOS boot, install GRUB to the Master Boot Record by
 running: *dpkg-reconfigure -plow grub-pc* and after pressing
 kbd:[Enter] twice to accept the kernel command line extra arguments
 and default command line argruments, use the arrow keys and
@@ -544,12 +542,12 @@ In the */root/fsl10* directory, start *fsadapt* with
 Using the arrow keys and kbd:[Space] make your selections and press kbd:[Enter].
 
 *  For NASA stations select *govt* and *noident*.
-*  If you are not using a GPIB board or USB, you can deselect the GPIB option.
+*  If you are not using a GPIB board or USB dongle, you can deselect the GPIB option.
 
 ==== FS Adaptation: Setup (Window 2)
 
 All of the steps in Window 2 need to be done once with the exception
-of *sshkeys* which can be used to recover old SSH keys from a backup.
+of *sshkeys* which can be used to generate new SSH keys if required.
 If you did not select the GPIB option in the previous page deselect the
 two related options on this page. Otherwise, simply press kbd:[Enter]
 with the *OK* selected to continue.
@@ -572,7 +570,7 @@ kbd:[Enter] on *OK* to continue.
 
 ==== FS Adaptation: Settings (Window 3)
 
-On Window 3 modify the email settings or network settings as required.
+On Window 3 you can choose to modify the email or network settings if required.
 Simply press kbd:[Enter] on *OK* to continue.
 
 ==== FS Adaptation: Network Services (Window 4)
@@ -610,7 +608,7 @@ been installed.  The four tools are:
    * *mdstat* allows all users to check on the RAID status
    * *refresh_secondary* allows *root* to refresh a secondary disk that is from the same RAID and has been booted on its own
    * *blank_secondary* allows *root* to initialize a secondary disk, must be used with extreme care
-   * *recover_raid* allows *root* to re-add a disk that fell out of the RAID back into it
+   * *recover_raid* allows *root* to re-add a disk that fell out of (or was removed from) the RAID back into it
 
 More information RAID operation can be found at <<raid.adoc#,RAID notes for FSL10>>.
 
@@ -647,7 +645,7 @@ watching its progress with:
 
 until the array no-longer shows a recovery in progress.
 
-The final step is to remove any DVD from the machine and to restart the machine
+The final steps are to remove any DVD from the machine and to restart the machine
 using *reboot* as *root* or kbd:[Ctrl+Alt+Del] whilst watching that everything
 starts up smoothly.
 
