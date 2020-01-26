@@ -187,7 +187,7 @@ check can actually trigger after the test for a foreign RAID above
 remains to be seen.
 
 . Was last booted at a future *TIME* (possibly due to a mis-set clock or clocks)
-. Has a higher *EVENT* count, i.e., is newer (but see the *IMPORTANT* item below)
+. Has a higher *EVENT* count, i.e., is newer (but see the *WARNING* item below)
 . Has been used (booted) separately by itself
 . Has a different partition layout from the *primary*
 . Is smaller than the size of the RAID on the primary disk.
@@ -200,7 +200,7 @@ possible, particular at a station with more than one FSL__x__ computer.
 We believe all the most common errors are trapped, but the script
 should still be used with care.
 
-IMPORTANT: The check on the *EVENT* counter is intended to prevent accidentally using
+WARNING: The check on the *EVENT* counter is intended to prevent accidentally using
 the *shelf* disk to overwrite a newer disk from the RAID.  This check can be
 over-run if the *primary* has run for a considerable period of time
 before the refresh is attempted.  This should not be an issue if the
@@ -314,7 +314,8 @@ It is *missing* if either the system was rebooted with the disk
 can check which state an *inactive* disk is in  with
 *mdadm{nbsp}--detail{nbsp}/dev/md0* -- which lists *failed* as
 faulty but a missing disk will not appear at all.
-The *active* disk is the one the system is still running on.
+
+NOTE: The *active* disk is the one the system is still running on.
 
 TIP: It is okay to use this script even if the *inactive* disk fell out
 the RAID a (long) long time ago (in a galaxy far, far away) and/or
@@ -324,7 +325,7 @@ was rebooted (even multiple times) or the *active* disk was used
 (booted) separately by itself since the *inactive* disk fell out of the
 RAID. 
 
-IMPORTANT: This script must *NOT* be used if the *inactive* disk has
+WARNING: This script must *NOT* be used if the *inactive* disk has
 been changed in any way e.g., by being used (booted) separately (which is
     caught by the script) or refreshed against some other disk, or if
 the *active* disk has been used to refresh any other disk in the
@@ -343,7 +344,7 @@ or if any *missing* disk:
 [start=3]
 . Has a later modification *TIME* than the *active* disk
 . Has a higher *EVENT* count, i.e., is newer,  than the *active* disk
-. Has been used (booted) separately (as mentioned above in the *IMPORTANT* item)
+. Has been used (booted) separately (as mentioned above in the *WARNING* item)
 
 The recovery may be fairly quick, as short as a few minutes, if the
 *inactive* disk is relatively fresh.
