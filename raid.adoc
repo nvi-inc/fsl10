@@ -1,6 +1,6 @@
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Draft 0.4 - Jan 2020
+Draft 0.5 - Jan 2020
 
 :sectnums:
 :experimental:
@@ -41,7 +41,7 @@ reason to split a pair.
 These recommendations are intended to provide consistent procedures and make it easier to understand any issues, if they occur.
 
 . Always use the lower number controller (slot) as the *primary*, label it as such, and the other slot as *secondary*
-. Make the upper (or left) slot the *primary*, the lower (or right) slot the *secondary*
+. Make the upper (or left) slot the *primary*, the lower (or right) slot the *secondary*. If necessary, change the internal cabling to make it so.
 . Always boot for a refresh/blank with the *primary* slot turned on and the *secondary* slot turned off: so it is clear which is the active disk
 . Label the disks (so visible when in use) with the system name and number them 1, 2, and 3, ...
 . Label the disks (so visible when in use) with their serial numbers, either from *mdstat* when only one disk inserted or by examining the disk
@@ -79,17 +79,16 @@ NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the
 . If the script rejects the disk (and stops with an error), seek expert advice. Be sure to note any messages so they can be reported.
 . If the disk is accepted, let the refresh run to completion (the progress report can be aborted as indicated). The system can be used in the meantime, but may be a little slow.
 
-== Test upgrade of FS - system updates - or other changes
+== Test upgrade of FS - system updates - or other significant changes
 
 Seek expert advice for this, but the basic plan is given below:
 
 . If a rotation hasn't just been completed, perform one (as an extra backup)
 . Before proceeding verify that there is no recovery in progress, check with *mdstat*
-. Drop the *primary* disk out of the RAID (as a backup) using the commands:
+. Drop the *primary* disk out of the RAID (as a backup) using the command:
 +
 ....
 mdadm /dev/md0 -f /dev/sda2
-mdadm /dev/md0 -r /dev/sda2
 ....
 . Install and test the update
 
@@ -105,13 +104,12 @@ Alternatively, If the update is deemed to have *failed*, the system can be
 [start=5]
 . Shutdown the system, e.g., *shutdown -h now*
 . Key off the *secondary* slot
-. Key on the *primary* slot
 . Reboot (*primary* keyed on, *secondary* keyed off)
 . Run *blank_secondary*
 . Key on the *secondary* slot when prompted
 . Answer *y* to blank
 . Run *refresh_secondary*
-. Once the refresh is complete, you have recovered to the pretest state
+. Once the refresh is complete, you have recovered to the original state.
 
 == Script descriptions
 
@@ -124,8 +122,8 @@ status of the RAID. It is most useful for checking whether a recovery
 is in process or has ended, but is also useful for showing the current
 state of the RAID, including any anomalies.
 
-The script also lists the serial number for all disks that are
-present.
+The script also lists the serial numbers for all block devices (such
+as disks) that are currently connected.
 
 === *refresh_secondary*
 
@@ -134,12 +132,26 @@ This can be used to refresh a *shelf* disk for the RAID as a new
 rotation.
 
 Initially, the script performs some sanity checks to confirm that the
-content the script intends to copy is where it expects it to be and
-has the right form.  Any *primary* disk (*sda*) will be rejected that:
+RAID */dev/md0*:
+
+. Exists.
+. Is not a clean state, i.e., it needs recovery.
+. Is not already recovering, i.e., is in a recoverable state.
+
+Additional checks are performed to confirm that the content the script
+intends to copy is where it expects it to be and has the right form.
+Any *primary* disk (*sda*) will be rejected that:
 
 . Is not part of the RAID (*md0*)
-. Is removable (USB)
-. Has a boot scheme other than BIOS or UEFI
+. Has a boot scheme other than the BIOS or UEFI set up as described in the FSL10 Installation Document.
+
+If the *primary* disk is removable, the user will provided with some
+information about the disk and given an opportunity to continue with
+kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
+identified as the *primary*, one would not want to continue. However
+for some machines the SATA disk that is the *primary* may be marked
+removable if it is hot swappable, but would still be appropriate to
+use. 
 
 For safety reasons, to ensure that only an old *shelf* disk is overwritten,
 any *secondary* disk (*sdb*) will be rejected that:
@@ -148,12 +160,12 @@ any *secondary* disk (*sdb*) will be rejected that:
 +
 Unless overridden by *-A* or previously loaded by this or the *blank_secondary* script.
 
-. Is removable (USB)
 . Is already part of RAID *md0*
 
 +
 Which should only happen if run incorrectly with *-A* (or other
-interfering commands have been executed).
+interfering commands have been executed) or the disk has
+fallen out of the RAID due to failure.
 
 . Has a RAID from a different computer, i.e., foreign
 +
@@ -174,8 +186,8 @@ This would be a disk from a different computer. Though whether this
 check can actually trigger after the test for a foreign RAID above
 remains to be seen.
 
-. Was last booted at a future time (possibly due to a mis-set clock or clocks)
-. Has a higher EVENT count, i.e., is newer (but see the *IMPORTANT* item below)
+. Was last booted at a future *TIME* (possibly due to a mis-set clock or clocks)
+. Has a higher *EVENT* count, i.e., is newer (but see the *IMPORTANT* item below)
 . Has been used (booted) separately by itself
 . Has a different partition layout from the *primary*
 . Is smaller than the size of the RAID on the primary disk.
@@ -184,30 +196,29 @@ If any of the checks reject the disk, we recommend you seek expert
 advice; please record the error so it can be reported.
 
 The checks are included to make the refresh process as safe as
-possible, particular at a station with more than one FSL10 computer.
+possible, particular at a station with more than one FSL__x__ computer.
 We believe all the most common errors are trapped, but the script
 should still be used with care.
 
-IMPORTANT: The check on the EVENT counter is intended to prevent accidentally using
+IMPORTANT: The check on the *EVENT* counter is intended to prevent accidentally using
 the *shelf* disk to overwrite a newer disk from the RAID.  This check can be
 over-run if the *primary* has run for a considerable period of time
 before the refresh is attempted.  This should not be an issue if the
 refresh is attempted promptly after the *shelf* disk is booted for the
-first time by itself and the RAID was run for more than a trivial
+first time by itself and the RAID was run on the other disks for more than a trivial
 amount of time beforehand.
 
 If the disk being refreshed is from the same computer and has just been
 on the *shelf* unused since it was last rotated, it is safe to refresh
 and should be accepted by all the checks.
 
-The refresh will take several hours. The script provides a progress
-indicator that can safely be aborted (using kbd:[Ctrl+C] as described
-    by the on-screen instructions) if that is preferred.  An active
-screen saver may make it difficult to see the progress after awhile,
-       but pressing kbd:[shift] or some other key should make it
-       visible again.  If you abort the progress indicator, you can
-       check the progress later with *mdstat*. The system can be used
-       normally while it refreshing, but it may be a little slow.
+If the *secondary* disk is removable, the user will provided with some
+information about the disk and given an opportunity to continue with
+kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
+identified as the *secondary*, one would not want to continue. However
+for some machines the SATA disk that is the *secondary* may be marked
+removable if it is hot swappable, but would still be appropriate to
+use. 
 
 This script requires the *secondary* disk (*sdb*) to not be loaded, i.e.,
 the slot turned off, when the script is started. However, it has an
@@ -218,8 +229,18 @@ possible and must be used with extra care.
 If the disk is turned on (when prompted) during the script, it
 will automatically be "Allowed" by both this script and
 *blank_secondary*, which also supports this feature.  This allows
-(expert use only) running *blank_secondary* then rerunning *refresh_secondary*
-without having to reboot and cycle the disk off and on for each.
+(expert use only), after a failed *refresh_secondary*, running
+*blank_secondary* then rerunning *refresh_secondary*, all without having to
+*shutdown*, turn the disk off, reboot, start the script, and turn the disk on for each.
+
+The refresh will take several hours. The script provides a progress
+indicator that can safely be aborted (using kbd:[Ctrl+C] as described
+    by the on-screen instructions) if that is preferred.  An active
+screen saver may make it difficult to see the progress after awhile,
+       but pressing kbd:[shift] or some other key should make it
+       visible again.  If you abort the progress indicator, you can
+       check the progress later with *mdstat*. The system can be used
+       normally while it refreshing, but it may be a little slow.
 
 === *blank_secondary*
 
@@ -228,7 +249,7 @@ This script should only be used with expert advice.
 It can be used to make _any_ *secondary* disk (*sdb*) refreshable, if
 it is big enough. It must be used with care and only on a *secondary*
 disk that you know is safe to erase. Generally speaking you don't want
-to use it with a disk from a different FSL10 computer, except for very
+to use it with a disk from a different FSL__x__ computer, except for very
 unusual circumstances, see <<Recovery scenarios>> section for some example
 cases. It will ask you to confirm before blanking.
 
@@ -239,15 +260,29 @@ It will reject any *secondary* disk (*sdb*) that:
 Unless you have just loaded it through *refresh_secondary*'s auspices or used
 the *-A* option to "Allow" it (see below).
 
-. Is removable (USB)
-. Is already part of the RAID *md0*
+. Is still part of the RAID *md0*
++
+Which should only happen if run incorrectly with *-A* (or other
+interfering commands have been executed).
+
 . Has any partition already mounted
++
+Again catching misuse of the *-A* option.
+
 . Has a partition that is in RAID *md0*
 +
 This is essentially redundant with the item two above, but is included
 out of an abundance of caution.
 
-. Has a partition that is mounted in any RAID in common with *sda*
+. Has a partition that is included in any RAID.
+
+If the *primary* disk is removable, the user will provided with some
+information about the disk and given an opportunity to continue with
+kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
+identified as the *primary*, one would not want to continue. However
+for some machines the SATA disk that is the *primary* may be marked
+removable if it is hot swappable, but would still be appropriate to
+use. 
 
 This script requires the *secondary* disk (*sdb*) to not be loaded, i.e.,
 the slot turned off, when the script is started. However, it has an
@@ -258,8 +293,8 @@ possible and must be used with extra care.
 If the disk is turned on (when prompted) during the script, it will
 automatically be "Allowed" by both this script and
 *refresh_secondary*, which also supports this feature.  This allows
-you to then run *refresh_secondary* without having to reboot and
-cycle the disk off and on.
+you to then run *refresh_secondary* immediately without having to 
+*shutdown*, turn the disk off, reboot, start the script, and turn the disk on.
 
 === *recover_raid*
 
@@ -267,19 +302,18 @@ This script is only for use with expert advice.
 
 This script can be used to recover a disk (*sda* or *sdb*) that has
 fallen out of RAID, becoming *inactive*.  This script is designed to only be used with a
-pair of disks that were most recently used _together_ in an active
+set of disks that were most recently used _together_ in an active
 RAID.  It is recommended to only use this script if the key switches
 for the disks have not been manipulated since the *inactive* disk fell
 out of the RAID; in this case it should always be safe.
 
 NOTE: The *inactive* disk is either *failed* or *missing*. It is
-*failed* if it was either marked _failed_ by hand or due to disk errors.
+*failed* if it was either marked *failed* by hand or dropped out of the RAID due to disk errors.
 It is *missing* if either the system was rebooted with the disk
-*failed* or *missing* or it was manually marked _removed_ by hand.  You
-can check which state an *inactive* disk is in  with +
+*failed* or physically missing or it was manually marked _removed_.  You
+can check which state an *inactive* disk is in  with
 *mdadm{nbsp}--detail{nbsp}/dev/md0* -- which lists *failed* as
-*faulty*. +
- +
+faulty but a missing disk will not appear at all.
 The *active* disk is the one the system is still running on.
 
 TIP: It is okay to use this script even if the *inactive* disk fell out
@@ -292,9 +326,9 @@ RAID.
 
 IMPORTANT: This script must *NOT* be used if the *inactive* disk has
 been changed in any way e.g., by being used (booted) separately (which is
-    caught be the script) or refreshed against some other disk, or if
+    caught by the script) or refreshed against some other disk, or if
 the *active* disk has been used to refresh any other disk in the
-interim.  In particular, the script must not be used to refresh a
+interim.  In particular, the script must *NOT* be used to refresh a
 *shelf* disk -- only use *refresh_secondary* for that purpose.
 
 It normally works on *md0*, but a different *md* device can be specified as the first argument.
@@ -304,15 +338,18 @@ It will refuse to recover the RAID if the RAID:
 . Does not need recovery
 . Is not in a recoverable state, e.g., is already recovering
 
-of if a *missing* disk:
+or if any *missing* disk:
 
 [start=3]
-. Has a later modification time than the *active* disk
-. Has a higher EVENT count, i.e., is newer,  than the *active* disk
+. Has a later modification *TIME* than the *active* disk
+. Has a higher *EVENT* count, i.e., is newer,  than the *active* disk
 . Has been used (booted) separately (as mentioned above in the *IMPORTANT* item)
 
 The recovery may be fairly quick, as short as a few minutes, if the
-*inactive* disk is relatively fresh. You can check the progress with *mdstat*. The
+*inactive* disk is relatively fresh.
+There is an ongoing progress display that can be
+terminated early with kbd:[Ctrl-C], without affecting the recovery.
+You can check the progress with *mdstat*. The
 system can be used normally while it recovering, but it may be a
 little slow.
 
@@ -330,13 +367,18 @@ included in the script.
 To use this script, It is important that the user and group IDs of all
 users on the two systems be the same.
 
-It is recommended that the script be used (including initial test)
+It is recommended that the script be used (including for initial testing)
   immediately after a disk rotation to provide the ample opportunities
   for recovery if there is a problem. In particular, for initial
   testing the procedure in the <<Test upgrade of FS - system updates - or other changes>>
   section should be used.
 
-#TODO: modify script to echo mke2fs command to aid recovery from inadvertent Control-C and comment here.#
+It is possible to recover fairly easily, using the script as a guide,
+from most operations performed by the script if they are accidentally
+terminated with a kbd:[Ctrl+C]. A significant except to this is the
+*mke2fs* command. For this reason, the script **echo**s the command to
+the terminal to allow the user to cut-and-paste the command to
+re-execute it, if that is needed.
 
 == Multiple computer set-up
 
@@ -365,9 +407,9 @@ parallel so that the same capabilities are available on both. In
 particular, any packages installed on one should also be installed
 on the other.  In addition, it is important that the user and group
 IDs of all users on the operational and spare computers be same. It
-should not be necessary to maintain parallelism with patches, but that
-is recommended as well. It is recommended to maintain this parallelism
-between multiple operational/spare systems at a site as well (this may
+should not be necessary to maintain parallelism with OS updates, but that
+is recommended as well. It is recommended to maintain maintenance parallelism
+with other independent **operational**/**spare** systems at a site as well (this may
     enable additional recovery options in extreme cases).
 
 ==  Recovery scenarios
@@ -398,7 +440,7 @@ this state, it should use the working disk. At the first opportunity,
      refresh the *shelf* disk and make a working RAID.  The failed
      disk should be repaired or replaced with a new disk that is at
      least as large. The *blank_secondary* script should be used too
-     erase the new disk when it is introduced into the rotation
+     erase the new disk before it is introduced into the rotation
      sequence.
 
 === *Operational* computer RAID corrupted
@@ -460,8 +502,8 @@ were created/modified after the last *operational* computer  disk
 rotation will need to be recreated.  It will be necessary to move
 connections for any serial/GPIB devices to the spare computer as well.
 However, it will not be necessary to enable any daemon's like
-*metserver* and *metclient* as it would in the former scenario; this
-may be significant time saver.
+*metserver* and *metclient* as it would be in the former scenario; this
+may be a significant time saver.
 
 === Loss of all *operational* computer disks
 
