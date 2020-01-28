@@ -313,7 +313,7 @@ It is *missing* if either the system was rebooted with the disk
 *failed* or physically missing or it was manually marked _removed_.  You
 can check which state an *inactive* disk is in  with
 *mdadm{nbsp}--detail{nbsp}/dev/md0* -- which lists *failed* as
-faulty but a missing disk will not appear at all.
+*faulty* but a missing disk will not appear at all.
 
 NOTE: The *active* disk is the one the system is still running on.
 
