@@ -377,7 +377,7 @@ It is recommended that the script be used (including for initial testing)
 It is possible to recover fairly easily, using the script as a guide,
 from most operations performed by the script if they are accidentally
 terminated with a kbd:[Ctrl+C]. A significant except to this is the
-*mke2fs* command. For this reason, the script **echo**s the command to
+*mke2fs* command. For this reason, the script displays the command to
 the terminal to allow the user to cut-and-paste the command to
 re-execute it, if that is needed.
 
