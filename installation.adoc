@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.91 - Jan 2020
+Version 1.92 - Jan 2020
 
 :sectnums:
 :experimental:
@@ -248,7 +248,7 @@ Repeat the process for the second disk, if present.
   to the disks.
 
 . Select *Create MD device*, choose *RAID1* and enter *2* as number
-of devices and *0* as number of spare.
+of devices and *0* as number of spares.
 
 . Select the RAID partitions we just created using space -- these
 should be *sda2* and *sdb2*, if you have just one disk, just pick *sda2* --
@@ -323,7 +323,7 @@ If you are using DVD installer you will be prompted to scan additional DVDs.
 Scanning the additional DVDs (and obtaining copies of them in the
 first place) is entirely optional, and is only useful if you don't have a
 reliable network connection to a suitable Debian mirror and hence would
-prefer not to download packages you get from the DVD.
+prefer not to download packages you could get from the DVD.
 
 NOTE: If you do want to use a mirror in future, it is better not to scan any
 DVDs at this stage and to scan them later during Stage 2 using *apt-cdrom*.
@@ -476,7 +476,7 @@ the file, again adding in *contrib* and/or *non-free* as needed:
 Also add *contrib* and/or *non-free* to the lines referring to the
 *security.debian.org* mirror in the middle of the file.
 
-IMPORTANT: you _MUST_ use *stretch* and _NOT_ *stable* for the distribution in
+WARNING: you _MUST_ use *stretch* and _NOT_ *stable* for the distribution in
 all these entries (but CD/DVD entries might use *unstable*.)
 
 === Update APT's list of packages
@@ -617,6 +617,7 @@ been installed.  The four tools are:
    * *recover_raid* allows *root* to re-add a disk that fell out of (or was removed from) the RAID back into it
 
 More information RAID operation can be found at <<raid.adoc#,RAID notes for FSL10>>.
+See also the <<Post Install>> section below.
 
 === Download the Field System
 
@@ -632,7 +633,7 @@ and enter *y* to confirm installation.
 
 === Make the FS
 
-IMPORTANT: Log-out of the console as *root*, and log-in again as *prog*.
+WARNING: Log-out of the console as *root*, and log-in again as *prog*.
 
    cd /usr2/fs
    make >& /dev/null
@@ -684,7 +685,7 @@ on the shelf.
 
 ==== Initialize new disk
 
-IMPORTANT: Do not initialize a disk unless you are sure there is no
+WARNING: Do not initialize a disk unless you are sure there is no
 data on it that you need to preserve.
 
 For the first time use of an additional disk with a new install, the
@@ -705,13 +706,13 @@ answer *n*.
 
 ==== Refresh secondary disk
 
-IMPORTANT: You can refresh a disk if it has been erased or has
+WARNING: You can refresh a disk if it has been erased or has
 previously been used in this RAID and is older than the current
 primary.  If it is newer than the current primary (maybe from a failed
     FS upgrade that needs to be abandoned) or comes from a different
 RAID (i.e., system) or has a different structure (i.e., was previously
     used for something else), it will have to be erased first. The
-script will detect these conditions and stop with an appropriate
+script should detect these conditions and stop with an appropriate
 message. In that case, consider carefully if it is safe to erase the
 disk (probably not). If you determine it is safe, follow the
 instructions for <<Initialize new disk>>.
@@ -724,8 +725,8 @@ installed and mistaken for the disk to be refreshed.
 NOTE: With the RAID now missing a disk, you may see
 ~20 of the *volume group
 not found* error messages, then the machine will boot. These error
-message  only appear is such a large quantity the first time a disk
-from the RAID is booted without its pair.
+message  only appear like this the first time a disk
+from the RAID is booted without its partner.
 
 Once booted, login as *root*.
 
@@ -736,14 +737,14 @@ Run the script:
 When the script says it is waiting for the second disk, key it on.
 
 Once your reach the message that it is recovering, you can resume using
-the computer as usual. You can stop the updating of the *recoverying*
+the computer as usual. You can stop the updating of the *recovery*
 message wth kbd:[Ctrl+C] as described in the output. If later you want
 to check the progress of the status of the RAID resync, you can use:
 
     mdstat
 
 While the operating system can resume syncing the RAID if you reboot,
-it is best to avoid in case the boot partition is not fully synced.
+it is best to avoid in case the boot partition is not yet fully synced.
 
 When the syncing is complete, you can repeat the process of the
 previous sub-section and this sub-section if you have a third disk that needs
@@ -974,7 +975,7 @@ apt-get purge modemmanger
 
 === Remove *Anacron* package
 
-If you enabled the weekly uodate job in *fsadapt* (it is strongly recommended), we recommend that you remove the *anacron* package so that the job will run at a fixed time evcery week, even the sysystem is turned off for some periods of time.
+If you enabled the weekly uodate job in *fsadapt* (it is strongly recommended), we recommend that you also remove the *anacron* package so that the job will run at a fixed time evcery week, even the sysystem is turned off for some periods of time.
 Execute this command:
 
 ....
@@ -986,7 +987,7 @@ apt-get purge anacron
 The following tersely summarizes some *ufw* settings that may be useful:
 
 ....
-# ssh
+#SSH 
 ufw allow OpenSSH
 #NTP
 ufw allow ntp
@@ -1043,6 +1044,7 @@ system_filter = /etc/exim4/reply-to-filter
 
 3. Then execute
 
+    update-exim4.conf
     systemctl restart exim4
 
 The configuration described here (*Internet site* or *mail
@@ -1102,8 +1104,8 @@ for *oper* on *atri* at GSFC, we changed the 5th field for
     GSFC VLBI Operator
 
 and for completeness, for *prog* and *desktop* we use:
-GSFC VLBI Programmer
 
+    GSFC VLBI Programmer
     GSFC Desktop User
 
 These changes will help the recipient (possibly you)
