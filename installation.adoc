@@ -21,13 +21,12 @@ explanations that impact what you actually type.
 As of Field System version 10.0, both *i386* and *amd64* architecture
 are supported natively. The *amd64* architecture is preferred and
 should be used if possible (it should be unless the processor is very
-old,
-~10+
-years). However, some work may be required to port your station
-code from a 32-bit to a 64-bit OS. Some automatic tools have been
-developed for this, and can be provided upon request. Usually the
-*i386* architecture will work on any processor. The *amd64*
-installation media will fail to boot on a system that is 32-bit only.
+    old, from about 2010 or older).  However, some work may be
+required to port your station code from a 32-bit to a 64-bit OS. Some
+automatic tools have been developed for this, and can be provided upon
+request. Usually the *i386* architecture will work on any processor.
+The *amd64* installation media will fail to boot on a system that is
+32-bit only.
 
 To install Debian 9, you can either use a DVD or USB drive. The latter is
 faster, and also easier if you wish to use UEFI. Directions for creating your
@@ -64,7 +63,7 @@ alternatives when the instructions differ.
 Decide which boot mode you want to use and select it through the motherboard
 setup menu (typically by pressing kbd:[DEL] during POST).
 
-Also make sure that the motherboard time is set to the current Universal time, ie.
+Also make sure that the motherboard time is set to the current Universal time, i.e.,
 UTC, and the motherboard can boot from the installation media.
 
 While you are in the motherboard menu, check that hot-swapping is enabled. This
@@ -81,9 +80,9 @@ single disk (for a test install etc.) is also annotated below.
 TIP: Installing to a single disk is recommended and has some
 advantages. It is faster and you can control when the syncing for the
 second disk occurs, such as when you leave for the evening.  The
-set-up of the second (and third) disk is covered in the <<Post Install>>
-section. As mentioned in the warning above, you should start with the
-smallest disk.
+set-up of additional disks is covered in the <<Post Install>> section.
+As mentioned in the warning above, you should start with the smallest
+disk.
 
 === Boot from the installation medium
 
@@ -170,7 +169,7 @@ main menu to skip forward to step 4.10 below.
 
 === Set a hostname
 Backspace over the default hostname *debian* and type in the name
-you require (if not already retrieved vis DNS), then press  kbd:[Enter].
+you require (if not already retrieved via DNS), then press  kbd:[Enter].
 Enter the required Internet Domain name (if not found) and press  kbd:[Enter].
 
 === Enter a suitable *root* password
@@ -186,7 +185,7 @@ password twice as prompted.
 === Get network time
 
 The installer now tries to set the time using NTP
-If this is not possible at your site due to your firewall etc. you may need
+If this is not possible at your site due to your firewall etc., you may need
 to press kbd:[Enter] to cancel this process.
 
 === Setup partitions 
@@ -385,7 +384,7 @@ primary disk.
 Remove the DVD from the DVD-ROM drive (it should be auto-ejected), or unplug the
 USB drive and press  kbd:[Enter]  to reboot into the newly installed system.
 
-TIP: It would generally be wise to disable booting from DVD-ROM and floppy ie. 
+TIP: It would generally be wise to disable booting from DVD-ROM and floppy i.e.,
 anything other than the hard drive, in the BIOS just in case someone
 leaves something nasty in the machine's removable drives by mistake.
 
@@ -439,7 +438,7 @@ such as is done for *oper* and *prog* by *fsadapt*.
 * If you installed with BIOS boot, install GRUB to the Master Boot Record by
 running: *dpkg-reconfigure -plow grub-pc* and after pressing
 kbd:[Enter] twice to accept the kernel command line extra arguments
-and default command line argruments, use the arrow keys and
+and default command line arguments, use the arrow keys and
 kbd:[Space] to select both */dev/sda* and */dev/sdb* (but not
     */dev/md0*) and press kbd:[Enter] to finalise the reconfiguration.
 (You should then see *Installation finished. No error reported* appear
@@ -725,7 +724,7 @@ installed and mistaken for the disk to be refreshed.
 NOTE: With the RAID now missing a disk, you may see
 ~20 of the *volume group
 not found* error messages, then the machine will boot. These error
-message  only appear like this the first time a disk
+messages  only appear like this the first time a disk
 from the RAID is booted without its partner.
 
 Once booted, login as *root*.
@@ -975,8 +974,11 @@ apt-get purge modemmanger
 
 === Remove *Anacron* package
 
-If you enabled the weekly uodate job in *fsadapt* (it is strongly recommended), we recommend that you also remove the *anacron* package so that the job will run at a fixed time evcery week, even the sysystem is turned off for some periods of time.
-Execute this command:
+If you enabled the weekly update job in *fsadapt* (it is strongly
+recommended), we recommend that you also remove the *anacron* package
+so that the job will run at a fixed time every week, even if the
+system is turned off for some periods of time.  Execute this
+command:
 
 ....
 apt-get purge anacron
