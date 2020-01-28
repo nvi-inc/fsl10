@@ -115,7 +115,7 @@ Alternatively, If the update is deemed to have *failed*, the system can be
 
 This section describes the various scripts that are used for RAID maintenance.
 
-=== *mdstat*
+=== mdstat
 
 This script can be used by any user (not just *root*) to check the
 status of the RAID. It is most useful for checking whether a recovery
@@ -125,7 +125,7 @@ state of the RAID, including any anomalies.
 The script also lists the serial numbers for all block devices (such
 as disks) that are currently connected.
 
-=== *refresh_secondary*
+=== refresh_secondary
 
 This can be used to refresh a *shelf* disk for the RAID as a new
 *secondary* disk (*sdb*) as part of a standard three (or more) disk
@@ -242,7 +242,7 @@ screen saver may make it difficult to see the progress after awhile,
        check the progress later with *mdstat*. The system can be used
        normally while it refreshing, but it may be a little slow.
 
-=== *blank_secondary*
+=== blank_secondary
 
 This script should only be used with expert advice.
 
@@ -296,7 +296,7 @@ automatically be "Allowed" by both this script and
 you to then run *refresh_secondary* immediately without having to 
 *shutdown*, turn the disk off, reboot, start the script, and turn the disk on.
 
-=== *recover_raid*
+=== recover_raid
 
 This script is only for use with expert advice.
 
@@ -313,7 +313,7 @@ It is *missing* if either the system was rebooted with the disk
 *failed* or physically missing or it was manually marked _removed_.  You
 can check which state an *inactive* disk is in  with
 *mdadm{nbsp}--detail{nbsp}/dev/md0* -- which lists *failed* as
-faulty but a missing disk will not appear at all.
+*faulty* but a missing disk will not appear at all.
 
 NOTE: The *active* disk is the one the system is still running on.
 
@@ -444,7 +444,7 @@ this state, it should use the working disk. At the first opportunity,
      erase the new disk before it is introduced into the rotation
      sequence.
 
-=== *Operational* computer RAID corrupted
+=== Operational computer RAID corrupted
 
 As well as a large scale corruption, this can include recovery from
 accidental loss of important non-volatile files. Volatile files
@@ -478,7 +478,7 @@ This approach of this section should not be used if a problem with the *operatio
 computer caused the damage to its RAID. In that case, follow
 the <<Operational computer RAID corrupted and operational computer failure>> sub-section below.
 
-=== *Operational* computer failure
+=== Operational computer failure
 
 This might be caused by a power supply or other hardware failure.
 If the contents of the *operational* RAID are not damaged, the RAID pair
@@ -506,7 +506,7 @@ However, it will not be necessary to enable any daemon's like
 *metserver* and *metclient* as it would be in the former scenario; this
 may be a significant time saver.
 
-=== Loss of all *operational* computer disks
+=== Loss of all operational computer disks
 
 If the RAID and *shelf* disk on the *operational* computer are beyond
 recovery, the RAID pair from the *spare* computer can be moved to the
