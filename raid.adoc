@@ -350,7 +350,7 @@ The recovery may be fairly quick, as short as a few minutes, if the
 *inactive* disk is relatively fresh.
 There is an ongoing progress display that can be
 terminated early with kbd:[Ctrl-C], without affecting the recovery.
-You can check the progress with *mdstat*. The
+If you abort the progress indicator, you can check the progress with *mdstat*. The
 system can be used normally while it recovering, but it may be a
 little slow.
 
@@ -371,12 +371,12 @@ users on the two systems be the same.
 It is recommended that the script be used (including for initial testing)
   immediately after a disk rotation to provide the ample opportunities
   for recovery if there is a problem. In particular, for initial
-  testing the procedure in the <<Test upgrade of FS - system updates - or other changes>>
+  testing the procedure in the <<Test upgrade of FS - system updates - or other significant changes>>
   section should be used.
 
 It is possible to recover fairly easily, using the script as a guide,
 from most operations performed by the script if they are accidentally
-terminated with a kbd:[Ctrl+C]. A significant except to this is the
+terminated with a kbd:[Ctrl+C]. A significant exception to this is the
 *mke2fs* command. For this reason, the script displays the command to
 the terminal to allow the user to cut-and-paste the command to
 re-execute it, if that is needed.
@@ -427,7 +427,7 @@ A few example recovery scenarios are described below. In any scenario,
   if disks and/or a computer have failed, they should be repaired or
   replaced as soon as feasible.
 
-=== One disk in the RAID fails
+=== One disk in the operational computer RAID fails
 
 This should not interrupt operations. The computer should continue to
 run seamlessly on the remaining disk.  If the system is rebooted in
@@ -452,7 +452,7 @@ include *.skd*, *.snp*, and *.prc* files (such volatile files can be
     more easily restored by generating them again). It also can be
 used to recover from a bad OS patch (which is extremely unlikely),
      which is easier if patches are applied just after a disk
-     rotation (see also the <<Test upgrade of FS - system updates - or other changes>> section).
+     rotation (see also the <<Test upgrade of FS - system updates - or other significant changes>> section).
 
 In this case, the *shelf* disks can be used to restore the system to
 the state at the time of the most recent rotation.  To do this, boot
@@ -491,7 +491,7 @@ connections for any serial/GPIB devices to the spare computer as well.
 
 This might happen if the operational computer is exposed to fire
 and/or water.  In this case, there are two options. One is switching to
-using the *spare* computer as in the <<Loss of *operational* computer and all its disks>> sub-section below.
+using the *spare* computer as in the <<Loss of operational computer and all its disks>> sub-section below.
 The other is to use the *operational* computer's
 *shelf* disk in the *spare* computer, either by itself or by making a
 ersatz RAID by blanking the *spare* computer's *shelf* disk and
@@ -519,7 +519,7 @@ This approach should not be used if a problem with the *operational*
 computer caused the damage to its RAID. In that case, follow the
 <<Operational computer RAID corrupted and operational computer failure>> sub-section above.
 
-=== Loss of *operational* computer and all its disks
+=== Loss of operational computer and all its disks
 
 In this case, operations should be moved to the *spare* computer until
 the *operational* computer is repaired or replaced.  It will be
