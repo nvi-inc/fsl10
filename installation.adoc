@@ -631,7 +631,9 @@ and enter *y* to confirm installation.
 
 === Make the FS
 
-WARNING: Log-out of the console as *root*, and log-in again as *prog*.
+The FS must always be compiled as *prog*.
+
+WARNING: Make sure you log-out as *root*, and log-in again as *prog*.
 
    cd /usr2/fs
    make >& /dev/null
