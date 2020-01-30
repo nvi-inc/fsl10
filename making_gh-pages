@@ -12,7 +12,7 @@ To update:
   cp installation.html index.html
   git add -f *.html
   git commit
-  git push —force
+  git push —-force
 
 View at:
 
