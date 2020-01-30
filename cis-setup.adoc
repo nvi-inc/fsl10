@@ -605,7 +605,7 @@ ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | (cd /usr2; tar 
 
 to
 ....
-ssh spare@operational sudo send_usr2 | (cd /usr2; tar xpf - --totals)
+ssh spare@operational sudo -s send_usr2 | (cd /usr2; tar xpf - --totals)
 ....
 
 where *operational* is the name or IP of your operational computer.
