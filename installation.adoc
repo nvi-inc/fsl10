@@ -527,7 +527,6 @@ Installation runs to completion.
 
 
 === Clean up the APT download directory
-#TODO: perhaps we can change to *apt-listchanges*#
 
 So that the update mechanism will work correctly, run
 
