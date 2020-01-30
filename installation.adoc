@@ -1156,6 +1156,7 @@ REMOTE_SMTP_HELO_DATA=FQDN
 Where *FQDN* is your system's Fully Qualified Domain Name. Then restart the server:
 
 ....
+update-exim4.conf
 systemctl restart exim4
 ....
 
