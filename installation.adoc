@@ -237,6 +237,11 @@ fine, just be sure to choose the large *FREE SPACE* at the end of the disk.
 
 . Select *Use as: physical volume for RAID*, then *Done setting up the partition*
 
+NOTE: If you physically only have one disk bay and wish to construct a FSL10 *test-bed*, 
+it is possible to avoid using the software RAID layer entirely.  Simply select *Use as: physical volume for LVM*
+for this partition instead and skip ahead to <<Setru Logial Volume Manager (LVM)>> below.
+However, plese note that a single disk setup is not recommended for any *operational* system.
+
 ==== Setup the second disk
 
 Repeat the process for the second disk, if present.
@@ -265,7 +270,7 @@ then press kbd:[Enter]
 
 . Choose *Create volume group* 
 . Enter a name appropriate for the machine and group, e.g., *lv*, and press kbd:[Enter]
-. Select the raid device *md0* by pressing kbd:[Space], then press kbd:[Enter]
+. Select the raid device *md0* (or *sda2* if not using RAID)  by pressing kbd:[Space], then press kbd:[Enter]
 to continue
 
 . For each item in the following table run *Create logical volume*, select the
@@ -602,7 +607,7 @@ entering the passwords twice as prompted.
 
 === Install tools for RAID (Optional)
 
-You can install some useful tools for working with the RAID with:
+You can install some useful tools for working with the RAID, if you're actually using it, with:
 
    ~/fsl10/RAID/install_tools
 
@@ -614,7 +619,8 @@ been installed.  The four tools are:
    * *blank_secondary* allows *root* to initialize a secondary disk, must be used with extreme care
    * *recover_raid* allows *root* to re-add a disk that fell out of (or was removed from) the RAID back into it
 
-More information RAID operation can be found at <<raid.adoc#,RAID notes for FSL10>>.
+TIP: More information about RAID operation can be found at <<raid.adoc#,RAID notes for FSL10>>.
+
 See also the <<Post Install>> section below.
 
 === Download the Field System
