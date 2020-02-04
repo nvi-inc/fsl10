@@ -1,6 +1,6 @@
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.91 - Jan 2020
+Version 1.93 - Feb 2020
 
 :experimental:
 :toc:
@@ -10,7 +10,8 @@ Version 1.91 - Jan 2020
 These notes detail adding extra security features to Field System
 Linux 10 as advised by Center for Internet Security (CIS). With the
 exception of the partition configuration, all actions are to be
-performed post-installation. All tests that failed, topics that need
+performed post-installation (see the <<installation.adoc#,FSL10
+      Installation>> document). All tests that failed, topics that need
 to be discussed, and issues with the benchmark remediations are
 provided in separate sections. A final section covers additional
 steps that are needed for FS operations.
@@ -58,7 +59,7 @@ All the CIS remediations that can applied at this point have been
 completed. The next section describes some other policies that can be
 considered.
 
-=== Other polices:
+=== Other polices
 
 This section describes other policies that may be desirable. Some
 are beyond the CIS benchmark.
@@ -536,32 +537,29 @@ auth required pam_tally2.so deny=5
 Small integer values (20 or less) should not be a signficant risk with
 long and complicated passwords and a lock-out of several minutes.
 
-=== *refresh_spare_usr2 with* AUID accounts
+=== *refresh_spare_usr2 with* CIS hardening
 
-If you have a spare FS computer, the
-<<raid.adoc#_refresh_spare_usr2,*refresh_spare_usr2*>> script can be
-used to copy the operational computer's */usr2* partition to the spare
-computer.  Normally this partition holds all the operational FS
-programs and data. For this to work correctly, the operational and
-spare computers should have the same set-up including particularly the
-same user accounts with same UIDs and GIDs in parallel for all accounts,
-     particularly for those that have home directories on */usr2*, as
-     well as other OS set-up information the FS may depends such as
-     */etc/hosts* and */etc/ntp.conf*.
+IMPORTANT: Please read the
+<<raid.adoc#_refresh_spare_usr2,refresh_spare_usr2>> section in the
+'RAID Notes for FSL10' document for important information on the
+*refresh_spare_usr2* script.
 
-The script is used on the spare computer. Neither computer should have anyone logged in
-with a home directory on */usr2* nor should there be any activity occuring that
-will affect */usr2*.
+NOTE: Despite what the script says, it is possible to run the script
+by using *su* or *sudo*/*root_account* from a non-root account as long
+ as there is no activity involving */usr2* and
+the user's current directory is not on */usr2*.
 
-Normally, the script is run by *root* and requires direct login on the
-console. For the AUID environment it could be run by a user with a
-home directory that is not on */usr2*.  The following set-up allows
-for either possibility. If the script is run by a user other than
-*root*, it must be run with:
+For a user other than *root* to use the script, _after_ they have made
+sure they are not currently on */usr2* (*cd*-ing away if necessary),
+     they should use the command 
 
 ....
 sudo refresh_spare_usr2
 ....
+
+The remainder of this sub-section describes the steps need to enable
+use of the script with CIS hardening. The possibility of running it as
+*root* or from a different account is allowed for the instructions.
 
 ==== On *operational* computer
 
@@ -584,16 +582,13 @@ Permissions: *rwxr-xr--*, ownership *root:root*.
 
 ===== Create *spare* account:
 
+NOTE: That the user's home directory is on */home* (by default), not */usr2*.
+
 ----
 adduser --uid 503 --gid 990 spare
 ----
 
-===== Disable password aging and inactivity time-out for this account:
-
-(Using a password will be disable further below.)
-----
-chage -I -1 -M 99999 spare
-----
+IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.
 
 ==== On *spare* computer
 
@@ -624,22 +619,15 @@ where *operational* is the name or IP of your operational computer.
 
 ===== For a different user than *root* to run the script
 
-IMPORTANT: They must not have their home directory on */usr2*.
+IMPORTANT: They must not have their current directory on */usr2* when they run the script.
 
 Use *visudo* to add
 
 ....
-%spare         ALL=(ALL) /usr/local/sbin/refresh_spare_usr2
+<user>         ALL=(ALL) /usr/local/sbin/refresh_spare_usr2
 ....
 
-Create a *spare* group and add the user to the group:
-
-....
-addgroup spare
-adduser <user> spare
-....
-
-where *<user>* is the user that wll run the script.
+where *<user>* is the user that will run the command (it could be *oper*).
 
 Create a key for the user (unless one already
     exists). In any event, copy it to the *spare* account on your operational computer:
@@ -653,14 +641,18 @@ ssh-copy-id spare@operational
 where *<user>* is the user that wll run the script and *operational*
 is the name or IP of your operational computer.
 
-==== On *operational* computer,
+==== On *operational* computer
 
 ===== Lock out *spare* account from normal login (but must have a shell):
+
+This will disable password login for this user:
 
 ----
 usermod -L spare
 ----
 
-#TODO: Test if a user with a home directory on */usr2* on the *spare* computer can run the script by *cd*-ing to a directory on a different partition first#
+===== Disable password aging and inactivity time-out for this account:
 
-IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.
+----
+chage -I -1 -M 99999 spare
+----

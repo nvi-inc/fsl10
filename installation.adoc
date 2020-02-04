@@ -1,12 +1,13 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.92 - Jan 2020
+Version 1.93 - Feb 2020
 
 :sectnums:
 :experimental:
 :downarrow: &downarrow;
 
 :toc:
+:toclevels: 1
 <<<
 == Introduction
 
@@ -164,7 +165,7 @@ press  kbd:[Enter].
 
 Alternatively, if you are only using the installer to initialize new disks,
 you may want to use *Go Back* and directly select *Detect disks* from the
-main menu to skip forward to step 4.10 below.
+main menu to skip forward to <<Setup partitions>> below.
 ====
 
 === Set a hostname
@@ -239,8 +240,8 @@ fine, just be sure to choose the large *FREE SPACE* at the end of the disk.
 
 NOTE: If you physically only have one disk bay and wish to construct a FSL10 *test-bed*, 
 it is possible to avoid using the software RAID layer entirely.  Simply select *Use as: physical volume for LVM*
-for this partition instead and skip ahead to <<Setru Logial Volume Manager (LVM)>> below.
-However, plese note that a single disk setup is not recommended for any *operational* system.
+for this partition instead and skip ahead to <<Setup Logical Volume Manager (LVM)>> below.
+However, please note that a single disk setup is not recommended for any *operational* system.
 
 ==== Setup the second disk
 
@@ -401,9 +402,9 @@ You can now boot to your new OS.
 NOTE: If the login screen is painfully slow and your CPU does not
 include a GPU, you can probably fix the slowness by disabling
 *Wayland* in *gdm3*. However, the result may be that rebooting or
-shutting down will typically have an enforced 90-120 second delay
-(<<Fix for slow reboot/shutdown with *Wayland* disabled,possible fix>>). You
-may find the slow login screen preferable. To disable
+shutting down will typically have an enforced 90-120 second delay (see
+    the <<Fix for slow reboot/shutdown with *Wayland* disabled>> section for a _possible_
+    fix). You may find the slow login screen preferable. To disable
 *Wayland*, edit */etc/gdm3/daemon.conf* and uncomment the line
 *WaylandEnable=false*.  Then *gdm3* will need to be restarted either
 by rebooting or entering *systemctl restart gdm3*.  You can restart an
@@ -652,7 +653,7 @@ to confirm that everything compiled correctly (no news is good news).
 
 === Wait for the RAID1 disk mirroring to set up
 
-watching its progress with:
+If you installed the RAID (and RAID tools) check its progress with:
 
    mdstat
 
@@ -679,15 +680,16 @@ disk already in use in the RAID.
 
 NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
 
-NOTE: This sub-section assumes you have <<Install tools for RAID (Optional),installed the Tools for RAID>>.
+NOTE: This sub-section assumes you have followed the directions in the <<Install tools for RAID (Optional)>>
+section above.
 
 Ensure the RAID is synced by checking that
 
     mdstat
 
 shows no recovery in progress. If there is none, shut down the
-machine safely. If you installed with a second disk, remove and place
-on the shelf.
+machine safely. If you installed with a second disk, remove it and place
+it on the shelf.
 
 ==== Initialize new disk
 
@@ -725,7 +727,7 @@ instructions for <<Initialize new disk>>.
 
 Boot with only the primary disk installed. The new secondary disk must
 be keyed off or removed. The script will refuse to run if there is a
-disk already installed. This will ensure that no other disk is
+second disk already turned on. This will ensure that no other disk is
 installed and mistaken for the disk to be refreshed.
 
 NOTE: With the RAID now missing a disk, you may see
@@ -936,7 +938,7 @@ Look for *hostnames=*, use fully qualified name.
 +
 If you have hardcoded your the mail *HELO* message data as descibed in
 the sub-section <<Generate FQDN in *HELO* for outgoing mail>>, you will need
-to update your data as described in that sub-section.
+to update your changes.
 
 When finished, reboot.
 
@@ -1139,9 +1141,34 @@ the line below is the account name) that has received mail
 === Generate FQDN in *HELO* for outgoing mail
 
 If mail from your system is being rejected by some servers because
-*exim4* is not providing a Fully Qualified Domain Name (FQDN) in its *HELO*
-message, one way to fix this is to comment out the following lines
-in */etc/exim4/exim4.conf.template*:
+*exim4* is not providing a Fully Qualified Domain Name (FQDN), in its *HELO*
+message, there are two possibke solutions, "recommended" and "alternate".
+
+A defect of both approaches is that they hard codes the *HELO* message
+  data, which will have to be manually updated if the FQDN changes.  A
+  more general solution may be possible, but hasn't been discovered
+  yet.
+
+
+==== Recommended method
+
+The recommended  way to fix this a solution is to add the following
+line to */etc/exim4/update-exim4.conf.conf*:
+
+....
+MAIN_HARDCODE_PRIMARY_HOSTNAME=<FQDN>
+....
+
+Where *<FQDN>* is your system's Fully Qualified Domain Name. Then restart the server:
+....
+update-exim4.conf
+systemctl restart exim4
+....
+
+==== Alternate method
+
+A possible alternate solution is to comment out the following lines in
+*/etc/exim4/exim4.conf.template*:
 
 ....
 .ifdef REMOTE_SMTP_HELO_FROM_DNS
@@ -1156,19 +1183,15 @@ REMOTE_SMTP_HELO_DATA=${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_
 Right after those lines, add the following line:
 
 ....
-REMOTE_SMTP_HELO_DATA=FQDN
+REMOTE_SMTP_HELO_DATA=<FQDN>
 ....
 
-Where *FQDN* is your system's Fully Qualified Domain Name. Then restart the server:
+Where *<FQDN>* is your system's Fully Qualified Domain Name. Then restart the server:
 
 ....
 update-exim4.conf
 systemctl restart exim4
 ....
-
-A defect of this approach is that it hard codes the *HELO* message data,
-  which will have to be manually updated if the FQDN changes.  A more
-  general solution may be possible, but hasn't been discovered yet.
 
 === Set X display resolution at boot
 

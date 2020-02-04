@@ -1,6 +1,6 @@
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Draft 0.5 - Jan 2020
+Version 1.93 - Feb 2020
 
 :sectnums:
 :experimental:
@@ -10,11 +10,12 @@ Draft 0.5 - Jan 2020
 <<<
 == Introduction
 
-These notes are intended to cover, albeit tersely, the major issues for
-RAID operations with FSL10. The disk lay-out has changed significantly
-since FSL9, which required updating the scripts that are used. In
-addition, the scripts have been extensively revised to provide more
-protection from possible errors in how they are used.
+These notes are intended to cover, albeit tersely, the major issues
+for RAID operations with FSL10 (see the <<installation.adoc#,FSL10
+      Installation>> document). The disk lay-out has changed
+significantly since FSL9, which required updating the scripts that are
+used. In addition, the scripts have been extensively revised to
+provide more protection from possible errors in how they are used.
 
 All operations and scripts in this document require *root* privileges
 unless otherwise indicated.
@@ -22,7 +23,8 @@ unless otherwise indicated.
 == Guidelines for RAID operations
 
 The FSL10 RAID configuration normally uses two disks configured
-according to the FSL10 installation instructions. Below are mandatory
+according to the FSL10 installation instructions (see the <<installation.adoc#,FSL10
+      Installation>> document). Below are mandatory
 and recommended guidelines.
 
 === Mandatory practices
@@ -33,8 +35,14 @@ These practices are fundamental to the operation of the RAID.
 . Never split up a RAID pair unless already synced, check with *mdstat*
  
 A RAID pair (kept together and in order) can be removed or moved
-between computers if need be. A disk rotation is probably the only
-reason to split a pair.
+between computers if need be. A disk rotation (or initializing a new
+    disk)  is probably the only reason to split a pair.
+
+NOTE: When booting a disk from a RAID by itself, you may see
+~20 of the *volume group
+not found* error messages, then the machine will boot. These error
+messages  only appear like this the first time a disk
+from the RAID is booted without its partner.
 
 === Recommended practices
 
@@ -70,12 +78,12 @@ NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the
 . Wait until the RAID is not recovering, check with *mdstat*
 . Shutdown the system, e.g., *shutdown -h now*
 . Take the disk from *primary* slot, put it on the *shelf*
-. Move the disk from the *secondary* slot to the *primary* slot, keyed on
-. Move the _old_ *shelf* disk to the *secondary* slot, keyed off
-. Boot (*primary* keyed on, *secondary* keyed off)
+. Move the disk from the *secondary* slot to the *primary* slot, keyed-on
+. Move the _old_ *shelf* disk to the *secondary* slot, keyed-off
+. Boot (*primary* keyed-on, *secondary* keyed-off)
 . Login in as root
 . Run *refresh_secondary*
-. Key on the *secondary* slot when prompted
+. Key-on the *secondary* slot when prompted
 . If the script rejects the disk (and stops with an error), seek expert advice. Be sure to note any messages so they can be reported.
 . If the disk is accepted, let the refresh run to completion (the progress report can be aborted as indicated). The system can be used in the meantime, but may be a little slow.
 
@@ -103,13 +111,112 @@ Alternatively, If the update is deemed to have *failed*, the system can be
 
 [start=5]
 . Shutdown the system, e.g., *shutdown -h now*
-. Key off the *secondary* slot
-. Reboot (*primary* keyed on, *secondary* keyed off)
+. Key-off the *secondary* slot
+. Reboot (*primary* keyed-on, *secondary* keyed-off)
 . Run *blank_secondary*
-. Key on the *secondary* slot when prompted
+. Key-on the *secondary* slot when prompted
 . Answer *y* to blank
 . Run *refresh_secondary*
 . Once the refresh is complete, you have recovered to the original state.
+
+== Initialize a new disk
+
+If one or more of the disks in the set for the RAID fails, you can
+initialize new ones to replace them.
+
+IMPORTANT: The new disks should be at least
+as large as the smallest of the remaining disks.
+
+The sub-sections below cover various scenarios for intializing one new
+disk to complete a set of three, i.e., one of three disks in a set has
+failed.  It is assumed that you want to maintain the cyclic numbering
+of the disks for rotations (but that is not required).  It should be
+straightforward to adapt them to other cases.
+
+If you need to initilaize more than one disk, please follow the
+instructions in the <<installation.adoc#_setup_additional_disk,Setup
+additional disk>> section of the FSL10 Installation document.
+
+=== Currently two disks are running in the RAID
+
+This case corresponds to not having a good shelf disk.
+
+. Wait until the RAID is not recovering, check with *mdstat*
+. Shutdown the system, e.g., *shutdown -h now*
+
+If the disks are in cyclical order (i.e, primary, secondary are numbered
+    in order: 1, 2, or 2, 3, or 3, 1), you should:
+
+. Take the disk from *primary* slot, put it on the *shelf*
+. Move the disk from the *secondary* slot to the *primary* slot, keyed-on
+
+If the disks are
+not in cyclical order (i.e, primary,
+      secondary are numbered in order: 1, 3, or 2, 1, or 3, 2), you
+    should:
+    
+. Take the disk from *secondary* slot, put it on the *shelf*
+    
+In either case, finish with:
+
+. Put the new disk in the *secondary* slot, key-off.
+. Boot (*primary* keyed-on, *secondary* keyed-off)
+. Login in as *root*
+. Run *blank_secondary*
+. Key-on the *secondary* slot when prompted
+. Answer *y* to blank
+. Run *refresh_secondary*
+. Once the refresh is complete, the disk can be used normally
+. Label the new disk with it system name, number, and serial number.
+
+=== Currently one disk is running in the RAID, but two are installed
+
+In this case, there is a good shelf disk. The strategy used avoids overwriting it until there are three functional disks again.
+
+. Use *mdstat* to determine which disk is running, compare the serial number to those shown on the labels or inspect the disks to determine their serial numbers.
+. Shutdown the system, e.g., *shutdown -h now*
+. Remove the non-working disk.
+. Move the working disk to the *primary* slot, if it isn't already there, keyed-on.
+. Put the new disk in the *secondary* slot, keyed-off.
+. Boot (*primary* keyed-on, *secondary* keyed-off)
+. Login in as *root*
+. Run *blank_secondary*
+. Key-on the *secondary* slot when prompted
+. Answer *y* to blank
+. Run *refresh_secondary*
+. Once the refresh is complete, the disk can be used normally
+. Label the new disk with it system name, number, and serial number.
+
+If the disks are not in cyclical order (i.e., primary, secondary are
+numbered in order: 1, 3, or 2, 1, or 3, 2), on the next disk rotation
+you should move the *secondary* disk to the shelf instead of moving
+the *primary*.
+
+=== Currently one disk is installed and running
+
+In this case, the shelf disk is assumed to be healthy, but older.
+
+If the working disk is not in the *primary* slot:
+
+. Shutdown the system, e.g., *shutdown -h now*
+. Move the working disk to the *primary* slot, keyed-on.
+. Boot (*primary* keyed-on, *secondary* empty)
+
+Then in any event:
+
+. Put the new disk in the *secondary* slot, keyed-off.
+. Login in as *root*
+. Run *blank_secondary*
+. Key-on the *secondary* slot when prompted
+. Answer *y* to blank
+. Run *refresh_secondary*
+. Once the refresh is complete, the disk can be used normally
+. Label the new disk with it system name, number, and serial number.
+
+If the disks are not in not in cyclical order (i.e, primary, secondary
+are numbered in order, 1, 3, or 2, 1, or 3, 2), on the next disk
+rotation you should move the *secondary* the shelf in stead of the
+*primary*.
 
 == Script descriptions
 
@@ -156,7 +263,7 @@ use.
 For safety reasons, to ensure that only an old *shelf* disk is overwritten,
 any *secondary* disk (*sdb*) will be rejected that:
 
-. Was loaded (slot keyed on) before starting the script
+. Was loaded (slot keyed-on) before starting the script
 +
 Unless overridden by *-A* or previously loaded by this or the *blank_secondary* script.
 
@@ -255,7 +362,7 @@ cases. It will ask you to confirm before blanking.
 
 It will reject any *secondary* disk (*sdb*) that:
 
-. Was loaded (slot keyed on) before starting the script
+. Was loaded (slot keyed-on) before starting the script
 +
 Unless you have just loaded it through *refresh_secondary*'s auspices or used
 the *-A* option to "Allow" it (see below).
@@ -358,28 +465,38 @@ little slow.
 
 This script is not part of RAID operations per se, but is included in
 this document for completeness. In a two computer configuration
-(*operational* and *spare*), it is used to make a copy of the *operational*
-computer's */usr2* partition on the *spare* computer.
+(*operational* and *spare*), it is used to make a copy of the
+*operational* computer's */usr2* partition on the *spare* computer.
+Normally this partition holds all the operational FS programs and
+data. The script can be found in */root/fsl10/RAID*.  Full
+instructions for its installation are included in the script.
 
-The script can be found in */root/fsl10/RAID*. It should installed on
-the *spare* computer *only*.  Full instructions for its installation are
-included in the script.
+WARNING: It should installed on the *spare* computer _only_.
 
-To use this script, It is important that the user and group IDs of all
-users on the two systems be the same.
+NOTE: Despite what the script says, it is possible to run the script
+by using *su* or *sudo* from a non-root account as long as there is no
+activity involving */usr2* and the user's current directory is not on
+*/usr2*.
 
-It is recommended that the script be used (including for initial testing)
+IMPORTANT: For this script to work usefully, the operational and
+spare computers should have the same set-up including particularly the
+same user accounts with same UIDs and GIDs in parallel for all
+accounts, particularly for those that have home directories on /usr2,
+  as well as other OS set-up information the FS may depends such as
+  /etc/hosts and /etc/ntp.conf.
+
+IMPORTANT: It is recommended that the script be used (including for initial testing)
   immediately after a disk rotation to provide the ample opportunities
   for recovery if there is a problem. In particular, for initial
   testing the procedure in the <<Test upgrade of FS - system updates - or other significant changes>>
   section should be used.
 
-It is possible to recover fairly easily, using the script as a guide,
+TIP: It is possible to recover fairly easily, using the script as a guide,
 from most operations performed by the script if they are accidentally
 terminated with a kbd:[Ctrl+C]. A significant exception to this is the
 *mke2fs* command. For this reason, the script displays the command to
 the terminal to allow the user to cut-and-paste the command to
-re-execute it, if that is needed.
+re-execute it, in case that is ever needed.
 
 == Multiple computer set-up
 
