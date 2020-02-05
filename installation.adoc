@@ -1,13 +1,12 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.93 - Feb 2020
+Version 1.94 - Feb 2020
 
 :sectnums:
 :experimental:
 :downarrow: &downarrow;
 
 :toc:
-:toclevels: 1
 <<<
 == Introduction
 
@@ -629,6 +628,11 @@ See also the <<Post Install>> section below.
     cd /usr2
     git clone https://github.com/nvi-inc/fs fs-git
 
+NOTE: You may be prompted for your credentials when cloning the
+repository.  If so, and you haven't already registered to have access,
+  please see the latest FS release notes for information on how to
+  register.
+
 === Set */usr2/fs* link, set */usr2/fs-git* permissions, and install default copies of all the FS related directories
 
    cd /usr2/fs-git
@@ -920,7 +924,8 @@ Change your hostname
 +
 ./etc/hosts
 +
-Update your IP address, FQDN, and alias (typically the hostname, multiple aliases are allowed).
+Update your IP address, FQDN (canonical name), and alias (typically the hostname,
+but multiple aliases/nicknames are allowed).
 +
 ./etc/networks
 +
@@ -933,12 +938,12 @@ Use fully qualified node name
 ./etc/exim4/update-exim4.conf.conf
 +
 Look for *hostnames=*, use fully qualified name.
-+
-./etc/exim4/update-exim4.conf.conf
-+
-If you have hardcoded your the mail *HELO* message data as descibed in
-the sub-section <<Generate FQDN in *HELO* for outgoing mail>>, you will need
-to update your changes.
+
+Then execute:
+
+....
+update-exim4.conf
+....
 
 When finished, reboot.
 
@@ -1142,51 +1147,15 @@ the line below is the account name) that has received mail
 
 If mail from your system is being rejected by some servers because
 *exim4* is not providing a Fully Qualified Domain Name (FQDN), in its *HELO*
-message, there are two possibke solutions, "recommended" and "alternate".
+message, the following solution should fix the problem.
 
-A defect of both approaches is that they hard codes the *HELO* message
-  data, which will have to be manually updated if the FQDN changes.  A
-  more general solution may be possible, but hasn't been discovered
-  yet.
-
-
-==== Recommended method
-
-The recommended  way to fix this a solution is to add the following
-line to */etc/exim4/update-exim4.conf.conf*:
+Add the following line to */etc/exim4/update-exim4.conf.conf*:
 
 ....
-MAIN_HARDCODE_PRIMARY_HOSTNAME=<FQDN>
+MAIN_HARDCODE_PRIMARY_HOSTNAME=ETC_MAILNAME
 ....
 
-Where *<FQDN>* is your system's Fully Qualified Domain Name. Then restart the server:
-....
-update-exim4.conf
-systemctl restart exim4
-....
-
-==== Alternate method
-
-A possible alternate solution is to comment out the following lines in
-*/etc/exim4/exim4.conf.template*:
-
-....
-.ifdef REMOTE_SMTP_HELO_FROM_DNS
-.ifdef REMOTE_SMTP_HELO_DATA
-REMOTE_SMTP_HELO_DATA==${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
-.else
-REMOTE_SMTP_HELO_DATA=${lookup dnsdb {ptr=$sending_ip_address}{$value}{$primary_hostname}}
-.endif
-.endif
-....
-
-Right after those lines, add the following line:
-
-....
-REMOTE_SMTP_HELO_DATA=<FQDN>
-....
-
-Where *<FQDN>* is your system's Fully Qualified Domain Name. Then restart the server:
+Then execute:
 
 ....
 update-exim4.conf
