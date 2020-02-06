@@ -1149,7 +1149,7 @@ If mail from your system is being rejected by some servers because
 *exim4* is not providing a Fully Qualified Domain Name (FQDN), in its *HELO*
 message, the following solution should fix the problem.
 
-Add the following line to */etc/exim4/update-exim4.conf.conf*:
+Add the following line to the beginning of */etc/exim4/exim4.conf.template*:
 
 ....
 MAIN_HARDCODE_PRIMARY_HOSTNAME=ETC_MAILNAME
