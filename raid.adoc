@@ -167,7 +167,7 @@ In either case, finish with:
 . Answer *y* to blank
 . Run *refresh_secondary*
 . Once the refresh is complete, the disk can be used normally
-. Label the new disk with it system name, number, and serial number.
+. Label the new disk with its system name, number, and serial number.
 
 === Currently one disk is running in the RAID, but two are installed
 
@@ -185,7 +185,7 @@ In this case, there is a good shelf disk. The strategy used avoids overwriting i
 . Answer *y* to blank
 . Run *refresh_secondary*
 . Once the refresh is complete, the disk can be used normally
-. Label the new disk with it system name, number, and serial number.
+. Label the new disk with its system name, number, and serial number.
 
 If the disks are not in cyclical order (i.e., primary, secondary are
 numbered in order: 1, 3, or 2, 1, or 3, 2), on the next disk rotation
@@ -195,6 +195,8 @@ the *primary*.
 === Currently one disk is installed and running
 
 In this case, the shelf disk is assumed to be healthy, but older.
+ Again, the strategy is to avoid overwriting it until there is a full
+ complement of disks available.
 
 If the working disk is not in the *primary* slot:
 
@@ -211,7 +213,7 @@ Then in any event:
 . Answer *y* to blank
 . Run *refresh_secondary*
 . Once the refresh is complete, the disk can be used normally
-. Label the new disk with it system name, number, and serial number.
+. Label the new disk with its system name, number, and serial number.
 
 If the disks are not in not in cyclical order (i.e, primary, secondary
 are numbered in order, 1, 3, or 2, 1, or 3, 2), on the next disk
@@ -315,9 +317,10 @@ refresh is attempted promptly after the *shelf* disk is booted for the
 first time by itself and the RAID was run on the other disks for more than a trivial
 amount of time beforehand.
 
-If the disk being refreshed is from the same computer and has just been
-on the *shelf* unused since it was last rotated, it is safe to refresh
-and should be accepted by all the checks.
+If the disk being refreshed is from the same computer and has just
+been on the *shelf* unused since it was last rotated, it is safe to
+refresh and should be accepted by all the checks. In other words,
+        normal disk rotation should work with no problems.
 
 If the *secondary* disk is removable, the user will provided with some
 information about the disk and given an opportunity to continue with
@@ -561,9 +564,10 @@ this state, it should use the working disk. At the first opportunity,
      performed (with the still good disk in the *primary* slot) to
      refresh the *shelf* disk and make a working RAID.  The failed
      disk should be repaired or replaced with a new disk that is at
-     least as large. The *blank_secondary* script should be used too
+     least as large. The *blank_secondary* script should be used to
      erase the new disk before it is introduced into the rotation
-     sequence.
+     sequence. See the <<Initialize a new disk>> section above for
+     full details on initializing a new disk.
 
 === Operational computer RAID corrupted
 

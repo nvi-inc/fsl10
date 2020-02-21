@@ -619,9 +619,9 @@ been installed.  The four tools are:
    * *blank_secondary* allows *root* to initialize a secondary disk, must be used with extreme care
    * *recover_raid* allows *root* to re-add a disk that fell out of (or was removed from) the RAID back into it
 
-TIP: More information about RAID operation can be found at <<raid.adoc#,RAID notes for FSL10>>.
+TIP: More information about RAID operation can be found in the <<raid.adoc#,RAID notes for FSL10>> document.
 
-See also the <<Post Install>> section below.
+See also the <<Setup additional disk>> sub-section n the <<Post Install>> section below.
 
 === Download the Field System
 

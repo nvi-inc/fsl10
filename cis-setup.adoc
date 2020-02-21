@@ -43,11 +43,17 @@ script ../remediate.txt
 exit
 ....
 
-NOTE: This script should not be run more than once on a system.
+WARNING: This script should not be run more than once on a system.
+
+TIP: The use of the *script* command causes the output to be recorded
+in the specified file. This can be very helpful for understanding what
+went wrong if the script fails. The script itself uses the *-x* option
+to echo the commands as they are executed to make it easy to match the
+output with the commands being executed.
 
 === Manual changes
 
-This section covers manual operations after running the script.
+This section covers manual operations that are required _after_ running the script.
 
 1. Reboot and execute:
 +
@@ -136,6 +142,12 @@ EOF
 If there is a requirement to be able to boot/reboot without entering
 the password, edit `/etc/grub.d/10_linux` and add `--unrestricted` to the
 line `CLASS=`
+
+IMPORTANT: It is strongly recommended that booting without a password
+be permitted. Otherwise, if a reboot is required to continue
+operations it will not be possible unless some one with the password
+is available. If they aren't available, this could lead to loss of
+VLBI data and can be a safety issue.
 
 Example:
 
