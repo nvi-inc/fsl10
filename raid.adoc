@@ -1,6 +1,6 @@
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.94 - Feb 2020
+Version 1.95 - Feb 2020
 
 :sectnums:
 :experimental:
@@ -118,6 +118,39 @@ Alternatively, If the update is deemed to have *failed*, the system can be
 . Answer *y* to blank
 . Run *refresh_secondary*
 . Once the refresh is complete, you have recovered to the original state.
+
+== Recover from a shelf disk
+
+The section describes how to recover from a _good_ shelf disk. This might be
+needed, e.g., if it is discovered that a problem has developed on the
+RAID pair since the last disk rotation.
+
+NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the *secondary* controller,
+
+. Shutdown the system, e.g., *shutdown -h now*
+. Take the disks from both the *primary* and *secondary* slots, set them aside.
+. Insert the _good_ shelf disk in the *primary* slot, keyed-on.
+. Insert the disk that is next in cyclic order (from the ones set aside)  in the *secondary* slot, keyed-off.
+. Reboot (*primary* keyed-on, *secondary* keyed-off)
+. Login in as root
+. Run *blank_secondary*
+. Key-on the *secondary* slot when prompted
+. Answer *y* to blank
+. Run *refresh_secondary*
++
+Once the refresh has entered the recovery phase (the progress display is being shown onscreen), the system can
+be used for operations, if need be. In that case, the rest of this procedure can be completed when time allows.
+. Wait until the RAID is not recovering, check with *mdstat*
+. Shutdown the system, e.g., *shutdown -h now*
+. Take the disk from *primary* slot, put it on the *shelf*
+. Move the disk from the *secondary* slot to the *primary* slot, keyed-on
+. Insert the remaining disk, that was set aside, in the *secondary* slot, keyed-off.
+. Reboot (*primary* keyed-on, *secondary* keyed-off)
+. Login in as root
+. Run *blank_secondary*
+. Key-on the *secondary* slot when prompted
+. Answer *y* to blank
+. Once the refresh is complete, you have recovered to the state of the previous _good_ shelf disk.
 
 == Initialize a new disk
 
@@ -579,25 +612,22 @@ used to recover from a bad OS patch (which is extremely unlikely),
      which is easier if patches are applied just after a disk
      rotation (see also the <<Test upgrade of FS - system updates - or other significant changes>> section).
 
-In this case, the *shelf* disks can be used to restore the system to
-the state at the time of the most recent rotation.  To do this, boot
-with only the *shelf* disk installed in the *primary* slot, then use
-the *blank_secondary* script to erase the corrupted disk that is next
-in cyclic order, then use *refresh_secondary* to restore a working
-RAID.  The system can be used for operations once the RAID is recovering. All needed
-volatile operational files that were created/modified after the last disk
-rotation will need to be recreated.  Then as time allows, a disk
-rotation with the other corrupted disk will bring the system back to
-full redundancy and restore the same disk sequence as before.
+In this case, the *shelf* disk can be used to restore the system to
+the state at the time of the most recent rotation.  To do this, follow
+the procedure in <<Recover from a shelf disk>> section above.  The
+system can be used for operations once the RAID is recovering for the
+first refresh in the procedure.  All needed volatile operational files that were
+created/modified after the last disk rotation will need to be
+recreated.  Then as time allows, the other disk can recovered by
+finishing the procedure in <<Recover from a shelf disk>> section.
 
 If the first disk that is tried for blanking and recovery doesn't work, the
 other one can be tried. If neither works, it should be possible to run on just
 what was the *shelf* disk until a fuller recovery is possible, probably with
 replacements for the malfunctioning disks.
 
-This approach could also be used for a similar
-problem with the *spare* computer and using its *shelf* disk for
-recovery.
+This approach could also be used for a similar problem with the
+*spare* computer and using its *shelf* disk for recovery.
 
 This approach of this section should not be used if a problem with the *operational*
 computer caused the damage to its RAID. In that case, follow
