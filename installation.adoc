@@ -80,9 +80,9 @@ single disk (for a test install etc.) is also annotated below.
 TIP: Installing to a single disk is recommended and has some
 advantages. It is faster and you can control when the syncing for the
 second disk occurs, such as when you leave for the evening.  The
-set-up of additional disks is covered in the <<Post Install>> section.
-As mentioned in the warning above, you should start with the smallest
-disk.
+set-up of additional disks is covered in the <<Post Install>> section
+(which references the *RAID Notoes for FSL10* document). As mentioned
+ in the warning above, you should start with the smallest disk.
 
 === Boot from the installation medium
 
