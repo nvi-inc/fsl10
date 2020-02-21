@@ -1610,6 +1610,7 @@ psmisc						install
 pulseaudio					install
 pulseaudio-module-bluetooth			install
 pulseaudio-utils				install
+pv						install
 python						install
 python-apt-common				install
 python-bs4					install
