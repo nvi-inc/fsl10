@@ -121,11 +121,23 @@ Alternatively, If the update is deemed to have *failed*, the system can be
 
 == Recover from a shelf disk
 
-The section describes how to recover from a _good_ shelf disk. This might be
-needed, e.g., if it is discovered that a problem has developed on the
-RAID pair since the last disk rotation.
+The section describes how to recover from a _good_ shelf disk. This
+might be needed, e.g., if it is discovered that a problem has
+developed on the RAID pair since the last disk rotation, possibly due
+to a bad update of some type or some other error.
 
-NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the *secondary* controller,
+TIP: Before using this procedure, it should be considered whether the
+damage is extensive enough to require starting over from the shelf
+disk or whether it can be reasonably repaired in place.
+
+IMPORTANT: This will only produce good result if the shelf disk is in
+_good_ copy.
+
+WARNING: Do *not* use this procedure if a problem with computer caused
+the damage to the RAID.
+
+NOTE: Your BIOS must be set to allow hot swapping of disks,
+    particularly for the *secondary* controller,
 
 . Shutdown the system, e.g., *shutdown -h now*
 . Take the disks from both the *primary* and *secondary* slots, set them aside.
