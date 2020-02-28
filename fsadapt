@@ -811,12 +811,14 @@ if [ -r /etc/ssh/ssh_host_rsa_key ] && [ -r /etc/ssh/ssh_host_ecdsa_key ]; then
 else
   sshkeys_def="on"
 fi
-# Do we have apt-get cron for weekly security updates.
-if [ -r /etc/cron.weekly/apt-get ] && \
-   ! grep -q "^APT" /etc/apt/apt.conf.d/20auto-upgrades; then
-  apt_get_def="off"
+# Do we have apt-show-upgradeable cron for weekly security updates.
+if [ -r /etc/cron.weekly/apt-show-upgradeable ] && \
+   grep -q "^APT::Periodic::Enable \"0\";" /etc/apt/apt.conf.d/20auto-upgrades && \
+   ! grep -q ",label=Debian-Security" /etc/apt/apt.conf.d/50unattended-upgrades &&\
+   grep -q "^\[cmdline\]" /etc/apt/listchanges.conf ; then
+  apt_def="off"
 else
-  apt_get_def="on"
+  apt_def="on"
 fi
 
 # Present a checklist which of the following to do.
@@ -837,7 +839,7 @@ all of these can be safely attempted again and again.)" \
   greeter       "Set up GDM3 greeter to not show user list" $greeter_def \
   serial        "Set '/etc/default/grub' for VScom cards" $serial_def \
   sshkeys       "'sshd' private/public keys (computer identity)" $sshkeys_def \
-  updates       "Automatic weekly security update reminder." $apt_get_def\
+  updates       "Automatic weekly security update reminder." $apt_def\
   2>/tmp/reply
   # Cancel?
   if [ $? != 0 ]; then
@@ -1003,14 +1005,31 @@ fi
 ;;
      updates)
 # Setup cron for weekly security updates.
-if [ -r "${SRCS}"etc_cron.weekly_apt-get ]; then
-    if [ -r /etc/cron.weekly/apt-get ]; then
+if [ -r "${SRCS}"etc_cron.weekly_apt-show-upgradeable ]; then
+    if [ -r /etc/cron.weekly/apt-show-upgradeable ]; then
 	:
     else
-	cp ${VERBO} "${SRCS}"etc_cron.weekly_apt-get /etc/cron.weekly/apt-get
-	chmod ${VERBO} 755 /etc/cron.weekly/apt-get
+	cp ${VERBO} "${SRCS}"etc_cron.weekly_apt-show-upgradeable /etc/cron.weekly/apt-show-upgradeable
+	chmod ${VERBO} 755 /etc/cron.weekly/apt-show-upgradeable
     fi
-    sed -i -e "s,^APT,# APT," /etc/apt/apt.conf.d/20auto-upgrades
+    if ! grep -q "^APT::Periodic::Enable" /etc/apt/apt.conf.d/20auto-upgrades; then
+	echo "APT::Periodic::Enable \"0\";" >> /etc/apt/apt.conf.d/20auto-upgrades
+    fi
+    sed -i -e "s/^APT::Periodic::Enable \"./APT::Periodic::Enable \"0/" /etc/apt/apt.conf.d/20auto-upgrades
+    if grep -q ",label=Debian-Security" /etc/apt/apt.conf.d/50unattended-upgrades; then
+	sed -i -e "s/,label=Debian-Security//" /etc/apt/apt.conf.d/50unattended-upgrades
+    fi
+    if ! grep -q "^\[cmdline\]" /etc/apt/listchanges.conf; then
+	cat >> /etc/apt/listchanges.conf << EOF
+
+[cmdline]
+frontend=text
+confirm=false
+save_seen=none
+which=changelog
+headers=true
+EOF
+    fi
 else
     :
 fi
