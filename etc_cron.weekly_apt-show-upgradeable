@@ -17,4 +17,12 @@ if [ -n "$PACKAGES" ]; then
 	echo
 	echo "        apt -uy upgrade"
 	echo "        apt clean"
+	if echo $PACKAGES | grep -q "linux-image-"; then
+		echo
+		echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+		echo "NB: The Linux kernel image is one of the packages due to be upgraded."
+		echo "NB: This will require a REBOOT and possibly out-of-tree modules to be rebuilt."
+		echo "NB: Please allow _extra time_ for testing after the upgrade."
+		echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	fi
 fi
