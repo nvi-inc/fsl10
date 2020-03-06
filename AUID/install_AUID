@@ -5,15 +5,21 @@ if ! [ $(id -u) = 0 ]; then
    echo "This script must be run as root."
    exit 1
 fi
-# install mdstat
+# install promotion scripts
+echo "Setting up promotion scripts"
 cd /usr/local/bin
 cp -a ~/fsl10/AUID/*_account .
 chown root:root *_account
 chmod a+rx *_account
-#
+# Updating ~oper/.profile
+echo "Updating ~oper/.profile"
 touch ~oper/.profile
 cat ~/fsl10/AUID/profile_oper >> ~oper/.profile
+# Updating ~prog/.profile
+echo "Updating ~prog/.profile"
 touch ~prog/.profile
 cat ~/fsl10/AUID/profile_prog >> ~prog/.profile
+# Updating ~root/.profile
+echo "Updating ~root/.profile"
 touch ~root/.profile
 cat ~/fsl10/AUID/profile_root >> ~root/.profile
