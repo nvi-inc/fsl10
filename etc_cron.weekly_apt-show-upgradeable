@@ -17,12 +17,18 @@ if [ -n "$PACKAGES" ]; then
 	echo
 	echo "        apt -uy upgrade"
 	echo "        apt clean"
-	if echo $PACKAGES | grep -q "linux-image-"; then
+	if echo $PACKAGES | grep -q linux-image-; then
 		echo
-		echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+		echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 		echo "NB: The Linux kernel image is one of the packages due to be upgraded."
-		echo "NB: This will require a REBOOT and possibly out-of-tree modules to be rebuilt."
-		echo "NB: Please allow _extra time_ for testing after the upgrade."
+		VERS=$(cat /proc/version | cut -d' ' -f3)
+		if echo $PACKAGES | grep -q linux-image-$VERS; then
+			echo "NB: (Upgrading will OVERWRITE the running kernel and require you to REBOOT!)"
+		else
+			echo "NB: (The kernal ABI has changed as per the linux-latest source package above"
+			echo "NB:  so all out-of-tree modules WILL NEED TO BE REBUILT after you REBOOT.)"
+		fi
+		echo "NB: Please allow _extra time_ for TESTING after the upgrade."
 		echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 	fi
 fi
