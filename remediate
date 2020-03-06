@@ -68,7 +68,7 @@ mount -o remount,noexec /dev/shm
 #
 # 1.3.1 Ensure AIDE is installed
 #
-apt-get -y install aide aide-common
+apt -y install aide aide-common
 aideinit
 #
 # 1.3.2 Ensure filesystem integrity is regularly checked
@@ -111,7 +111,7 @@ sysctl -w kernel.randomize_va_space=2
 #
 # 1.6.2.1 Ensure AppArmor is enabled in the bootloader configuration
 #
-apt-get -y install apparmor apparmor-profiles apparmor-utils
+apt -y install apparmor apparmor-profiles apparmor-utils
 #
 sed -i 's/^GRUB_CMDLINE_LINUX=\"[^"]\+/& apparmor=1 security=apparmor/' /etc/default/grub
 update-grub
@@ -123,8 +123,8 @@ sed -i 's/ Debian GNU\/Linux//' /etc/motd
 #
 # 2.1.2 Ensure openbsd-inetd is not installed
 #
-apt-get -y remove openbsd-inetd
-apt-get -y purge  openbsd-inetd
+apt -y remove openbsd-inetd
+apt -y purge  openbsd-inetd
 #
 # 2.2.1.2 Ensure ntp is configured
 #
@@ -143,8 +143,8 @@ systemctl disable rsync
 #
 # 2.3.4 Ensure telnet client is not installed
 #
-apt-get -y remove telnet
-apt-get -y purge  telnet
+apt -y remove telnet
+apt -y purge  telnet
 #
 # 3.1 Network Parameters (Host Only)
 #
