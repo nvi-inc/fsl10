@@ -1,0 +1,30 @@
+= Password reset recipe
+
+. Disconnect network cable(s)
+. Boot from installation media
+. Select *Advanced options ...*
+. Select *... Rescue mode*
+. Select Language (*English*)
+. Select country (*United States*)
+. Select keymap (*American English*)
+. During the lengthy DHCP configuration, use *Enter* to cancel
+. Use *Enter* to continue for failed network configuration
+. Select *Do no configure the network at this time*
+. When asked for hostname, use *Enter*
+. Select time zone (*Eastern*)
+. Select *Assemble RAID array*
+. Press *Space* on *Automatic*
++
+Use *Enter* to continue
+
+. Select your root file system (*/dev/lv/root*)
+. Select *Yes* to mount */boot*
+. Select *Yes* to mount */boot/efi*
+. Select *Execute a shell in /dev/lv/root* (i.e., in your root file system)
+. Select *Continue* to enter rescue mode
+. Use *passwd* command to set password
+. Use *exit* command to exit
+. Reconnect network cable(s)
+. Select *Reboot the system*
+. *Bob's your uncle*
+
