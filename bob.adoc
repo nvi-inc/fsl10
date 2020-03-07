@@ -1,16 +1,45 @@
-= Password reset recipe
+= Rescue mode
 
-. Disconnect network cable(s)
+Rescue mode is useful for repairing some problems that prevent booting
+and/or logging in.
+
+NOTE: If your Setup is locked with a password, you may need that
+password to select booting from your installation media.
+
 . Boot from installation media
 . Select *Advanced options ...*
 . Select *... Rescue mode*
 . Select Language (*English*)
 . Select country (*United States*)
 . Select keymap (*American English*)
-. During the lengthy DHCP configuration, use *Enter* to cancel
-. Use *Enter* to continue for failed network configuration
-. Select *Do no configure the network at this time*
-. When asked for hostname, use *Enter*
+. Network configuration
++
+
+TIP: If you experience a lengthy DHCP search, you can cancel it by
+pressing *Enter*.
+
++
+
+If you use DHCP for this machine  and need the network for your repair
+work, set your hostname and domain name appropriately, pressing
+*Enter* for each when done. Then proceed to the next numbered step below.
+
++
+
+Otherwise, select *Go Back* at the first opportunity. For the
+autoconfiguration failed message, press *Enter* to continue.
+
++
+
+If you do not need the network, select *Do not configure the network
+at this time* and when asked for the hostname, press *Enter*. Then
+proceed to the next numbered step below.
+
++
+
+Otherwise if you do need the network, select the appropriate configuration
+method and respond to the prompts as is suitable.
+
 . Select time zone (*Eastern*)
 . Select *Assemble RAID array*
 . Press *Space* on *Automatic*
@@ -22,9 +51,8 @@ Use *Enter* to continue
 . Select *Yes* to mount */boot/efi*
 . Select *Execute a shell in /dev/lv/root* (i.e., in your root file system)
 . Select *Continue* to enter rescue mode
-. Use *passwd* command to set password
-. Use *exit* command to exit
-. Reconnect network cable(s)
+. Use whatever commands are needed for your repair
+. Use the *exit* command to exit when done
 . Select *Reboot the system*
 . *Bob's your uncle*
 
