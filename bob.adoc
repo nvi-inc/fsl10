@@ -3,8 +3,8 @@
 Rescue mode is useful for repairing some problems that prevent booting
 and/or logging in.
 
-NOTE: If your Setup is locked with a password, you may need that
-password to select booting from your installation media.
+NOTE: If your computer's Setup utility is locked with a password, you
+may need that password to select booting from your installation media.
 
 . Boot from installation media
 . Select *Advanced options ...*
@@ -15,30 +15,27 @@ password to select booting from your installation media.
 . Network configuration
 +
 
-TIP: If you experience a lengthy DHCP search, you can cancel it by
-pressing *Enter*.
+TIP: If you don't use DHCP and experience a lengthy DHCP search, you
+can press *Enter* to cancel it.
 
 +
 
-If you use DHCP for this machine  and need the network for your repair
-work, set your hostname and domain name appropriately, pressing
-*Enter* for each when done. Then proceed to the next numbered step below.
+If you get a *Network autoconfiguration failed* message: press *Enter*
+and continue with the next paragraph in this numbered step.  Otherwise
+the DHCP configuration will have succeeded (you will prompted for a
+        hostname), and (a) you want to use it as part of your repair work:
+set your hostname and domain name appropriately when prompted,
+    pressing *Enter* for each, then proceed to the next numbered step
+    below; or (b) you do not want to use it: select *Go Back* and continue
+    with the next paragraph in this step.
 
 +
 
-Otherwise, select *Go Back* at the first opportunity. For the
-autoconfiguration failed message, press *Enter* to continue.
-
-+
-
-If you do not need the network, select *Do not configure the network
-at this time* and when asked for the hostname, press *Enter*. Then
-proceed to the next numbered step below.
-
-+
-
-Otherwise if you do need the network, select the appropriate configuration
-method and respond to the prompts as is suitable.
+If you do not need the network: select *Do not configure the network
+at this time*, when asked for the hostname, press *Enter*, then
+proceed to the next numbered step below. Otherwise if you do need the
+network: select the appropriate configuration method and respond to
+the prompts as is suitable.
 
 . Select time zone (*Eastern*)
 . Select *Assemble RAID array*
