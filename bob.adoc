@@ -23,11 +23,11 @@ can press *Enter* to cancel it.
 If you get a *Network autoconfiguration failed* message: press *Enter*
 and continue with the next paragraph in this numbered step.  Otherwise
 the DHCP configuration will have succeeded (you will prompted for a
-        hostname), and (a) you want to use it as part of your repair work:
-set your hostname and domain name appropriately when prompted,
-    pressing *Enter* for each, then proceed to the next numbered step
-    below; or (b) you do not want to use it: select *Go Back* and continue
-    with the next paragraph in this step.
+        hostname), and (a) you do not want to use it as part of your
+repair work: select *Go Back* and continue with the next paragraph in
+this step; or (b) you want to use it as part of your repair work: set
+your hostname and domain name appropriately when prompted, pressing
+*Enter* for each, then proceed to the next numbered step below.
 
 +
 
