@@ -37,6 +37,12 @@ proceed to the next numbered step below. Otherwise if you do need the
 network: select the appropriate configuration method and respond to
 the prompts as is suitable.
 
++
+
+NOTE: DNS does not appear to work when the network is used in
+recovery mode. Addditional measures may make that possible, but using
+IP addresses does work as is.
+
 . Select time zone (*Eastern*)
 . Select *Assemble RAID array*
 . Press *Space* on *Automatic*
