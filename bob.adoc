@@ -1,61 +1,71 @@
 = Rescue mode
 
+:experimental:
+
 Rescue mode is useful for repairing some problems that prevent booting
 and/or logging in.
 
 NOTE: If your computer's Setup utility is locked with a password, you
 may need that password to select booting from your installation media.
 
+NOTE: You should provide suitable values for your systems when an
+specific value is required. Values that agree with the FSL10 install
+described in this document are shown in parentheses.
+ 
 . Boot from installation media
 . Select *Advanced options ...*
 . Select *... Rescue mode*
 . Select Language (*English*)
-. Select country (*United States*)
-. Select keymap (*American English*)
+. Select Location (*United States*)
+. Select Keymap (*American English*)
 . Network configuration
 +
 
-TIP: If you don't use DHCP and experience a lengthy DHCP search, you
-can press *Enter* to cancel it.
+If no network is currently available (or you know that you do not need it
+for the rescue), simply press kbd:[Enter] when DHCP autoconfiguration starts and
+press kbd:[Enter] again for the resulting *Network autoconfiguration failed*
+message. Thereafter select *Do not configure the network at this time* and 
+enter in the machine's hostname when prompted before continuing below.
 
 +
 
-If you get a *Network autoconfiguration failed* message: press *Enter*
-and continue with the next paragraph in this numbered step.  Otherwise
-the DHCP configuration will have succeeded (you will prompted for a
-        hostname), and (a) you do not want to use it as part of your
-repair work: select *Go Back* and continue with the next paragraph in
-this step; or (b) you want to use it as part of your repair work: set
-your hostname and domain name appropriately when prompted, pressing
-*Enter* for each, then proceed to the next numbered step below.
+If the DHCP autoconfiguration succeeds before you can stop it, you may
+as well confirm the hostname and domainname and continue with the
+network anyway, since you never know when it might prove useful.
+(However, if you want to make sure you don't use the network, you can
+ select *Go Back* and press kbd:[Enter] for the resulting *Network
+ autoconfiguration failed* message.  Thereafter select *Do not
+ configure the network at this time* and enter in the machine's
+ hostname when prompted before continuing below.)
+
 
 +
 
-If you do not need the network: select *Do not configure the network
-at this time*, when asked for the hostname, press *Enter*, then
-proceed to the next numbered step below. Otherwise if you do need the
-network: select the appropriate configuration method and respond to
-the prompts as is suitable.
+Otherwise if the DHCP autoconfiguration fails and you want to use the
+network, press kbd:[Enter] for the resulting *Network autoconfiguration
+failed* message. You can then select the appropriate option, most
+likely *Configure network manually* and give appropriate responses to the
+prompts, ultimately continuing below.
 
 +
 
 NOTE: DNS does not appear to work when the network is used in
-recovery mode. Addditional measures may make that possible, but using
+recovery mode. Additional measures may make that possible, but using
 IP addresses does work as is.
 
 . Select time zone (*Eastern*)
 . Select *Assemble RAID array*
 . Press *Space* on *Automatic*
 +
-Use *Enter* to continue
+Press kbd:[Enter] to continue
 
 . Select your root file system (*/dev/lv/root*)
-. Select *Yes* to mount */boot*
-. Select *Yes* to mount */boot/efi*
-. Select *Execute a shell in /dev/lv/root* (i.e., in your root file system)
+. Select *Yes* to mount separate */boot* partition (*/boot*), unless it is corrupt
+. Select *Yes* to mount separate */boot/efi* partition (*/boot/efi*), unless it is corrupt
+. Select *Execute a shell in /dev/lv/root* (or whatever your root file system is)
 . Select *Continue* to enter rescue mode
 . Use whatever commands are needed for your repair
 . Use the *exit* command to exit when done
 . Select *Reboot the system*
-. *Bob's your uncle*
+. *Bob's your uncle* (i.e., you are done!)
 
