@@ -1026,7 +1026,7 @@ if [ -r "${SRCS}"etc_cron.weekly_apt-show-upgradeable ]; then
 frontend=text
 confirm=false
 save_seen=none
-which=changelog
+which=both
 headers=true
 EOF
     fi

@@ -7,6 +7,8 @@
 
 export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin
 
+apt-get -qq update
+
 PACKAGES=$(for file in `unattended-upgrade -v --dry-run 2>&1 | grep "^Packages that will be upgraded: " | cut -c33-`; do echo -n "/var/cache/apt/archives/$file*.deb "; done)
 
 if [ -n "$PACKAGES" ]; then
