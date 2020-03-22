@@ -3,6 +3,8 @@
 # cron script to display all upgradeable packages using apt-listchanges
 # (designed to replace the APT::Periodic::Unattended-Upgrade mechanism)
 #
+# - passes through all command line arguments to the underlying apt-listchanges command
+#
 # Written by Jonathan Quick <jon@hartrao.ac.za>.
 
 export PATH=$PATH:/sbin:/usr/sbin:/usr/local/sbin
@@ -14,7 +16,7 @@ PACKAGES=$(for file in `unattended-upgrade -v --dry-run 2>&1 | grep "^Packages t
 if [ -n "$PACKAGES" ]; then
 	echo "Suggested Debian (Security?) Updates are:"
 	echo
-	apt-listchanges $PACKAGES
+	apt-listchanges $@ $PACKAGES
 	echo "To install these upgrades run (as root)"
 	echo
 	echo "        apt -uy upgrade"
