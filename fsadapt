@@ -1020,6 +1020,7 @@ if [ -r "${SRCS}"etc_cron.weekly_apt-show-upgradeable ]; then
 	sed -i -e "s/,label=Debian-Security//" /etc/apt/apt.conf.d/50unattended-upgrades
     fi
     if ! grep -q "^\[cmdline\]" /etc/apt/listchanges.conf; then
+    	sed -i -e "s/confirm=[a-z]*/confirm=true/" /etc/apt/listchanges.conf
 	cat >> /etc/apt/listchanges.conf << EOF
 
 [cmdline]
