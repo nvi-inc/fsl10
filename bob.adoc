@@ -10,11 +10,26 @@ may need that password to select booting from your installation media.
 
 NOTE: You should provide suitable values for your systems when an
 specific value is required. Values that agree with the FSL10 install
-described in this document are shown in parentheses.
+described in this document (or reasonable defaults) are shown in parentheses.
  
 . Boot from installation media
 . Select *Advanced options ...*
 . Select *... Rescue mode*
++
+
+[NOTE]
+====
+
+You could instead add parameters to the boot line (by entering kbd:[Tab] for BIOS or
+kbd:[e] for UEFI on the *... Rescue mode* line instead), following the
+directions in the *Set boot options and boot installer* section above.
+This is not necessary nor usually helpful, but if you use this approach the
+most useful parameters are probably *netcfg/disable_dhcp=true* and/or
+*time/zone=UTC*. Use of added parameters will change the dialogue
+below.
+
+====
+
 . Select Language (*English*)
 . Select Location (*United States*)
 . Select Keymap (*American English*)
@@ -47,13 +62,12 @@ failed* message. You can then select the appropriate option, most
 likely *Configure network manually* and give appropriate responses to the
 prompts, ultimately continuing below.
 
+. Select time zone (*Eastern*)
 +
 
-NOTE: DNS does not appear to work when the network is used in
-recovery mode. Additional measures may make that possible, but using
-IP addresses does work as is.
+NOTE: The selected time zone will have no effect on the timestamps
+stored on the disk for any changes you may make, but will affect the displayed times you see.
 
-. Select time zone (*Eastern*)
 . Select *Assemble RAID array*
 . Press *Space* on *Automatic*
 +
@@ -65,6 +79,22 @@ Press kbd:[Enter] to continue
 . Select *Execute a shell in /dev/lv/root* (or whatever your root file system is)
 . Select *Continue* to enter rescue mode
 . Use whatever commands are needed for your repair
++
+
+[NOTE]
+====
+If you need to use the network, DNS does not appear to work by
+default in recovery mode. Use of explicit IP addresses does work. If
+you need to use DNS, you can make it functional by deleting the symbolic
+link */etc/resolv.conf* and creating it as a normal file with the
+nameserver information you want, e.g.:
+
+    rm /etc/resolv.conf
+    cat >>/etc/resolv.conf <<EOF
+    nameserver 8.8.8.8
+    EOF
+====
+
 . Use the *exit* command to exit when done
 . Select *Reboot the system*
 . *Bob's your uncle* (i.e., you are done!)
