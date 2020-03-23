@@ -204,8 +204,8 @@ When prompted, select *Manual*
 
 . Select the *FREE SPACE* under the first device
 
-NOTE: If some other file system, like *xfs*, or other  old setup is
-displayed, you can, and may need, to use *Guided partitioning* to
+NOTE: If some other file system, like *xfs*, or other old setup is
+displayed, you can, and may need to, use *Guided partitioning* to
 delete the existing configuration (and temporarily create new
     partitions). In this case, select *Guided - use entire disk*. Then
 select your disk, such as listed above, do not select a RAID or your
@@ -371,7 +371,7 @@ The Debian standard system is now installed from the installation media plus any
 updates from the network mirror and/or *security.debian.org* site if they can be
 reached. 
 
-This can take a while, up to one and half hours or more.
+This can take a while, up to one and a half hours or more.
 
 
 === Install the GRUB bootloader (BIOS boot only)
@@ -520,10 +520,10 @@ First install *git* and *deselect* and update *dselect*:
 +
 then press kbd:[Enter] to confirm any updating of installed packages (where
 you have an Internet connection) and the installation of 
-~198 new packages
+~212 new packages
 (unless you did not select the Desktop or added other tasks earlier -
 currently downloading
-~188 MB from the Internet and/or DVDs).
+~196 MB from the Internet and/or DVDs).
 
 Downloading commences for up to half an hour (depending on your Internet
 access and the exact revision of DVDs used):
@@ -621,7 +621,7 @@ been installed.  The four tools are:
 
 TIP: More information about RAID operation can be found in the <<raid.adoc#,RAID notes for FSL10>> document.
 
-See also the <<Setup additional disk>> sub-section n the <<Post Install>> section below.
+See also the <<Setup additional disk>> sub-section in the <<Post Install>> section below.
 
 === Download the Field System
 
@@ -761,6 +761,123 @@ it is best to avoid in case the boot partition is not yet fully synced.
 When the syncing is complete, you can repeat the process of the
 previous sub-section and this sub-section if you have a third disk that needs
 to be set-up.
+
+== Managing Security Updates
+
+It is strongly recommended that you use the weekly *cron* update
+download job as configured according to the *Window 2* sub-section in
+the <<_fsadapt>> section above. This will keep you informed of the
+available updates on a weekly basis.
+
+It is also recommended that you remove *anacron* as described in the
+<<_remove_anacron_package>> section below. This will cause the updates
+to always be downloaded at what should be innocuous time, early Sunday
+morning (but this can be adjusted if need be).
+
+If updates are needed, the *cron* job will send a message to *root*
+(or whoever e-mail to *root* is aliased to, typically *oper*) with
+instructions on how to install the updates. You can choose a convenient
+time, when not in (or about to start) operations, to apply the
+updates and test the system.
+
+Kernel point updates, for example from *9.11* to *9.12*, require extra
+care and testing. They are described in more detail in the next
+sub-section. You can tell if a point upgrade is needed if the *cron*
+job includes the package *linux-image-amd64* (or *linux-image-i386*
+        depending on your architecture).  Non-kernel point updates are
+less risky.
+
+TIP: It is recommended that a disk rotation be performed before any
+update. This will make recovery much easier if a problem with the
+update is discovered.  Please see the FSL10 Raid document for
+information on performing disk rotations and how to manage testing
+updates.
+
+=== Kernel point updates
+
+By default the instructions from the *cron* job will cause kernel
+point upgrades to be installed. If it is desired, these can be
+deferred to a later date when more extensive testing can be performed
+by using *apt-get* in place of *apt* in instructions.
+
+If you are using the GPIB driver (as selected in *fsadapt*). It will
+need to be recompiled (using *fsadapt*) after a kernel point update and
+then the *ibcon* will need to be reloaded (as *prog*):
+
+    cd /usr2/fs
+    rm bin/ibcon
+    (you may need to answer *y* to confirm)
+    make
+
+If a kernel point upgrade fails, i.e., the previous kernel fails to boot or
+causes other problems, the previous kernel can be used. For a single
+boot, use the *Advanced* option in the *grub* menu at boot and then
+select the previous kernel. You can change back permanently to the previous
+kernel by purging the new kernel and its headers. To do this use:
+
+    dpkg -l|grep linux-image
+    dpkg -l|grep linux_headers
+
+to determine the point version to be removed. For example for the
+first command above, you may get:
+
+    linux-image-4.9.0-11-amd64
+    linux-image-4.9.0-12-amd64
+
+The *-12* would be the later version that should be purged:
+
+    apt purge linux-image-4.9.0-12-amd64
+
+Likewise with the linux-headers. For this there will be two point
+version packages you should delete:
+
+    linux-headers-4.9.0-12-amd64
+    linux-headers-4.9.0-12-common
+
+The GPIB driver will need to be recompiled and *ibcon* reloaded
+as described above.
+
+=== End of security updates
+
+When security updates comes to an end, the existing packages will be
+migrated to the Debian archive site. Two steps are needed at that
+time:
+
+. If you have been using the weekly *cron* update job, it should be deleted::
++
+    rm /etc/cron.weekly/apt-show-upgradeable
++
+(you may need to answer *y* to confirm)
+
+. Change the */etc/apt/sources.list* file to point to the archive
+site. Although there will be no more security updates, this will enable
+downloading of additional packages if they are needed. The new lines that
+should replace the corresponding lines are:
++
+   deb http://archive.debian.org/debian/ stretch main contrib non-free
+   deb http://archive.debian.org/debian-security stretch/updates main contrib non-free
+   deb http://archive.debian.org/debian-volatile stretch/volatile main contrib non-free
++
+And if you are using *deb-src* lines:
++
+   deb-src http://archive.debian.org/debian/ stretch main contrib non-free
+   deb-src http://archive.debian.org/debian-security stretch/updates main contrib non-free
+   deb-src http://archive.debian.org/debian-volatile stretch/volatile main contrib non-free
++
+Otherwise the *deb-src* lines can be commented out (with a leading *#*).
++
+In addition, if you want to install packages from more recent
+distributions that have been backported to *stretch* you can add:
++
+  deb http://archive.debian.org/debian-backports stretch-backports main contrib non-free
++
+However, the "backports" are not normally needed.
++
+Lastly, update the index files:
++
+    apt update
++
+This may generate an error about a *Release* file having expired, but that is benign.
 
 == Optional Items
 
