@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.95 - Mar 2020
+Version 1.96 - Mar 2020
 
 :sectnums:
 :experimental:
@@ -797,7 +797,7 @@ convenient time, when not in (or about to start) operations, to install
 the updates and test the system.
 
 IMPORTANT: The *cron* job
-message will included instructions for kernel updates if one is available.
+message will include instructions for handling a kernel update if one is available.
  See the <<Kernel updates>> sub-section below for additional
 considerations when the kernel is being updated.
 
@@ -838,15 +838,19 @@ update can be deferred to a later date when more extensive
 testing can be performed by using *apt-get* in place of *apt* in the
 instructions for installing the update.
 
-=== Additional kernel point update steps
+==== Additional kernel point update steps
 
 When a kernel point upgrade is installed, it will be necessary to
 update any, so-called, _out-of-tree_ modules that use the kernel ABI.
+For a normal FSL10 installations, unless you have installed other
+out-of-tree modules, the only module that would meet this criteria is
+the GPIB driver. If you have installed other out-of-tree modules, you
+will need to update them appropriately. 
+If you did not install the GPIB (usually selected in
+        *fsadapt*) you can skip the remainder of this
+sub-section.
 
-Unless you have installed other out-of-tree modules, for a normal
-FSL10 installations, the only such module that would meed this
-criteria is the GPIB driver GPIB driver (if it was selected in
-        *fsadapt*). It will need to be recompiled (using *fsadapt*)
+You will need to recompile the GPIB driver (usually using *fsadapt*)
 after a kernel point update and then the *ibcon* program will need to
 be reloaded (as *prog*):
 
@@ -859,12 +863,14 @@ and then the FS must be restarted.
 
 ====  Recovery from a failed kernel update
 
-If a kernel point fails, i.e., the new kernel fails to
-boot or causes other problems, you can recover as described in FSL10 RAID document
+If a kernel update (point or non-point) fails, i.e., the new kernel
+fails to boot or causes other problems, you can recover as described
+in FSL10 RAID document
 <<raid.adoc#_test_upgrade_of_fs_system_updates_or_other_significant_changes,Test
-upgrade of FS - system updates - or other significant changes>> section,
-if you were following that method, or from a shelf disk according to the
-<<raid.adoc#__recover_from_a_shelf_disk,Recover from a shelf disk>> if not and you have a good shelf disk.
+upgrade of FS - system updates - or other significant changes>>
+section, if you were following that method, or from a shelf disk
+according to the <<raid.adoc#__recover_from_a_shelf_disk,Recover from
+a shelf disk>> if not and you have a good shelf disk.
 
 ===== Additional recovery option for failed kernel point update
 
@@ -895,27 +901,39 @@ version packages you should delete, e.g.:
 
 If you had updated the GPIB driver as described above, you will need
 to be recompile it and reload *ibcon* as described above. Any other
-out-of-tree modules will also need to restored.
+out-of-tree modules will also need to be restored.
 
 === Manually checking for updates
 
-If you do not use the weekly update script, or if you want to make
-sure you have the very latest updates when you install them, you can run
-the weekly update script manually to check for the latest updates:
+If you do not use the weekly *cron* job to check for updates, or if
+you want to make sure you have the very latest updates when you
+install them, you can run the distributed copy of the weekly update
+script manually to check for updates:
 
     /root/fsl10/etc_cron.weekly_apt-show-upgradeable 
 
-Then to install the updates, follow the update procedure in sub-section <<Installing updates>>
-above, except you will use the instructions in the output of the
-script above instead of from the *cron* job output (which should be
-        equivalent for the same set of upgrades). 
+If there is no output, there are no updates to install.  If there are
+updates, you can install then by following the update procedure in
+sub-section <<Installing updates>> above, except you will use the
+instructions from the output of the script above instead of from the
+*cron* job (the outputs should be equivalent for the same set of
+        updates). 
 
-Any NEWS items will included in the script output along with the
+Any NEWS items will be included in the script output along with the
 packages to be updated. If you would like to see any NEWS items more
-distinctly before installing updates, you can rerun (or initially run)
-    the script with the *--which=new* option:
+distinctly after the previous command and before installing the
+updates, you can run the script again using the *--which=new* option:
 
     /root/fsl10/etc_cron.weekly_apt-show-upgradeable --which=news
+
+If there are updates available and no NEWS items, you will only get
+the installation instructions.
+
+You can use this second form of running the script to check for
+updates initially, if you do not need to review what updates are
+available (you will still get warnings about kernel updates). As
+usual, you will see no output at all if there are no updates
+available.
 
 === End of security updates
 
