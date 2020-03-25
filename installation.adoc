@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.97 - Mar 2020
+Version 1.98 - Mar 2020
 
 :sectnums:
 :experimental:
@@ -819,19 +819,34 @@ upgrading.
 === Kernel updates
 
 Kernel updates, require extra care and testing. There are two types of
-kernel updates:
+kernel updates. The *cron* download job output will include a warning
+at the end with additional instructions depending on which is
+available.  The two types are:
 
 . Point updates, e.g., from *9.11* to *9.12*, which change the kernel
-ABI (Application Binary Interface).
+ABI (Application Binary Interface). The warning for this case is:
 
-. Non-point updates, which update the kernel, but do not change the ABI.
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    NB: The Linux kernel image is one of the packages due to be upgraded.
+    NB: (The kernal ABI has changed as per the linux-latest source package above
+    NB:  so all out-of-tree modules WILL NEED TO BE REBUILT after you REBOOT.)
+    NB: Please allow _extra time_ for TESTING after the upgrade.
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-The weekly update job message will warn when either type of update is
-available and what other steps are needed.  Be sure to allow time
-for these extra steps and extra testing before installing a kernel update.
+. Non-point updates, which update the kernel, but do not change the
+ABI. The warning for this case is:
 
-For point updates, additional steps after the updates are installed
-may be required. These are discussed in the <<Additional kernel point update steps>> sub-section below.
+
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    NB: The Linux kernel image is one of the packages due to be upgraded.
+    NB: (Upgrading will OVERWRITE the running kernel and require you to REBOOT!)
+    NB: Please allow _extra time_ for TESTING after the upgrade.
+    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Be sure to allow time to follow the instructions when planning to
+install these updates.  As described in point update warning, you will need to rebuild
+any out-of-tree modules after rebooting for that case. This is discussed in the
+<<Additional kernel point update steps>> sub-section below.
 
 TIP: If it is desired, a kernel *point* (but _not_ a non-point)
 update can be deferred to a later date when more extensive
@@ -868,7 +883,7 @@ you can recover as described in FSL10 RAID document
 <<raid.adoc#_test_upgrade_of_fs_system_updates_or_other_significant_changes,Test
 upgrade of FS - system updates - or other significant changes>>
 section, if you were following that method, or from a shelf disk
-according to the <<raid.adoc#__recover_from_a_shelf_disk,Recover from
+according to the <<raid.adoc#_recover_from_a_shelf_disk,Recover from
 a shelf disk>> if not and you have a good shelf disk.
 
 ==== Additional recovery option for failed kernel point update
