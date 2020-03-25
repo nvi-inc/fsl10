@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.94 - Feb 2020
+Version 1.95 - Mar 2020
 
 :sectnums:
 :experimental:
@@ -490,7 +490,7 @@ TIP: Recent versions of Debian have the *apt* program, which gives a more
 
 Next tell APT to update its internal source list of packages using
 
-   apt update 
+   apt-get update 
 
 NOTE: It is also possible to add additional DVDs at this stage using the
 *apt-cdrom add* command 
@@ -499,7 +499,7 @@ NOTE: It is also possible to add additional DVDs at this stage using the
 
 First install *git* and *deselect* and update *dselect*:
 
-   apt install git dselect
+   apt-get install git dselect
    dselect update
 
 . Get the selections by downloading this repository:
@@ -885,7 +885,7 @@ first command above, you may get:
 
 The package with *12* would be the later version that should be purged:
 
-    apt purge linux-image-4.9.0-12-amd64
+    apt-get purge linux-image-4.9.0-12-amd64
 
 Likewise with the linux-headers. For the *12* point update, there will be two point
 version packages you should delete, e.g.:
@@ -955,7 +955,7 @@ However, the "backports" are not normally needed.
 +
 Lastly, update the index files:
 +
-    apt update
+    apt-get update
 +
 This may generate an error about a *Release* file having expired, but that is benign.
 
@@ -1087,7 +1087,7 @@ TCP Wrappers.
 To install and configure *ufw* to only allow *ssh* for incoming conections, use the commands:
 
 ....
-apt -y install ufw
+apt-get -y install ufw
 ufw allow OpenSSH
 ufw --force enable
 ....

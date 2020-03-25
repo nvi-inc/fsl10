@@ -1,6 +1,6 @@
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.93 - Feb 2020
+Version 1.95 - Mar 2020
 
 :experimental:
 :toc:
@@ -195,7 +195,7 @@ for incoming connections, enable incoming SSH connections, and sets
 logging for all connections. Setup:
 
 ....
-apt -y install ufw
+apt-get -y install ufw
 ufw allow OpenSSH
 ufw logging on
 ufw --force enable
