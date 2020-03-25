@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.96 - Mar 2020
+Version 1.97 - Mar 2020
 
 :sectnums:
 :experimental:
@@ -861,20 +861,19 @@ be reloaded (as *prog*):
 
 and then the FS must be restarted.
 
-====  Recovery from a failed kernel update
+===  Recovery from a failed update
 
-If a kernel update (point or non-point) fails, i.e., the new kernel
-fails to boot or causes other problems, you can recover as described
-in FSL10 RAID document
+If an update fails, e.g., an updated kernel fails to boot or other problem is discovered,
+you can recover as described in FSL10 RAID document
 <<raid.adoc#_test_upgrade_of_fs_system_updates_or_other_significant_changes,Test
 upgrade of FS - system updates - or other significant changes>>
 section, if you were following that method, or from a shelf disk
 according to the <<raid.adoc#__recover_from_a_shelf_disk,Recover from
 a shelf disk>> if not and you have a good shelf disk.
 
-===== Additional recovery option for failed kernel point update
+==== Additional recovery option for failed kernel point update
 
-For a kernal point update, it is also possible to try to use the
+For a kernal point update that has failed, it is also possible to try to use the
 previous kernel on the current system. For a single boot, use the
 *Advanced* option in the *grub* menu at boot and then select the
 previous kernel. You can change back permanently to the previous
