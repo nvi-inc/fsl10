@@ -815,7 +815,7 @@ you will be given a chance to abort before installing.
 
 NOTE: NEWS items are, rarely occurring, announcements that may
 indicate additional steps are needed beyond the standard installation
-process. If you any NEWS items are displayed, you should consider
+process. If any NEWS items are displayed, you should consider
 whether these will effect your system and how to handle them before
 installing. The first command above (with *upgrade*) will also cause e-mails
 to be sent to *root* with the NEWS information.
@@ -861,7 +861,7 @@ for installing the update. This works because an ABI update involves
 new packages. While *apt-get* will install the updates for existing
 packages, it will not install the new packages. While this method can
 be used to install the other updates, it is not recommended since
-there are presumably security patches that the kernel needs and they
+there are presumably security patches needed to the kernel and they
 are not being installed in this case.
 
 ==== Updating out-of-tree modules
@@ -883,7 +883,7 @@ appropriately _after_ the initial reboot and then (to keep these
 
 ===  Recovery from a failed update
 
-If an update fails, e.g., an updated kernel fails to boot or other problem is discovered,
+If an update fails, e.g., an updated kernel fails to boot or another problem is discovered,
 you can recover as described in FSL10 RAID document
 <<raid.adoc#_test_upgrade_of_fs_system_updates_or_other_significant_changes,Test
 upgrade of FS - system updates - or other significant changes>>
