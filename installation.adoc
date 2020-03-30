@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.99 - Mar 2020
+Version 1.991 - Mar 2020
 
 :sectnums:
 :experimental:
@@ -102,10 +102,10 @@ At the *Installer boot menu*:
 . _Highlight_ *Install* (or *Graphical install* -- only the installer
   interface differs -- but this may not work on some video hardware)
     * BIOS: press kbd:[Tab]; or
-    * UEFI: press kbd:[e], then the *downarrow* three times (*vmlinuz*), then kbd:[End]
+    * UEFI: press kbd:[e], then kbd:[{downarrow}] three times (*vmlinuz*), then kbd:[End]
 
-// The following  does not display properly in asciidoctor-pdf for PDF:
-// * UEFI: press kbd:[e], then kbd:[{downarrow}] three times (*vmlinuz*), then kbd:[End]
+// The above does not work for asciidoctor-pdf for PDF, use this instead:
+//    * UEFI: press kbd:[e], then the *downarrow* three times (*vmlinuz*), then kbd:[End]
 
 NOTE: If kbd:[e] doesn't work, UEFI is not available.  It may be possible to enable it in the BIOS.
 
@@ -205,16 +205,20 @@ When prompted, select *Manual*
 . Select the *FREE SPACE* under the first device
 
 NOTE: If some other file system, like *xfs*, or other old setup is
-displayed, you can, and may need to, use *Guided partitioning* to
-delete the existing configuration (and temporarily create new
-    partitions). In this case, select *Guided - use entire disk*. Then
-select your disk, such as listed above, do not select a RAID or your
-boot device.  Then select *All files in one partition (recommended for
-    new users)*.  You may be prompted to confirm deleting RAID and/or
-LVM, which you must do to continue. Then you should be able to select
-your disk, as above, and get *FREE SPACE*. If you still do not get a single
-*FREE SPACE* partition, you can try selecting individual partitions and
-deleting them one by one (progressing in reverse order has worked).
+displayed, you will need to delete it first.  You may be able to do
+this by deleting individual partitions until you have a single *FREE
+SPACE* area.  For more complicated layouts, it may be more expedient,
+    and it may be necessary, to use *Guided partitioning* to delete
+    the existing configuration (and temporarily create new
+            partitions). In this case, select *Guided partitioning*,
+    then select *Guided - use entire disk*.  Then select your disk,
+    such as listed above, do not select a RAID or your installation
+    media device.  Then select *All files in one partition
+    (recommended for new users)*.  You may be prompted to confirm
+    deleting RAID and/or LVM, which you must do to continue.  Then you
+    should be able to select and delete remaining partitions
+    one-by-one. You should end up with a single *FREE SPACE* area,
+    which you can select and then continue with the process below.
 
 . Select *Create a new partition*
 
@@ -858,21 +862,21 @@ CAUTION: In extreme circumstances, an ABI (but _not_ a non-ABI) kernel
 update can be deferred to a later date when more extensive testing can
 be performed by using *apt-get* in place of *apt* in the instructions
 for installing the update. This works because an ABI update involves
-new packages. While *apt-get* will install the updates for existing
-packages, it will not install the new packages. While this method can
+new packages. The  *apt-get* command will install the updates for existing
+packages, but it will not install the new packages. While this method can
 be used to install the other updates, it is not recommended since
-there are presumably security patches needed to the kernel and they
+there are presumably security patches needed for the kernel and they
 are not being installed in this case.
 
 ==== Updating out-of-tree modules
 
 When a ABI update is installed, it will be necessary to update any,
 so-called, _out-of-tree_ modules that use the kernel ABI. This must be
-done _after_ rebooting with the new kernel installed..
+done _after_ rebooting with the new kernel installed.
 
 For a normal FSL10 installations, unless you have installed other
 out-of-tree modules, the only module that needs to be rebuilt is the
-GPIB driver.  You will need to recompile it (usually using *fsadapt*,
+GPIB driver (if it is installed).  You will need to recompile it (usually using *fsadapt*,
         *Window 2*, *config_gpib* only) _after_ the initial reboot
         and then (to keep these instructions simple) reboot _again_.
 
@@ -959,9 +963,11 @@ available.
 
 === End of security updates
 
-When security updates comes to an end, the existing packages will be
-migrated to the Debian archive site. Two steps are needed at that
-time:
+When support for *stretch* ends, currently expected in June 2022,
+there will be no more security updates.  At that time, the existing
+packages will be migrated to the Debian archive site. This will be
+visible in the output from the weekly *cron* job script as errors that
+the packages can't be found. Two steps are needed at that time:
 
 . If you have been using the weekly *cron* job, it should be deleted::
 +
