@@ -808,7 +808,7 @@ considerations for kernel updates.
 The commands for installing the updates given by the message are (note
         the use of *apt* instead of *apt-get*):
 
-   apt -uy upgrade
+   apt -y upgrade
    apt clean
 
 If the weekly *cron* job was installed according to the <<_fsadapt>>

@@ -19,7 +19,7 @@ if [ -n "$PACKAGES" ]; then
 	apt-listchanges $@ $PACKAGES
 	echo "To install these upgrades run (as root)"
 	echo
-	echo "        apt -uy upgrade"
+	echo "        apt -y upgrade"
 	echo "        apt clean"
 	if echo $PACKAGES | grep -q linux-image-; then
 		echo
