@@ -322,9 +322,9 @@ After the CIS hardening is completed, some additional set-up is needed.
 
 === Fix-ups
 
-There are two issues that need to be corrected after the CIS hardening.
+There are three issues that need to be corrected after the CIS hardening.
 
-1. The AIDE package used in CIS hardening adds a line to */etc/crontab*
+. The AIDE package used in CIS hardening adds a line to */etc/crontab*
 to run *aide.wrapper*. Unfortunately at this time, the line inserted is
 incorrectly formatted, missing the "user" field, for Debian systems.
 This causes the *cron* daemon to ignore the file, thereby breaking
@@ -336,7 +336,7 @@ and then running:
 systemctl restart cron
 ....
 
-2. The CIS hardening configuration of PAM causes uses of *sudo* that
+. The CIS hardening configuration of PAM causes uses of *sudo* that
 require a password to increment the failure count when a correct
 password is accepted, leading to eventual lock-out of the user using
 *sudo* when the *deny* lock-out failure count is reached.  To make sure the
@@ -352,6 +352,25 @@ account required pam_tally2.so
 +
 NOTE: To reset a locked-out user after CIS hardening, use */sbin/pam_tally2 -u <user> --reset*
 where *<user>* is the user account. Leave off the *--reset* to see what the current tally is.
+
+. Using the *noexec* option for */tmp* causes a problem for the
+package management system. The *dpkg-preconfigure* program places and
+executes scripts on */tmp* as part of package installation. The
+*noexec* option prevents the execution of the scripts. To work around
+this issue, create a file (only writable by *root*):
+
+
++
+./etc/apt/apt.conf.d/50extracttemplates
+[source]
+```
+APT::ExtractTemplates::TempDir “/run/user/0”;
+```
+
++
+
+There may be other issues with using the *noexec* option for */tmp*,
+but we don't have any specifics at this time.
 
 === Enabling user promotion to *oper*, *prog* and *root*
 
