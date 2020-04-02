@@ -768,9 +768,6 @@ to be set-up.
 
 == Managing security updates
 
-#This section is under construction. It should be useful as is, but we
-are working on improvements.#
-
 It is strongly recommended that you use the weekly *cron* update
 download job (the "weekly *cron* job") as configured according to the *Window 2* sub-section in
 the <<_fsadapt>> section above. This will keep you informed of the
@@ -808,14 +805,14 @@ considerations for kernel updates.
 The commands for installing the updates given by the message are (note
         the use of *apt* instead of *apt-get*):
 
-   apt -y upgrade
+   apt upgrade     (and 'y' to confirm as needed)
    apt clean
 
 If the weekly *cron* job was installed according to the <<_fsadapt>>
 section above (for *Window 2*), the first of these commands (with
         *upgrade*) will show if any NEWS items are included in the
 update. If there are, they will be displayed by a paging program and
-you will be given a chance to abort before installing.
+you will be given an extra chance to abort before installing.
 
 NOTE: NEWS items are, rarely occurring, announcements that may
 indicate additional steps are needed beyond the standard installation
@@ -967,7 +964,7 @@ When support for *stretch* ends, currently expected in June 2022,
 there will be no more security updates.  At that time, the existing
 packages will be migrated to the Debian archive site. This will be
 visible in the output from the weekly *cron* job script as errors that
-the packages can't be found. Two steps are needed at that time:
+the packages files can't be found. Two steps are needed at that time:
 
 . If you have been using the weekly *cron* job, it should be deleted::
 +
@@ -1013,7 +1010,7 @@ and/or logging in.
 NOTE: If your computer's Setup utility is locked with a password, you
 may need that password to select booting from your installation media.
 
-NOTE: You should provide suitable values for your systems when an
+NOTE: You should provide suitable values for your system when a
 specific value is required. Values that agree with the FSL10 install
 described in this document (or reasonable defaults) are shown in parentheses.
  
@@ -1027,7 +1024,7 @@ described in this document (or reasonable defaults) are shown in parentheses.
 
 You could instead add parameters to the boot line (by entering kbd:[Tab] for BIOS or
 kbd:[e] for UEFI on the *... Rescue mode* line instead), following the
-directions in the *Set boot options and boot installer* section above.
+directions in the <<Set boot options and boot installer>> section above.
 This is not necessary nor usually helpful, but if you use this approach the
 most useful parameters are probably *netcfg/disable_dhcp=true* and/or
 *time/zone=UTC*. Use of added parameters will change the dialogue
@@ -1622,8 +1619,8 @@ or reboot.
 If there is a VLAN firewall in use on the local network, it may be
 necessary to use *KeepAlive* for TCP connections to prevent inactivity
 time-outs for network connections from the FS to the VLBI equipment
-when not activity is occurring with the system. For some devices, having
-the time-out break the connect may cause an issue with the number of
+when no activity is occurring with the system. For some devices, having
+the time-out break the connection may cause an issue with the number of
 connections available.
 
 To use *KeepAlive* to prevent the inactivity time-outs, first install
@@ -1655,7 +1652,7 @@ You will need to termimate the FS, log out, and log back in to activate these ch
 
 A similar alias can used to allow other individual applications,
 to avoid the inactivity time-outs. (A better
-solution is available for *ssh*, discussed below.) It is also possible to put'
+solution is available for *ssh*, discussed below.) It is also possible to put
 *export{nbsp}LD_PRELOAD=libkeepalive.so* in *~/.profile* to enable it for all
 applications, but this may generate some error messages (in the case of
 *xterm* the error is apparently benign).
