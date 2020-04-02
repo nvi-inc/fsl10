@@ -811,7 +811,7 @@ The commands for installing the updates given by the message are (note
 If the weekly *cron* job was installed according to the <<_fsadapt>>
 section above (for *Window 2*), the first of these commands (with
         *upgrade*) will show if any NEWS items are included in the
-update. If there are, they will be displayed by a paging program and
+update. If there are, they will be displayed by a paging program at the beginning of the upgrade and
 you will be given an extra chance to abort before installing.
 
 NOTE: NEWS items are, rarely occurring, announcements that may
@@ -1655,7 +1655,7 @@ to avoid the inactivity time-outs. (A better
 solution is available for *ssh*, discussed below.) It is also possible to put
 *export{nbsp}LD_PRELOAD=libkeepalive.so* in *~/.profile* to enable it for all
 applications, but this may generate some error messages (in the case of
-*xterm* the error is apparently benign).
+*xterm*, the error is apparently benign).
 
 If you need to have a persistent *ssh* connection, add the follow for *oper* (and *prog*):
 
