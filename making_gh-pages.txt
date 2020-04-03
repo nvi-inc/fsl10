@@ -11,7 +11,7 @@ To update:
   make
   cp installation.html index.html
   git add -f *.html
-  git commit
+  git commit -m "Update"
   git push —-force
 
 View at:
