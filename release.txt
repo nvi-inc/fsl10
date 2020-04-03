@@ -1,0 +1,8 @@
+To make a release:
+
+. git checkout master
+. Update version and dates in *.adoc
+. git push
+. git tag <tag>     (<tag>=v2, or whatever)
+. git push --tags
+. Follow making_gh-pages.txt to publish; through the first push is already done
