@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+# set-up preconfgure on /root/tmp
+#
+# select /root/tmp for preconfigure
+rm -f /etc/apt/apt.conf.d/50extracttemplates
+touch /etc/apt/apt.conf.d/50extracttemplates
+cat >>/etc/apt/apt.conf.d/50extracttemplates <<EOT
+APT::ExtractTemplates::TempDir "/root/tmp";
+EOT
+#
+# create boot job to clean /root/tmp
+#
+systemctl disable root_tmp || :
+rm -f /etc/systemd/system/root_tmp.service
+touch /etc/systemd/system/root_tmp.service
+cat >>/etc/systemd/system/root_tmp.service <<EOT
+[Unit]
+Description=Clean /root/tmp on startup
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/root_tmp
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOT
+rm -f /usr/local/sbin/root_tmp
+touch /usr/local/sbin/root_tmp
+cat >> /usr/local/sbin/root_tmp <<EOT
+#!/bin/bash
+set -e
+rm -rf /root/tmp
+mkdir /root/tmp
+chmod go-wx /root/tmp
+exit 0
+EOT
+chmod u+x /usr/local/sbin/root_tmp
+systemctl enable root_tmp.service
+#
+# create directory
+#
+. /usr/local/sbin/root_tmp

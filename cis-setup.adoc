@@ -1,6 +1,6 @@
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.95 - Mar 2020
+Version 1.96 - Apr 2020
 
 :experimental:
 :toc:
@@ -65,7 +65,7 @@ All the CIS remediations that can applied at this point have been
 completed. The next section describes some other policies that can be
 considered.
 
-=== Other polices
+=== Other policies
 
 This section describes other policies that may be desirable. Some
 are beyond the CIS benchmark.
@@ -86,12 +86,12 @@ Add:
 sshd:ALL
 ....
 
-It is recommened that you further restrict `sshd` to specific hosts and/or
+It is recommended that you further restrict `sshd` to specific hosts and/or
 sub-domains.
 
 ==== Password policies
 
-You may wish to set minimum password lengh to 12.
+You may wish to set minimum password length to 12.
 
 You may wish to set password reuse remember to 24.
 
@@ -170,7 +170,7 @@ after all the remediations in this document were applied.
 
 === 1.4.2 Ensure bootloader password is set
 
-Must be set later by adminstrators.
+Must be set later by administrators.
 
 === 2.2.2 Ensure X Window System is not installed
 
@@ -203,7 +203,7 @@ ufw --force enable
 
 === 4.2.1.4 Ensure rsyslog is configured to send logs to a remote log host
 
-A remote log server must be configured by system adminstrators later.
+A remote log server must be configured by system administrators later.
 	
 === 4.2.4 Ensure permissions on all logfiles are configured
 
@@ -220,7 +220,7 @@ and testing.
 === 5.4.2 Ensure system accounts are non-login
 
 System accounts (i.e., accounts with user ID less than 1000) `oper`
-and `prog` are needed for compatabilty with the wider VLBI community
+and `prog` are needed for compatibility with the wider VLBI community
 and are only used as service accounts from AUID accounts. They require
 a valid shell, but direct local login and `ssh` login (including with
     keys) are disabled for these two accounts. Note that *oper* and
@@ -254,11 +254,11 @@ What ciphers should we use?
 
 === 5.2.14 Ensure only strong MAC algorithms are used
 
-What MAC alogorithms should we use?
+What MAC algorithms should we use?
 
 === 5.2.15 Ensure only strong Key Exchange algorithms are used
 
-What Key Exchange alogorithms should we use?
+What Key Exchange algorithms should we use?
 
 === 5.2.16 Ensure SSH Idle Timeout Interval is configured
 
@@ -357,15 +357,18 @@ where *<user>* is the user account. Leave off the *--reset* to see what the curr
 package management system. The *dpkg-preconfigure* program places and
 executes scripts on */tmp* as part of package installation. The
 *noexec* option prevents the execution of the scripts. To work around
-this issue, create a file (only writable by *root*):
+this issue, you can exeucte:
 
+    cd /root/fsl10/
+    ./root_tmp
 
 +
-./etc/apt/apt.conf.d/50extracttemplates
-[source]
-```
-APT::ExtractTemplates::TempDir “/run/user/0”;
-```
+
+The *root_tmp* script will do three things: 
+
+.. Create a one time service at boot to clean the */root/tmp* directory
+.. Set *dpkg-preconfigure* to use */root/tmp* for temporary files
+.. Create an initial */root/tmp* directory
 
 +
 
