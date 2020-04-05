@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.991 - Mar 2020
+Version 1.992 - Apr 2020
 
 :sectnums:
 :experimental:
@@ -506,11 +506,12 @@ First install *git* and *deselect* and update *dselect*:
    apt-get install git dselect
    dselect update
 
-. Get the selections by downloading this repository:
+. Get the selections by downloading this repository and checking out this version:
 +
     cd /root
     git clone https://github.com/nvi-inc/fsl10
     cd fsl10
+    git checkout v1
 
 . Feed the package selections into *dpkg* using the command
 +
@@ -523,14 +524,13 @@ First install *git* and *deselect* and update *dselect*:
     apt-get dselect-upgrade
 +
 then press kbd:[Enter] to confirm any updating of installed packages (where
-you have an Internet connection) and the installation of 
-~212 new packages
-(unless you did not select the Desktop or added other tasks earlier -
-currently downloading
-~196 MB from the Internet and/or DVDs).
+you have an Internet connection) and the installation of currently
+~212 new packages (downloading
+~196 MB from the Internet and/or DVDs) --
+unless you did not select the Desktop or added other tasks earlier.
 
 Downloading commences for up to half an hour (depending on your Internet
-access and the exact revision of DVDs used):
+access and the exact revision of DVDs used).
    
 Installation runs to completion.
 
@@ -629,17 +629,36 @@ See also the <<Setup additional disk>> sub-section in the <<Post Install>> secti
 
 === Download the Field System
 
-    cd /usr2
-    git clone https://github.com/nvi-inc/fs fs-git
+[IMPORTANT]
+====
 
-NOTE: You may be prompted for your credentials when cloning the
-repository.  If so, and you haven't already registered to have access,
-  please see the latest FS release notes for information on how to
-  register.
+The *git checkout* command below uses, as its last parameter,  the
+most recent release available at the time this was written. That
+should work for an initial installation, but may not give you the most
+up-to-date release. To find more recent releases, go to:
+
+https://github.com/nvi-inc/fs/releases
+
+You should use the most recent release with no trailing *-_string_*,
+e.g., *10.0.0*, except that *10.0.0-beta* versions should be useful
+for beta testing.
+
+NOTE: Releases before *10.0.0-beta1* are listed mostly for historical
+reference. They are not expected to be work for 64-bit systems and
+may need some adjustments for full functionality on 32-bit systems.
+
+Once you locate the release you want, you should use it in place of
+*10.0.0-beta1* at the end of the *git checkout* command below.
+
+====
+
+   cd /usr2
+   git clone https://github.com/nvi-inc/fs fs-git
+   cd /usr2/fs-git
+   git checkout 10.0.0-beta1
 
 === Set */usr2/fs* link, set */usr2/fs-git* permissions, and install default copies of all the FS related directories
 
-   cd /usr2/fs-git
    make install
 
 and enter *y* to confirm installation.
@@ -966,7 +985,7 @@ packages will be migrated to the Debian archive site. This will be
 visible in the output from the weekly *cron* job script as errors that
 the packages files can't be found. Two steps are needed at that time:
 
-. If you have been using the weekly *cron* job, it should be deleted::
+. If you have been using the weekly *cron* job, it should be deleted:
 +
     rm /etc/cron.weekly/apt-show-upgradeable
 +
