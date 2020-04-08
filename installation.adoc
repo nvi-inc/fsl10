@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.992 - Apr 2020
+Version 1.993 - Apr 2020
 
 :sectnums:
 :experimental:
@@ -285,7 +285,7 @@ optional unless you are applying CIS hardening.
 |=======================================
 |  |Mount point    | LV name | Size
 
-|1 |/var/log/audit | audit*   | 500 M
+|1 |/var/log/audit | audit*   | 4 G
 |2 |/boot          | boot     | 1 G
 |3 |/home          | home     | 4 G
 |4 |/var/log       | log*     | 4 G
