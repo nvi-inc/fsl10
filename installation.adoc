@@ -10,30 +10,30 @@ Version 1.994 - Apr 2020
 <<<
 == Introduction
 
-These instructions provide a complete method for the system installation and
-some tuning. They are not the only method for accomplishing these goals, but
-have been well tested. Experts can of course use their own means, but the
-farther they deviate from this model, the less likely we be able to support
-them.
-+
+These instructions provide a complete method for system installation
+and some tuning. They are not the only method for accomplishing these
+goals, but have been well tested. Experts can of course use their own
+means, but the farther they deviate from this model, the less support
+we will be able to provide.
+
 .FSL distributions
 |=============================================================
-| FS Linux |Release Name| Base Distro. | Kernel vers. | Year
-
-|    1     |            | Slackware    | Linux 1.2.x  | 1994
-|    2     |"bo"        | Debian 1.3.1 | Linux 2.0.29 | 1997
-|    3     |"hamm"      | Debian 2.0   | Linux 2.0.34 | 1998
-|          |"slink"     | Debian 2.1   | Linux 2.0.36 | 1999
-|    4     |"potato"    | Debian 2.2   | Linux 2.2.18 | 2000
-|    5     |"woody"     | Debian 3.0   | Linux 2.2.20 | 2002
-|    6     |"sarge"     | Debian 3.1   | Linux 2.4.27 | 2005
-|    7     |"etch"      | Debian 4.0   | Linux 2.6.18 | 2007
-|    8     |"lenny"     | Debian 5.0   | Linux 2.6.26 | 2009
-|          |"squeeze"   | Debian 6.0   | Linux 2.6.32 | 2011
-|    9     |"wheezy"    | Debian 7.0   | Linux 3.2.0  | 2013
-|          |"jessie"    | Debian 8.0   | Linux 3.16.0 | 2015
-|   10     |"stretch"   | Debian 9.0   | Linux 4.9.0  | 2017
-|          |"buster"    | Debian 10.0  | Linux 4.19.0 | 2019
+| FS Linux |Release Name| Base Distro. | Linux kernel | Year
+|    1     |            | Slackware    | 1.2.x  | 1994
+|    2     |"bo"        | Debian 1.3.1 | 2.0.29 | 1997
+|    3     |"hamm"      | Debian 2.0   | 2.0.34 | 1998
+|          |"slink"     | Debian 2.1   | 2.0.36 | 1999
+|    4     |"potato"    | Debian 2.2   | 2.2.18 | 2000
+|    5     |"woody"     | Debian 3.0   | 2.2.20 | 2002
+|          |            |              | 2.4.18 |
+|    6     |"sarge"     | Debian 3.1   | 2.4.27 | 2005
+|    7     |"etch"      | Debian 4.0   | 2.6.18 | 2007
+|    8     |"lenny"     | Debian 5.0   | 2.6.26 | 2009
+|          |"squeeze"   | Debian 6.0   | 2.6.32 |     
+|    9     |"wheezy"    | Debian 7.0   | 3.2.0  | 2014
+|          |"jessie"    | Debian 8.0   | 3.16.0 |     
+|   10     |"stretch"   | Debian 9.0   | 4.9.0  | 2020
+|          |"buster"    | Debian 10.0  | 4.19.0 |     
 |=============================================================
 
 Please note that for each step in this guide, we recommend you
@@ -662,29 +662,34 @@ See also the <<Setup additional disk>> sub-section in the <<Post Install>> secti
 ====
 
 The *git checkout* command below uses, as its last parameter,  the
-most recent release available at the time this was written. That
-should work for an initial installation, but may not give you the most
-up-to-date release. To find more recent releases, go to:
+most recent release available, or expected, at the time this was
+written. That should work for an initial installation, but may not
+give you the most up-to-date release. To find more recent releases, go
+to:
 
 https://github.com/nvi-inc/fs/releases
 
-You should use the most recent release with no trailing *-_string_*,
-e.g., *10.0.0*, except that *10.0.0-beta* versions should be useful
-for beta testing.
+You should probably use the most recent release ending in *.0* (a
+so-called _feature_ release) with no trailing *-_string_*, e.g.,
+    *10.0.0*. However, if there is a more recent _patch_ release (not
+            ending *.0*) for the most recent feature release, you
+    should use the most recent patch release.  For example if *10.0.0*
+    is the most recent feature release and there are  corresponding
+    patch releases,  *10.0.1* and *10.0.2*, the last one is probably
+    the best choice,
 
-NOTE: Releases before *10.0.0-beta1* are listed mostly for historical
-reference. They are not expected to be work for 64-bit systems and
-may need some adjustments for full functionality on 32-bit systems.
+NOTE: Releases before *10.0.0* are listed mostly for historical
+reference. They are not intended for production.
 
 Once you locate the release you want, you should use it in place of
-*10.0.0-beta1* at the end of the *git checkout* command below.
+*10.0.0* at the end of the *git checkout* command below.
 
 ====
 
    cd /usr2
    git clone https://github.com/nvi-inc/fs fs-git
    cd /usr2/fs-git
-   git checkout 10.0.0-beta1
+   git checkout 10.0.0
 
 === Set */usr2/fs* link, set */usr2/fs-git* permissions, and install default copies of all the FS related directories
 
