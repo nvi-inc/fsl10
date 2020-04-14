@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.993 - Apr 2020
+Version 1.994 - Apr 2020
 
 :sectnums:
 :experimental:
@@ -9,6 +9,32 @@ Version 1.993 - Apr 2020
 :toc:
 <<<
 == Introduction
+
+These instructions provide a complete method for the system installation and
+some tuning. They are not the only method for accomplishing these goals, but
+have been well tested. Experts can of course use their own means, but the
+farther they deviate from this model, the less likely we be able to support
+them.
++
+.FSL distributions
+|=============================================================
+| FS Linux |Release Name| Base Distro. | Kernel vers. | Year
+
+|    1     |            | Slackware    | Linux 1.2.x  | 1994
+|    2     |"bo"        | Debian 1.3.1 | Linux 2.0.29 | 1997
+|    3     |"hamm"      | Debian 2.0   | Linux 2.0.34 | 1998
+|          |"slink"     | Debian 2.1   | Linux 2.0.36 | 1999
+|    4     |"potato"    | Debian 2.2   | Linux 2.2.18 | 2000
+|    5     |"woody"     | Debian 3.0   | Linux 2.2.20 | 2002
+|    6     |"sarge"     | Debian 3.1   | Linux 2.4.27 | 2005
+|    7     |"etch"      | Debian 4.0   | Linux 2.6.18 | 2007
+|    8     |"lenny"     | Debian 5.0   | Linux 2.6.26 | 2009
+|          |"squeeze"   | Debian 6.0   | Linux 2.6.32 | 2011
+|    9     |"wheezy"    | Debian 7.0   | Linux 3.2.0  | 2013
+|          |"jessie"    | Debian 8.0   | Linux 3.16.0 | 2015
+|   10     |"stretch"   | Debian 9.0   | Linux 4.9.0  | 2017
+|          |"buster"    | Debian 10.0  | Linux 4.19.0 | 2019
+|=============================================================
 
 Please note that for each step in this guide, we recommend you
 carefully read all the included caveats and notes as the material is
@@ -45,8 +71,11 @@ installer. Note also that installing from DVDs as described here is
 recommended mainly for sites with little to poor Internet connectivity (even
 then, use of a single DVD may suffice) and the equivalent use of a Debian
 GNU/Linux 9.x "Stretch" - Official i386/amd64 *netinst* CD would suffice for
-installation at most sites with good connectivity. Disk images for the installer
-ca be found at: https://cdimage.debian.org/cdimage/archive/
+installation at most sites with good connectivity. Official images for the installer
+can be found at: https://cdimage.debian.org/cdimage/archive/ or alternatively,
+should your hardware require non-free firmware, unofficial images for the
+installer that also include all available non-free firmware can be found at:
+https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/archive/
 
 The details of creating your installation media can be found in the Debian
 installation guide available from:
@@ -143,7 +172,8 @@ You may need to locate the files requested (especially if they relate to
 your network or disk-drive interfaces)  and place them on a USB stick which
 should be inserted at this stage.  If you do have the required files select
 *Yes*, otherwise press kbd:[Tab] to select *No* then press
-kbd:[Enter] to continue.
+kbd:[Enter] to continue.  It may well be simpler just to use the unofficial
+installer images mentioned above that include all available non-free firmware.
 
 === If you are presented with a dialog asking which interface to use 
 Typically only shown if two or more network interfaces are
@@ -511,7 +541,6 @@ First install *git* and *deselect* and update *dselect*:
     cd /root
     git clone https://github.com/nvi-inc/fsl10
     cd fsl10
-    git checkout v1
 
 . Feed the package selections into *dpkg* using the command
 +
