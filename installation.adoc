@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.994 - Apr 2020
+Version 1.995 - Apr 2020
 
 :sectnums:
 :experimental:
@@ -20,19 +20,19 @@ we will be able to provide.
 |=============================================================
 | FS Linux |Release Name|Debian Version| Linux kernel | Year
 |    1     |            | (Slackware)  | 1.2.x  | 1994
-|    2     |"bo"        |     1.3.1    | 2.0.29 | 1997
-|    3     |"hamm"      |     2.0      | 2.0.34 | 1998
-|          |"slink"     |     2.1      | 2.0.36 | 1999
-|    4     |"potato"    |     2.2      | 2.2.18 | 2000
-|    5     |"woody"     |     3.0      | 2.2.20/2.4.18 | 2002
-|    6     |"sarge"     |     3.1      | 2.4.27 | 2005
-|    7     |"etch"      |     4.0      | 2.6.18 | 2007
-|    8     |"lenny"     |     5.0      | 2.6.26 | 2009
-|          |"squeeze"   |     6.0      | 2.6.32 |     
-|    9     |"wheezy"    |     7.0      | 3.2.0  | 2014
-|          |"jessie"    |     8.0      | 3.16.0 |     
-|   10     |"stretch"   |     9.0      | 4.9.0  | 2020
-|          |"buster"    |    10.0      | 4.19.0 |     
+|    2     | bo         |     1.3.1    | 2.0.29 | 1997
+|    3     | hamm       |     2.0      | 2.0.34 | 1998
+|          | slink      |     2.1      | 2.0.36 | 1999
+|    4     | potato     |     2.2      | 2.2.18 | 2000
+|    5     | woody      |     3.0      | 2.2.20/2.4.18 | 2002
+|    6     | sarge      |     3.1      | 2.4.27 | 2005
+|    7     | etch       |     4.0      | 2.6.18 | 2007
+|    8     | lenny      |     5.0      | 2.6.26 | 2009
+|          | squeeze    |     6.0      | 2.6.32 |     
+|    9     | wheezy     |     7.0      | 3.2.0  | 2014
+|          | jessie     |     8.0      | 3.16.0 |     
+|   10     | stretch    |     9.0      | 4.9.0  | 2020
+|          | buster     |    10.0      | 4.19.0 |     
 |=============================================================
 
 Please note that for each step in this guide, we recommend you
@@ -672,10 +672,10 @@ You should probably use the most recent release ending in *.0* (a
 so-called _feature_ release) with no trailing *-_string_*, e.g.,
     *10.0.0*. However, if there is a more recent _patch_ release (not
             ending *.0*) for the most recent feature release, you
-    should use the most recent patch release.  For example if *10.0.0*
-    is the most recent feature release and there are  corresponding
-    patch releases,  *10.0.1* and *10.0.2*, the last one is probably
-    the best choice,
+    should use the most recent patch release.  For example, if
+    *10.0.0* is the most recent feature release and there are
+    corresponding patch releases,  *10.0.1* and *10.0.2*, the last
+    one, ending *.2*, is probably the best choice.
 
 NOTE: Releases before *10.0.0* are listed mostly for historical
 reference. They are not intended for production.
