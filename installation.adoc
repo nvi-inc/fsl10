@@ -18,22 +18,21 @@ we will be able to provide.
 
 .FSL distributions
 |=============================================================
-| FS Linux |Release Name| Base Distro. | Linux kernel | Year
-|    1     |            | Slackware    | 1.2.x  | 1994
-|    2     |"bo"        | Debian 1.3.1 | 2.0.29 | 1997
-|    3     |"hamm"      | Debian 2.0   | 2.0.34 | 1998
-|          |"slink"     | Debian 2.1   | 2.0.36 | 1999
-|    4     |"potato"    | Debian 2.2   | 2.2.18 | 2000
-|    5     |"woody"     | Debian 3.0   | 2.2.20 | 2002
-|          |            |              | 2.4.18 |
-|    6     |"sarge"     | Debian 3.1   | 2.4.27 | 2005
-|    7     |"etch"      | Debian 4.0   | 2.6.18 | 2007
-|    8     |"lenny"     | Debian 5.0   | 2.6.26 | 2009
-|          |"squeeze"   | Debian 6.0   | 2.6.32 |     
-|    9     |"wheezy"    | Debian 7.0   | 3.2.0  | 2014
-|          |"jessie"    | Debian 8.0   | 3.16.0 |     
-|   10     |"stretch"   | Debian 9.0   | 4.9.0  | 2020
-|          |"buster"    | Debian 10.0  | 4.19.0 |     
+| FS Linux |Release Name|Debian Version| Linux kernel | Year
+|    1     |            | (Slackware)  | 1.2.x  | 1994
+|    2     |"bo"        |     1.3.1    | 2.0.29 | 1997
+|    3     |"hamm"      |     2.0      | 2.0.34 | 1998
+|          |"slink"     |     2.1      | 2.0.36 | 1999
+|    4     |"potato"    |     2.2      | 2.2.18 | 2000
+|    5     |"woody"     |     3.0      | 2.2.20/2.4.18 | 2002
+|    6     |"sarge"     |     3.1      | 2.4.27 | 2005
+|    7     |"etch"      |     4.0      | 2.6.18 | 2007
+|    8     |"lenny"     |     5.0      | 2.6.26 | 2009
+|          |"squeeze"   |     6.0      | 2.6.32 |     
+|    9     |"wheezy"    |     7.0      | 3.2.0  | 2014
+|          |"jessie"    |     8.0      | 3.16.0 |     
+|   10     |"stretch"   |     9.0      | 4.9.0  | 2020
+|          |"buster"    |    10.0      | 4.19.0 |     
 |=============================================================
 
 Please note that for each step in this guide, we recommend you

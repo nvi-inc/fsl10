@@ -9,4 +9,4 @@ Special instructions for X11SCA-F motherboard
 .. make
 .. make install
 .. reboot
-. Continue with the Third Stage Installaton
+. Continue with the Third Stage Installation
