@@ -600,7 +600,7 @@ NOTE: The *updates* option relies on email to *root* being re-directed to some
       test it as well.  The installer sets it up to go the *desktop* account
       by default which would definitely be a problem if you have removed that!
 
-==== GPIB driver configuration
+==== GPIB driver configuration (Optional)
 
 On the */etc/gpib.conf* screen, use the up/down arrow keys to select the
 required GPIB controller and press kbd:[Enter] on *OK* to continue.
