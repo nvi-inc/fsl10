@@ -287,9 +287,9 @@ Repeat the process for the second disk, if present.
 . Select *Create MD device*, choose *RAID1* and enter *2* as number
 of devices and *0* as number of spares.
 
-. Select the RAID partitions we just created using space -- these
-should be *sda2* and *sdb2*, if you have just one disk, just pick *sda2* --
-then press kbd:[Enter]
+. Select the RAID partitions we just created by pressing kbd:[Space]
+-- these should be *sda2* and *sdb2*, if you have just one disk, just
+pick *sda2* -- then press kbd:[Enter] to continue
 
 . Select *Finish*.
 
@@ -587,11 +587,13 @@ Using the arrow keys and kbd:[Space] make your selections and press kbd:[Enter].
 
 ==== FS Adaptation: Setup (Window 2)
 
-All of the steps in Window 2 need to be done once with the exception
-of *sshkeys* which can be used to generate new SSH keys if required.
+All of the steps in Window 2 need to be done once (even if you do not
+intend to use the serial ports) with the exception of *sshkeys* which
+can be used to generate new SSH keys if required.
 If you did not select the GPIB option in the previous page deselect the
-two related options on this page. Otherwise, simply press kbd:[Enter]
-with the *OK* selected to continue.
+two related options on this page (but do not deselect *set_perms* as it
+is always required). Otherwise, simply press kbd:[Enter] with the *OK*
+selected to continue.
 
 NOTE: The *updates* option relies on email to *root* being re-directed to some
       mailbox that will be read regularly, so make sure you set that up and
@@ -606,8 +608,9 @@ required GPIB controller and press kbd:[Enter] on *OK* to continue.
 ==== Serial port configuration
 
 On the */etc/default/grub: serial port configuration* screen
-up/down arrow keys to select the required RS232 serial card and press
-kbd:[Enter] on *OK* to continue.
+up/down arrow keys to select the required RS232 serial card
+(or *None* if you don't have one) and press kbd:[Enter] on *OK*
+to continue.
 
 ==== FS Adaptation: Settings (Window 3)
 
