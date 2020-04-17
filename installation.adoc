@@ -142,6 +142,9 @@ NOTE: If kbd:[e] doesn't work, UEFI is not available.  It may be possible to ena
 
    locale=en_US.UTF8 netcfg/disable_dhcp=true time/zone=UTC
 
+NOTE: Whilst typins a */* (slash) it may automatically be changed (escaped) to
+      *\/* (i.e. preceded by a backslash). This is normal behaviour and harmless.
+
 . Press:
     * BIOS: kbd:[Enter]
     * UEFI: kbd:[F10] 
