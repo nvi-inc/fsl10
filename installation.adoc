@@ -142,6 +142,9 @@ NOTE: If kbd:[e] doesn't work, UEFI is not available.  It may be possible to ena
 
    locale=en_US.UTF8 netcfg/disable_dhcp=true time/zone=UTC
 
+NOTE: If typing *time/zone=UTC* it may automatically be changed (escaped) to
+      *time\/zone=UTC* (extra backslash). This is fine.
+
 . Press:
     * BIOS: kbd:[Enter]
     * UEFI: kbd:[F10] 
