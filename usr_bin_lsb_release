@@ -1,6 +1,6 @@
 #! /bin/sh
 if [ $1x = "-dx" ]; then
-  echo "Description: FS Linux 9"
+  echo "Description: FS Linux 10"
 else
   exec /usr/bin/lsb_release.real $@
 fi
