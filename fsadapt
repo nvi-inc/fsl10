@@ -466,6 +466,18 @@ if (grep -F -i 'government' "${NEW_ROOT}"etc/govtwarn.txt >/dev/null 2>&1); then
   govt_def="on"
 fi
 
+go_inst_update="Install"
+go_inst_def='off'
+if [ -d /usr/local/go ]; then
+    go_inst_update="Update"
+    LATEST_VERSION=$(curl --fail -s 'https://golang.org/VERSION?m=text' | cut -c3-)
+    INSTALLED_VERSION=$(/usr/local/go/bin/go version | cut -d' ' -f3 | cut -c3-)
+    if  [[ $LATEST_VERSION != "$INSTALLED_VERSION" ]]
+    then
+      go_inst_def='on'
+    fi
+fi
+
 # Present a checklist of the patches to do.
 if [ "$NODIALOGS" ]; then
   :  # Use PHASE1 params from command line.
@@ -478,11 +490,12 @@ elif [ "$SHOWPHASE1" ]; then
 Missing '*' indicates that this action has already been performed.\n\
 Most of these can only be done _once_, so please don't put an '*' on\n\
 unless you are certain that you want and can to do that item again." \
-22 76 10 \
+22 76 11 \
   skip      "Skip all steps below (regardless of [*] marks)" off \
   verbose   "Show names of files being processed in 'fsadapt'" $verb_def \
   atgpib    "Install Linux GPIB driver and library" $atgpib_def \
   pgplot    "Install PGPLOT5 and associated perl binding" $pgplot_def \
+  goinst    "$go_inst_update Go programming language" $go_inst_def \
   systemd   "Adjust systemd to run FS-specific programs in boot" $systemd_def \
   rtxgroup  "Add 'rtx' group to '/etc/group'" $rtxgroup_def \
   stdaccts  "Add 'oper' and 'prog' to '/etc/passwd and /etc/shadow'" $stdaccts_def \
@@ -528,6 +541,18 @@ popd || exit
 # Install appropriate packages from distribution
 chroot "${NEW_ROOT}" apt-get -y install pgplot5 libpgplot-perl
 ;;
+
+    goinst)
+# Install/Upgrade Go programming language (if needed)
+LATEST_VERSION=$(curl --fail -s 'https://golang.org/VERSION?m=text' | cut -c3-)
+GOARCH=$(dpkg --print-architecture |  sed -e 's/^i//')
+curl --fail -o /tmp/go.tar.gz "https://dl.google.com/go/go$LATEST_VERSION.linux-$GOARCH.tar.gz"
+[ -d /usr/local/go ] && rm -r /usr/local/go
+pushd /usr/local/ &>/dev/null || exit
+tar xf /tmp/go.tar.gz
+popd || exit
+    ;;
+
       systemd)
 ##systemd, new in Debian 8
 chroot "${NEW_ROOT}" systemctl disable fsalloc >/dev/null 2>&1
