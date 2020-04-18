@@ -1,6 +1,6 @@
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.995 - Apr 2020
+Version 1.996 - Apr 2020
 
 :sectnums:
 :experimental:
@@ -683,7 +683,7 @@ so-called _feature_ release) with no trailing *-_string_*, e.g.,
     corresponding patch releases,  *10.0.1* and *10.0.2*, the last
     one, ending *.2*, is probably the best choice.
 
-NOTE: Releases before *10.0.0* are listed mostly for historical
+NOTE: Releases _numbered_ before *10.0.0* are listed mostly for historical
 reference. They are not intended for production.
 
 Once you locate the release you want, you should use it in place of
