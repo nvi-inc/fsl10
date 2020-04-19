@@ -7,4 +7,4 @@ is a tried-and-tested setup for robust VLBI operations.
 Using this guide will make it easier to
 ask the community for help.
 
-Follow the <<installation.adoc#,installation notes>> to get started.
+Follow the https://nvi-inc.github.io/fsl10[installation notes] to get started.
