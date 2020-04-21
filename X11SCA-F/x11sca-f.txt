@@ -22,11 +22,11 @@ Special instructions for X11SCA-F motherboard
 
 . When beginning put network cable in the second (right) interface.
 . At the beginning of the Third Stage Installation:
-.. Move the network cable to the first (left) interface.
 .. cd /usr/local/src
 .. tar xzf /root/fsl10/X11SCA-F/e1000e-3.6.0.tar.gz
 .. cd e1000e-3.6.0/src
 .. make
 .. make install
+.. Move the network cable to the first (left) interface.
 .. reboot
 . Continue with the Third Stage Installation

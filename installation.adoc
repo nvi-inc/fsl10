@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.996 - Apr 2020
+Version 1.998 - Apr 2020
 
 :sectnums:
 :experimental:
@@ -63,13 +63,14 @@ explanations that impact what you actually type.
 
 == Choosing architecture and creating installation media
 
-As of Field System version 10.0, both *i386* and *amd64* architecture
+As of Field System version 10.0, both *i386* and *amd64* architectures
 are supported natively. The *amd64* architecture is preferred and
 should be used if possible (it should be unless the processor is very
     old, from about 2010 or older).  However, some work may be
 required to port your station code from a 32-bit to a 64-bit OS. Some
 automatic tools have been developed for this, and can be provided upon
-request. Usually the *i386* architecture will work on any processor.
+request. Usually the *i386* architecture will work on any processor,
+but requires use of the *Legacy* (or *BIOS*) boot mode in most cases.
 The *amd64* installation media will fail to boot on a system that is
 32-bit only.
 
@@ -114,8 +115,9 @@ setup menu (typically by pressing kbd:[DEL] during POST).
 Also make sure that the motherboard time is set to the current Universal time, i.e.,
 UTC, and the motherboard can boot from the installation media.
 
-While you are in the motherboard menu, check that hot-swapping is enabled. This
-will be useful for disk rotation.
+While you are in the motherboard menu, make sure that hot-swapping is
+enabled for at least the secondary controller. This will be useful for
+disk rotation.
 
 == First Stage Installation
 
@@ -325,7 +327,7 @@ pick *sda2* -- then press kbd:[Enter] to continue
 . Now choose *Configure the Logical Volume Manager* and select *yes* if prompted to write the changes to disk
 
 . Choose *Create volume group* 
-. Enter a name appropriate for the machine and group, e.g., *lv*, and press kbd:[Enter]
+. Enter a name appropriate for the machine and group, e.g., *vg0*, and press kbd:[Enter]
 . Select the raid device *md0* (or *sda2* if not using RAID)  by pressing kbd:[Space], then press kbd:[Enter]
 to continue
 
@@ -577,8 +579,8 @@ First install *git* and *deselect* and update *dselect*:
 then press kbd:[Enter] to confirm any updating of installed packages (where
 you have an Internet connection) and the installation of currently
 ~212 new packages (downloading
-~196 MB from the Internet and/or DVDs) --
-unless you did not select the Desktop or added other tasks earlier.
+~196 MB from the Internet and/or DVDs) for *amd64*, somewhat more for
+*i386* -- unless you did not select the Desktop or added other tasks earlier.
 
 Downloading commences for up to half an hour (depending on your Internet
 access and the exact revision of DVDs used).
@@ -764,7 +766,8 @@ All commands (except checking the RAID status) in this section need to be run as
 NOTE: An additional disk should be at least as large as the smallest
 disk already in use in the RAID.
 
-NOTE: You may need to enable hot-swapping in your motherboard's setup menu.
+NOTE: You will need to have hot-swapping enabled in your motherboard's
+setup menu, at least for the secondary controller.
 
 NOTE: This sub-section assumes you have followed the directions in the <<Install tools for RAID (Optional)>>
 section above.
@@ -1153,10 +1156,10 @@ stored on the disk for any changes you may make, but will affect the displayed t
 +
 Press kbd:[Enter] to continue
 
-. Select your root file system (*/dev/lv/root*)
+. Select your root file system (*/dev/vg0/root*)
 . Select *Yes* to mount separate */boot* partition (*/boot*), unless it is corrupt
 . Select *Yes* to mount separate */boot/efi* partition (*/boot/efi*), unless it is corrupt
-. Select *Execute a shell in /dev/lv/root* (or whatever your root file system is)
+. Select *Execute a shell in /dev/vg0/root* (or whatever your root file system is)
 . Select *Continue* to enter rescue mode
 . Use whatever commands are needed for your repair
 +
