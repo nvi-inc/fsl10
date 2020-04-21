@@ -476,9 +476,17 @@ you to then run *refresh_secondary* immediately without having to
 This script is only for use with expert advice.
 
 This script can be used to recover a disk (*sda* or *sdb*) that has
-fallen out of RAID, becoming *inactive*.  This script is designed to only be used with a
+fallen out of the RAID array, becoming *inactive*.  A disk can _fall_ out of
+the array for several possible reasons, including:
+
+. A real disk fault of some sort, including one caused by turning it off
+  whilst it is still in use.
+. Use of the *mdadm* command with *-f* option to mark it as faulty.
+. Turning it off whilst the system is shutdown and booting without it.
+
+This script is designed to be used only with a
 set of disks that were most recently used _together_ in an active
-RAID.  It is recommended to only use this script if the key switches
+RAID.  It is recommended only to use this script if the key switches
 for the disks have not been manipulated since the *inactive* disk fell
 out of the RAID; in this case it should always be safe.
 
@@ -520,6 +528,8 @@ or if any *missing* disk:
 . Has a later modification *TIME* than the *active* disk
 . Has a higher *EVENT* count, i.e., is newer,  than the *active* disk
 . Has been used (booted) separately (as mentioned above in the *WARNING* item)
+
+or if no matching *missing* disk can be found.
 
 The recovery may be fairly quick, as short as a few minutes, if the
 *inactive* disk is relatively fresh.

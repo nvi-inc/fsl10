@@ -54,6 +54,7 @@ else
 	for device in $(ls /dev/sd*[0-9]); do
 		mdadm -D $raid | grep "active sync" | grep -q $device && active=$device
 	done
+	missing=""
 	# Compare the status of each 'missing' device against the active one
 	for device in $(ls /dev/sd*[0-9]); do
 		# Only devices from the same RAID will be considered
@@ -70,8 +71,13 @@ else
 				echo "ERROR: Missing device $device has been used separately since last in sync"
 				exit 1
 			fi
+			missing="$missing $device"
 		fi
 	done
+	if [ -z "$missing" ]; then
+		echo "ERROR: No \"missing\" devices available to be re-added to $raid"
+		exit 1
+	fi
 	# All 'missing' devices check out as OK so it should be relatively safe to proceed
 	echo "Re-adding missing device(s) to RAID array $raid ... "
 	mdadm $raid --re-add missing
