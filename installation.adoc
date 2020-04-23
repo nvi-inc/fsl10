@@ -716,7 +716,7 @@ Once you locate the release you want, you should use it in place of
    cd /usr2
    git clone https://github.com/nvi-inc/fs fs-git
    cd /usr2/fs-git
-   git checkout 10.0.0
+   git checkout -q 10.0.0
 
 === Set */usr2/fs* link, set */usr2/fs-git* permissions, and install default copies of all the FS related directories
 

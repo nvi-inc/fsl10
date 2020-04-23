@@ -91,7 +91,7 @@ These recommendations are intended to provide consistent procedures and make it 
 
 == Disk Rotation
 
-The section describes the disk rotation procedure.
+This section describes the disk rotation procedure.
 
 NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the *secondary* controller,
 
@@ -108,6 +108,11 @@ NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the
 . If the disk is accepted, let the refresh run to completion (the progress report can be aborted as indicated). The system can be used in the meantime, but may be a little slow.
 
 == Test upgrade of FS - system updates - or other significant changes
+
+This section describes a method for testing updates in a way that provides a
+relatively easy recovery option if a problem occurs. Should that recovery fail
+for some reason, it is still possible to recover with the shelf disk as
+described in the <<Recover from a shelf disk>> section below.
 
 Seek expert advice for this, but the basic plan is given below:
 
