@@ -91,7 +91,8 @@ These recommendations are intended to provide consistent procedures and make it 
 
 == Disk Rotation
 
-This section describes the disk rotation procedure.
+This section describes the disk rotation procedure. It is used to make
+periodic updates of the shelf disk.
 
 NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the *secondary* controller,
 
