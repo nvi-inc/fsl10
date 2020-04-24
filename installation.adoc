@@ -131,8 +131,8 @@ TIP: Installing to a single disk is recommended and has some
 advantages. It is faster and you can control when the syncing for the
 second disk occurs, such as when you leave for the evening.  The
 set-up of additional disks is covered in the <<Post Install>> section
-(which references the *RAID Notes for FSL10* document). As mentioned
- in the warning above, you should start with the smallest disk.
+(which references the <<raid.adoc#,RAID notes for FSL10>> document).
+As mentioned in the warning above, you should start with the smallest disk.
 
 === Boot from the installation medium
 
