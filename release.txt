@@ -26,3 +26,17 @@ To make a release:
 . git tag <tag>     (<tag>=v2, or whatever)
 . git push --tags
 . Follow making_gh-pages.txt to publish; through the first push is already done
+
+Versioning
+
+. Incremental changes accumulate on master
+. For wording changes in documents, increment patch level in documents
+  affected, e.g., 1.0.1, and republish gh-pages
+. For changes in function, e.g., a new feature in fsadapt, increment minor
+  level in affected documents (if any), e.g., 1.1, and republish
+. A new release would be made if the changes should be retrofitted by existing
+  users, all docs updated with the new version numbers and republished
+. A major change would increment the major level, e.g., 2.0.0, and would be a
+  new release with new updated documents and their version numbers, but it
+  isn't clear what the use case would be, the next OS would go to a new repo,
+  e.g., fsl11.
