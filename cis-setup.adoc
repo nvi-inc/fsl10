@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.0 - Apr 2020
+Version 1.0.1 - Apr 2020
 
 :experimental:
 :toc:
@@ -710,3 +710,18 @@ usermod -L spare
 ----
 chage -I -1 -M 99999 spare
 ----
+
+=== Remove login banners for commands run by *ssh* on remote systems
+
+If you use *ssh*, e.g., as *oper*, to run commands on other systems as
+part of FS operations, you may get login banners mixed in with the
+output.  You can suppress the banners by adding the following to
+*oper*'s *~/.ssh/config* file:
+
+----
+LogLevel ERROR
+----
+
+This will allow errors to be displayed while suppressing the login
+banners of remote systems. This can be set selectively per remote
+system.
