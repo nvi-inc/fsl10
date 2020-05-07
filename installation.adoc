@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.0.2 - Apr 2020
+Version 1.0.3 - May 2020
 
 :sectnums:
 :experimental:
@@ -1732,14 +1732,14 @@ Then add the following alias for *oper* (and *prog*):
 alias fs='LD_PRELOAD=libkeepalive.so fs'
 ----
 
-You will need to termimate the FS, log out, and log back in to activate these changes.
+You will need to terminate the FS, log out, and log back in to activate these changes.
 
 A similar alias can used to allow other individual applications,
 to avoid the inactivity time-outs. (A better
 solution is available for *ssh*, discussed below.) It is also possible to put
 *export{nbsp}LD_PRELOAD=libkeepalive.so* in *~/.profile* to enable it for all
 applications, but this may generate some error messages (in the case of
-*xterm*, the error is apparently benign).
+*xterm* at least, the error is apparently benign).
 
 If you need to have a persistent *ssh* connection, add the follow for *oper* (and *prog*):
 
@@ -1747,16 +1747,40 @@ If you need to have a persistent *ssh* connection, add the follow for *oper* (an
 [source]
 ----
 Host *
-    ServerAliveInterval 300
+    ServerAliveInterval 200
     ServerAliveCountMax 2
 ----
+
+This can be set selectively per remote system.  The interval of *200*
+seconds is chosen to be less than the *300* seconds that some (possibly
+security hardened) servers may use.
 
 If not already set correctly, set the *~/.ssh/config* file's
 permissions and ownership for *oper* (analogously for *prog*) with:
 
 [source,bash]
 ----
-chmod 600 ~oper/.ssh/config
+chmod 644 ~oper/.ssh/config
 chown oper.rtx ~oper/.ssh/config
 ----
 
+=== Remove login banners for commands run by *ssh* on remote systems
+
+If you use *ssh* as *oper* (and maybe *prog*), to run commands on
+other systems as part of FS operations, you may get login banners
+mixed in with the output.  You can suppress the banners by adding the
+following for *oper* (and analogously for *prog*):
+
+.~/.ssh/config file:
+[source]
+----
+Host *
+    LogLevel ERROR
+----
+
+This will allow errors to be displayed while suppressing the login
+banners of remote systems. This can be set selectively per remote
+system.
+
+Please check the end of the <<Use *KeepAlive* to prevent VLAN firewall inactivity time-out>>
+section for setting the ownership and  permissions on *~/.ssh/config*.
