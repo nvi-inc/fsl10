@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.0.1 - Apr 2020
+Version 1.0.2 - May 2020
 
 :sectnums:
 :experimental:
@@ -130,7 +130,7 @@ If the update is deemed *successful*:
 
 [start=5]
 . Run *recover_raid* to add the *primary* disk back into the RAID.
-. Once the recovery completes, the system has been successfully updated.
+. Once the recovery completes (this may only take a few minutes), the system has been successfully updated.
 
 Alternatively, If the update is deemed to have *failed*, the system can be
  recovered as follows:
@@ -143,7 +143,7 @@ Alternatively, If the update is deemed to have *failed*, the system can be
 . Key-on the *secondary* slot when prompted
 . Answer *y* to blank
 . Run *refresh_secondary*
-. Once the refresh is complete, you have recovered to the original state.
+. Once the refresh is complete (this may take several hours), you have recovered to the original state.
 
 == Recover from a shelf disk
 

@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.0.3 - May 2020
+Version 1.0.4 - May 2020
 
 :sectnums:
 :experimental:
@@ -555,11 +555,11 @@ NOTE: It is also possible to add additional DVDs at this stage using the
 
 === Download the FS Linux 10 package selections
 
-First install *git* and *dselect*
-
+. Install *git* and *dselect*
++
    apt-get install git dselect
 
-and update *dselect*'s package lists
+. Update *dselect*'s package lists
 
    dselect update
 
