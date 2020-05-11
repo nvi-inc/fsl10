@@ -458,8 +458,8 @@ else
   systemd_def="off"
 fi
 
-# Add 'rtx' / 990 group into '/etc/group'.
-if (grep 'rtx:.:990' "${NEW_ROOT}"etc/group >/dev/null); then
+# Add 'rtx' group
+if (grep '^rtx:' "${NEW_ROOT}"etc/group >/dev/null); then
   rtxgroup_def="off"
 else
   rtxgroup_def="on"
@@ -590,27 +590,25 @@ else
 fi
 ;;
       rtxgroup)
-# Add 'rtx' / 990 group into '/etc/group'.
-if (grep 'rtx:.:990' "${NEW_ROOT}"etc/group >/dev/null); then
+# Add 'rtx' group
+if (grep '^rtx:' "${NEW_ROOT}"etc/group >/dev/null); then
   :
 else
-  chroot "${NEW_ROOT}" addgroup --gid 990 rtx >/dev/null 2>&1
+  chroot "${NEW_ROOT}" addgroup rtx >/dev/null 2>&1
 fi
 ;;
       stdaccts)
-# Add std accounts into '/etc/passwd'.
+# Add std accounts
     if [ ! "$is_oper" ]; then
-	echo 'oper:x:501:990:VLBI Operator:/usr2/oper:/bin/bash' >> "${NEW_ROOT}"etc/passwd
-	echo 'oper:*:12256:0:99999:7:::' >> "${NEW_ROOT}"etc/shadow
+	chroot "${NEW_ROOT}" adduser --home /usr2/oper --shell /bin/bash --ingroup rtx --no-create-home --gecos "FS Operator" --disabled-login oper >/dev/null 2>&1
     fi
     mkdir -p "${NEW_ROOT}"usr2/oper
-    chown ${VERBO} 501.990 "${NEW_ROOT}"usr2/oper
+    chown ${VERBO} -R oper.rtx "${NEW_ROOT}"usr2/oper
     if [ ! "$is_prog" ]; then
-	echo 'prog:x:502:990:FS Programmer:/usr2/prog:/bin/bash' >> "${NEW_ROOT}"etc/passwd
-	echo 'prog:*:12256:0:99999:7:::' >> "${NEW_ROOT}"etc/shadow
+	chroot "${NEW_ROOT}" adduser --home /usr2/prog --shell /bin/bash --ingroup rtx --no-create-home --gecos "FS Programmer" --disabled-login prog >/dev/null 2>&1
     fi
     mkdir -p "${NEW_ROOT}"usr2/prog
-    chown ${VERBO} 502.990 "${NEW_ROOT}"usr2/prog
+    chown ${VERBO} -R prog.rtx "${NEW_ROOT}"usr2/prog
 ;;
       fstab)
 # Add swap, '/usr2', '/proc' into '/etc/fstab'.
