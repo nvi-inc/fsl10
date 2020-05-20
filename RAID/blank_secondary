@@ -124,10 +124,29 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 		if [ $VERBOSE -ne 0 ]; then
 			echo -n "Detected /dev/$part in \"foreign\" RAID array: "
 			mdadm --detail /dev/$raid
+		fi
+		if pvdisplay /dev/$raid 2>/dev/null | grep -q "/dev/$raid" ; then
+			VG=$(pvs --noheadings -o vg_name /dev/$raid | tr -d " ")
+			LVS=$(pvs --noheadings -o lv_name /dev/$raid | tr -d " " | sort -u)
+			if [ $VERBOSE -ne 0 ]; then
+				echo "In use as a LVM physical volume:"
+				pvdisplay /dev/$raid
+				echo -n "Which contains LV(s):"
+				for lv in $LVS; do
+					echo -n " $VG/$lv"
+				done; echo
+				echo -n "Delete RAID+LVM contents (Control-C aborts)? "
+				read $ans
+			fi
+			for lv in $LVS; do
+				lvremove -f $VG/$lv
+			done
+			vgreduce -f $VG /dev/$raid
+			pvremove -ff -y /dev/$raid
+		elif [ $VERBOSE -ne 0 ]; then
 			echo -n "Delete RAID contents (Control-C aborts)? "
 			read $ans
 		fi
-		pvremove -ff -y /dev/$raid 2>/dev/null
 		mdadm -S /dev/$raid
 		mdadm --zero-superblock --force /dev/$part 2>/dev/null
 	else
@@ -202,6 +221,6 @@ else
 	fi
 	wipefs -aq $disk > /dev/null
 fi
-echo -e "\n\"Secondary\" disk $disk is now blank!"
+echo -e "\n\"Secondary\" disk $disk is hopefully now blank!"
 
 exit 0
