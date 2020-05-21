@@ -106,6 +106,8 @@ if [ $VERBOSE -eq 0 ]; then
 	done
 fi
 
+VG0=$(pvs --noheadings -o vg_name /dev/md0 | tr -d " ")
+
 for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 	partnum=$(echo $part | sed -e "s/$devname//")
 	[ $VERBOSE -ne 0 ] && sgdisk -i$partnum $disk | head -n 1
@@ -129,7 +131,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			VG=$(pvs --noheadings -o vg_name /dev/$raid | tr -d " ")
 			LVS=$(pvs --noheadings -o lv_name /dev/$raid | tr -d " " | sort -u)
 			if [ $VERBOSE -ne 0 ]; then
-				echo "In use as a LVM physical volume:"
+				echo "In use as LVM physical volume:"
 				pvdisplay /dev/$raid
 				echo -n "Which contains LV(s):"
 				for lv in $LVS; do
@@ -138,10 +140,13 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				echo -n "Delete RAID+LVM contents (Control-C aborts)? "
 				read $ans
 			fi
-			for lv in $LVS; do
-				lvremove -f $VG/$lv
-			done
-			vgreduce -f $VG /dev/$raid
+			if [ $VG -ne $VG0 ]; then
+				# Only unwind LVM if _not_ our primary VG!!!
+				for lv in $LVS; do
+					lvremove -f $VG/$lv
+				done
+				vgremove -ff $VG
+			fi
 			pvremove -ff -y /dev/$raid
 		elif [ $VERBOSE -ne 0 ]; then
 			echo -n "Delete RAID contents (Control-C aborts)? "
@@ -176,7 +181,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			VG=$(pvs --noheadings -o vg_name /dev/$part | tr -d " ")
 			LVS=$(pvs --noheadings -o lv_name /dev/$part | tr -d " " | sort -u)
 			if [ $VERBOSE -ne 0 ]; then
-				echo "Detected raw LVM physical volume:"
+				echo "Detected LVM physical volume:"
 				pvdisplay /dev/$part
 				echo -n "Which contains LV(s):"
 				for lv in $LVS; do
@@ -185,10 +190,13 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				echo -n "Delete LVM contents (Control-C aborts)? "
 				read $ans
 			fi
-			for lv in $LVS; do
-				lvremove -f $VG/$lv
-			done
-			vgreduce -f $VG /dev/$part
+			if [ $VG -ne $VG0 ]; then
+				# Only unwind LVM if _not_ our primary VG!!!
+				for lv in $LVS; do
+					lvremove -f $VG/$lv
+				done
+				vgremove -ff $VG
+			fi
 			pvremove -ff -y /dev/$part
 		elif [ $VERBOSE -ne 0 ]; then
 			echo "Detected unrecognised partition: /dev/$part"
