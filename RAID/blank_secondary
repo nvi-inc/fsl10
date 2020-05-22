@@ -24,11 +24,15 @@
 usage() { echo "Usage: $0 [-A][-h]"; echo -e "  where\t-A\tAllow \"Secondary\" disk to be loaded at start"; echo -e "  \t-h\tdisplay this help and exit"; }
 
 ACCEPT_LOAD=0
+DRY_RUN=0
 VERBOSE=0
-while getopts "Avh" arg; do
+while getopts "Anvh" arg; do
 	case $arg in
 		A)
 			ACCEPT_LOAD=1
+			;;
+		n)
+			DRY_RUN=1
 			;;
 		v)
 			VERBOSE=1
@@ -39,6 +43,8 @@ while getopts "Avh" arg; do
 			;;
 	esac
 done
+
+[ $DRY_RUN -eq 0 ] || echo -e "\n!! NB: running in DRY RUN mode ie. no action will actually be taken !!\n"
 
 disk="/dev/sdb"
 devname=$(basename $disk)
@@ -143,17 +149,17 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			if [ $VG -ne $VG0 ]; then
 				# Only unwind LVM if _not_ our primary VG!!!
 				for lv in $LVS; do
-					lvremove -f $VG/$lv
+					[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv
 				done
-				vgremove -ff $VG
+				[ $DRY_RUN -eq 0 ] && vgremove -ff $VG
 			fi
-			pvremove -ff -y /dev/$raid
+			[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$raid
 		elif [ $VERBOSE -ne 0 ]; then
 			echo -n "Delete RAID contents (Control-C aborts)? "
 			read $ans
 		fi
-		mdadm -S /dev/$raid
-		mdadm --zero-superblock --force /dev/$part 2>/dev/null
+		[ $DRY_RUN -eq 0 ] && mdadm -S /dev/$raid
+		[ $DRY_RUN -eq 0 ] && mdadm --zero-superblock --force /dev/$part 2>/dev/null
 	else
 		# Standalone partition or part of a local RAID volume
 		if [ $VERBOSE -ne 0 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
@@ -176,7 +182,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				echo -n "Delete RAID contents (Control-C aborts)? "
 				read $ans
 			fi
-			mdadm --zero-superblock --force /dev/$part 2>/dev/null
+			[ $DRY_RUN -eq 0 ] && mdadm --zero-superblock --force /dev/$part 2>/dev/null
 		elif pvdisplay /dev/$part 2>/dev/null | grep -q "/dev/$part" ; then
 			VG=$(pvs --noheadings -o vg_name /dev/$part | tr -d " ")
 			LVS=$(pvs --noheadings -o lv_name /dev/$part | tr -d " " | sort -u)
@@ -193,11 +199,11 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			if [ $VG -ne $VG0 ]; then
 				# Only unwind LVM if _not_ our primary VG!!!
 				for lv in $LVS; do
-					lvremove -f $VG/$lv
+					[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv
 				done
-				vgremove -ff $VG
+				[ $DRY_RUN -eq 0 ] && vgremove -ff $VG
 			fi
-			pvremove -ff -y /dev/$part
+			[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$part
 		elif [ $VERBOSE -ne 0 ]; then
 			echo "Detected unrecognised partition: /dev/$part"
 			echo -n "Wipe partition (Control-C aborts)? "
@@ -206,29 +212,33 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 	fi
 	if [ $VERBOSE -ne 0 ]; then
 		echo -n "Wiping partition /dev/$part ... "
-		wipefs -a /dev/$part
+		[ $DRY_RUN -eq 0 ] && wipefs -a /dev/$part
 		echo -e "done.\n"
 	else
-		wipefs -aq /dev/$part > /dev/null
+		[ $DRY_RUN -eq 0 ] && wipefs -aq /dev/$part > /dev/null
 	fi
 done
 if [ $VERBOSE -ne 0 ]; then
 	echo -n "Erase partition table of disk $disk (Control-C aborts)? "
 	read $ans
 	if $(partprobe -ds $disk | grep -q msdos); then
-		sfdisk --delete $disk
+		[ $DRY_RUN -eq 0 ] && sfdisk --delete $disk
 	else
-		sgdisk -Z -o $disk
+		[ $DRY_RUN -eq 0 ] && sgdisk -Z -o $disk
 	fi
-	wipefs -a $disk
+	[ $DRY_RUN -eq 0 ] && wipefs -a $disk
 else
 	if $(partprobe -ds $disk | grep -q msdos); then
-		sfdisk --delete $disk > /dev/null
+		[ $DRY_RUN -eq 0 ] && sfdisk --delete $disk > /dev/null
 	else
-		sgdisk -Z -o $disk > /dev/null
+		[ $DRY_RUN -eq 0 ] && sgdisk -Z -o $disk > /dev/null
 	fi
-	wipefs -aq $disk > /dev/null
+	[ $DRY_RUN -eq 0 ] && wipefs -aq $disk > /dev/null
 fi
-echo -e "\n\"Secondary\" disk $disk is hopefully now blank!"
+if [ $DRY_RUN -eq 0 ]; then
+	echo -e "\n\"Secondary\" disk $disk is hopefully now blank!"
+else
+	echo -e "\n\"Secondary\" disk $disk is hopefully _NOT_ blank! ;-)"
+fi
 
 exit 0
