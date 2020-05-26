@@ -146,7 +146,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				echo -n "Delete RAID+LVM contents (Control-C aborts)? "
 				read $ans
 			fi
-			if [ $VG -ne $VG0 ]; then
+			if [ $VG != $VG0 ]; then
 				# Only unwind LVM if _not_ our primary VG!!!
 				for lv in $LVS; do
 					[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv
@@ -196,7 +196,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				echo -n "Delete LVM contents (Control-C aborts)? "
 				read $ans
 			fi
-			if [ $VG -ne $VG0 ]; then
+			if [ $VG != $VG0 ]; then
 				# Only unwind LVM if _not_ our primary VG!!!
 				for lv in $LVS; do
 					[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv
