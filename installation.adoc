@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.1.0 - May 2020
+Version 1.1.1 - May 2020
 
 :sectnums:
 :experimental:
@@ -257,7 +257,7 @@ When prompted, select *Manual*
 .. Installer may warn: *You have selected an entire device to partition…*. Select *Yes*
 
 . Select the *FREE SPACE* under the first device
-
++
 NOTE: If some other file system, like *xfs*, or other old setup is
 displayed, you will need to delete it first.  You may be able to do
 this by deleting individual partitions until you have a single *FREE
@@ -270,9 +270,7 @@ SPACE* area.  For more complicated layouts, it may be more expedient,
     media device.  Then select *All files in one partition
     (recommended for new users)*.  You may be prompted to confirm
     deleting RAID and/or LVM, which you must do to continue.  Then you
-    should be able to select and delete remaining partitions
-    one-by-one. You should end up with a single *FREE SPACE* area,
-    which you can select and then continue with the process below.
+    should be able to continue with step 1 above, by selecting your disk.
 
 . Select *Create a new partition*
 
