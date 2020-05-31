@@ -150,19 +150,25 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				# Only unwind LVM if _not_ our primary VG!!!
 				for lv in $LVS; do
 					if [ $VERBOSE -ne 0 ]; then
-						[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv
+						[ $DRY_RUN -eq 0 ] && lvremove -v -f $VG/$lv
 					else
 						[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv > /dev/null
 					fi
 				done
 				if [ $VERBOSE -ne 0 ]; then
-					[ $DRY_RUN -eq 0 ] && vgremove -ff $VG
+					[ $DRY_RUN -eq 0 ] && vgremove -v -f $VG
 				else
-					[ $DRY_RUN -eq 0 ] && vgremove -ff $VG > /dev/null
+					[ $DRY_RUN -eq 0 ] && vgremove -f $VG > /dev/null
+				fi
+			else
+				if [ $VERBOSE -ne 0 ]; then
+					[ $DRY_RUN -eq 0 ] && vgreduce -v $VG /dev/$taid
+				else
+					[ $DRY_RUN -eq 0 ] && vgreduce $VG /dev/$raid > /dev/null
 				fi
 			fi
 			if [ $VERBOSE -ne 0 ]; then
-				[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$raid
+				[ $DRY_RUN -eq 0 ] && pvremove -v -ff -y /dev/$raid
 			else
 				[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$raid > /dev/null
 			fi
@@ -174,7 +180,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			[ $DRY_RUN -eq 0 ] && mdadm -S /dev/$raid
 			[ $DRY_RUN -eq 0 ] && mdadm --zero-superblock --force /dev/$part 2>/dev/null
 		else
-			[ $DRY_RUN -eq 0 ] && mdadm -S /dev/$raid > /dev/null
+			[ $DRY_RUN -eq 0 ] && mdadm -S /dev/$raid > /dev/null 2>&1
 			[ $DRY_RUN -eq 0 ] && mdadm --zero-superblock --force /dev/$part >/dev/null 2>&1
 		fi
 	else
@@ -219,19 +225,25 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				# Only unwind LVM if _not_ our primary VG!!!
 				for lv in $LVS; do
 					if [ $VERBOSE -ne 0 ]; then
-						[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv
+						[ $DRY_RUN -eq 0 ] && lvremove -v -f $VG/$lv
 					else
 						[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv > /dev/null
 					fi
 				done
 				if [ $VERBOSE -ne 0 ]; then
-					[ $DRY_RUN -eq 0 ] && vgremove -ff $VG
+					[ $DRY_RUN -eq 0 ] && vgremove -v -f $VG
 				else
-					[ $DRY_RUN -eq 0 ] && vgremove -ff $VG > /dev/null
+					[ $DRY_RUN -eq 0 ] && vgremove -f $VG > /dev/null
+				fi
+			else
+				if [ $VERBOSE -ne 0 ]; then
+					[ $DRY_RUN -eq 0 ] && vgreduce -v $VG /dev/$part
+				else
+					[ $DRY_RUN -eq 0 ] && vgreduce $VG /dev/$part > /dev/null
 				fi
 			fi
 			if [ $VERBOSE -ne 0 ]; then
-				[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$part
+				[ $DRY_RUN -eq 0 ] && pvremove -v -ff -y /dev/$part
 			else
 				[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$part > /dev/null
 			fi
