@@ -112,8 +112,6 @@ if [ $VERBOSE -eq 0 ]; then
 	done
 fi
 
-VG0=$(pvs --noheadings -o vg_name /dev/md0 | tr -d " ")
-
 for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 	partnum=$(echo $part | sed -e "s/$devname//")
 	[ $VERBOSE -ne 0 ] && sgdisk -i$partnum $disk | head -n 1
@@ -135,6 +133,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 		fi
 		if pvdisplay /dev/$raid 2>/dev/null | grep -q "/dev/$raid" ; then
 			VG=$(pvs --noheadings -o vg_name /dev/$raid | tr -d " ")
+			VG_UUID=$(pvs --noheadings -o vg_uuid /dev/$raid | tr -d " ")
 			LVS=$(pvs --noheadings -o lv_name /dev/$raid | tr -d " " | sort -u)
 			if [ $VERBOSE -ne 0 ]; then
 				echo "In use as LVM physical volume:"
@@ -145,31 +144,12 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				done; echo
 				echo -n "Delete RAID+LVM contents (Control-C aborts)? "
 				read $ans
-			fi
-			if [ $VG != $VG0 ]; then
-				# Only unwind LVM if _not_ our primary VG!!!
-				for lv in $LVS; do
-					if [ $VERBOSE -ne 0 ]; then
-						[ $DRY_RUN -eq 0 ] && lvremove -v -f $VG/$lv
-					else
-						[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv > /dev/null
-					fi
-				done
-				if [ $VERBOSE -ne 0 ]; then
-					[ $DRY_RUN -eq 0 ] && vgremove -v -f $VG
-				else
-					[ $DRY_RUN -eq 0 ] && vgremove -f $VG > /dev/null
-				fi
-			else
-				if [ $VERBOSE -ne 0 ]; then
-					[ $DRY_RUN -eq 0 ] && vgreduce -v $VG /dev/$taid
-				else
-					[ $DRY_RUN -eq 0 ] && vgreduce $VG /dev/$raid > /dev/null
-				fi
-			fi
-			if [ $VERBOSE -ne 0 ]; then
+				[ $DRY_RUN -eq 0 ] && lvremove -v -f -S vg_uuid=$VG_UUID
+				[ $DRY_RUN -eq 0 ] && vgremove -v -f -S vg_uuid=$VG_UUID
 				[ $DRY_RUN -eq 0 ] && pvremove -v -ff -y /dev/$raid
 			else
+				[ $DRY_RUN -eq 0 ] && lvremove -f -S vg_uuid=$VG_UUID > /dev/null
+				[ $DRY_RUN -eq 0 ] && vgremove -f -S vg_uuid=$VG_UUID > /dev/null
 				[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$raid > /dev/null
 			fi
 		elif [ $VERBOSE -ne 0 ]; then
@@ -210,6 +190,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 			fi
 		elif pvdisplay /dev/$part 2>/dev/null | grep -q "/dev/$part" ; then
 			VG=$(pvs --noheadings -o vg_name /dev/$part | tr -d " ")
+			VG_UUID=$(pvs --noheadings -o vg_uuid /dev/$part | tr -d " ")
 			LVS=$(pvs --noheadings -o lv_name /dev/$part | tr -d " " | sort -u)
 			if [ $VERBOSE -ne 0 ]; then
 				echo "Detected LVM physical volume:"
@@ -220,31 +201,12 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				done; echo
 				echo -n "Delete LVM contents (Control-C aborts)? "
 				read $ans
-			fi
-			if [ $VG != $VG0 ]; then
-				# Only unwind LVM if _not_ our primary VG!!!
-				for lv in $LVS; do
-					if [ $VERBOSE -ne 0 ]; then
-						[ $DRY_RUN -eq 0 ] && lvremove -v -f $VG/$lv
-					else
-						[ $DRY_RUN -eq 0 ] && lvremove -f $VG/$lv > /dev/null
-					fi
-				done
-				if [ $VERBOSE -ne 0 ]; then
-					[ $DRY_RUN -eq 0 ] && vgremove -v -f $VG
-				else
-					[ $DRY_RUN -eq 0 ] && vgremove -f $VG > /dev/null
-				fi
-			else
-				if [ $VERBOSE -ne 0 ]; then
-					[ $DRY_RUN -eq 0 ] && vgreduce -v $VG /dev/$part
-				else
-					[ $DRY_RUN -eq 0 ] && vgreduce $VG /dev/$part > /dev/null
-				fi
-			fi
-			if [ $VERBOSE -ne 0 ]; then
+				[ $DRY_RUN -eq 0 ] && lvremove -v -f -S vg_uuid=$VG_UUID
+				[ $DRY_RUN -eq 0 ] && vgremove -v -f -S vg_uuid=$VG_UUID 
 				[ $DRY_RUN -eq 0 ] && pvremove -v -ff -y /dev/$part
 			else
+				[ $DRY_RUN -eq 0 ] && lvremove -f -S vg_uuid=$VG_UUID > /dev/null
+				[ $DRY_RUN -eq 0 ] && vgremove -f -S vg_uuid=$VG_UUID > /dev/null
 				[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$part > /dev/null
 			fi
 		elif [ $VERBOSE -ne 0 ]; then
