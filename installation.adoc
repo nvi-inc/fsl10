@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.1.1 - May 2020
+Version 1.1.2 - June 2020
 
 :sectnums:
 :experimental:
@@ -39,6 +39,7 @@ we will be able to provide.
 .FSL distributions
 |=============================================================
 | FS Linux |Release Name|Debian Version| Linux kernel | Year
+
 |    1     |            | (Slackware)  | 1.2.x  | 1994
 |    2     | bo         |     1.3.1    | 2.0.29 | 1997
 |    3     | hamm       |     2.0      | 2.0.34 | 1998
@@ -104,6 +105,25 @@ https://www.debian.org/releases/stretch/installmanual
 
 == Motherboard setup
 
+[NOTE]
+====
+
+Some hardware may require special procedures. For cases we know about,
+instructions are provided in top-level sub-directories of the
+repository, which is visible at https://github.com/nvi-inc/fsl10. In
+addition to special instructions, there may be needed software/drivers
+in the sub-directories. The following table lists the cases that are
+currently covered. If you have the listed hardware, we recommend
+reading the instructions before beginning the installation.
+
+.Special installation instructions available
+|=============================================================
+| Sub-directory | Hardware
+
+| https://github.com/nvi-inc/fsl10/tree/master/X11SCA-F[X11SCA-F] | SuperMicro X11SCA-F motherboard
+|=============================================================
+
+====
 Modern motherboards offer two forms of booting: native UEFI or BIOS
 emulation ("Legacy"). UEFI is the preferred approach.  Either mode of
 boot is supported by this installation guide, and you will be given
@@ -133,6 +153,7 @@ second disk occurs, such as when you leave for the evening.  The
 set-up of additional disks is covered in the <<Post Install>> section
 (which references the <<raid.adoc#,RAID notes for FSL10>> document).
 As mentioned in the warning above, you should start with the smallest disk.
+
 
 === Boot from the installation medium
 
