@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.1.3 - June 2020
+Version 1.1.4 - June 2020
 
 :sectnums:
 :experimental:
@@ -113,14 +113,16 @@ instructions are provided in top-level sub-directories of the
 repository, which is visible at https://github.com/nvi-inc/fsl10. In
 addition to special instructions, there may be needed software/drivers
 in the sub-directories. The following table lists the cases that are
-currently covered. If you have the listed hardware, we recommend
-reading the instructions before beginning the installation.
+currently covered. Some of these solutions may be useful for other
+hardware with the same issues. If you have the listed hardware or
+issue, we recommend reading the instructions before beginning the
+installation.
 
 .Special installation instructions available
 |=============================================================
-| Sub-directory | Hardware
+| Sub-directory | Hardware |Issue
 
-| https://github.com/nvi-inc/fsl10/tree/master/X11SCA-F[X11SCA-F] | Supermicro X11SCA-F motherboard
+| https://github.com/nvi-inc/fsl10/tree/master/X11SCA-F[X11SCA-F] | Supermicro X11SCA-F motherboard|Driver for Intel 1000e NIC
 |=============================================================
 
 ====
