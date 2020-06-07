@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.1.5 - June 2020
+Version 1.1.6 - June 2020
 
 :sectnums:
 :experimental:
@@ -119,8 +119,9 @@ issue, we recommend reading the instructions before beginning the
 installation.
 
 .Special installation instructions available
+[cols="1,3,3"]
 |=============================================================
-| Sub-directory | Hardware |Issue
+| Directory | Hardware |Issue
 
 | https://github.com/nvi-inc/fsl10/tree/master/X11SCA-F[X11SCA-F] | Supermicro X11SCA-F motherboard|Newer driver required for Intel 1000e NIC
 |=============================================================
