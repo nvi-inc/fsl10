@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.1.0 - May 2020
+Version 1.1.6 - June 2020
 
 :sectnums:
 :experimental:
@@ -39,6 +39,7 @@ we will be able to provide.
 .FSL distributions
 |=============================================================
 | FS Linux |Release Name|Debian Version| Linux kernel | Year
+
 |    1     |            | (Slackware)  | 1.2.x  | 1994
 |    2     | bo         |     1.3.1    | 2.0.29 | 1997
 |    3     | hamm       |     2.0      | 2.0.34 | 1998
@@ -104,6 +105,28 @@ https://www.debian.org/releases/stretch/installmanual
 
 == Motherboard setup
 
+[NOTE]
+====
+
+Some hardware may require special procedures. For cases we know about,
+instructions are provided in top-level sub-directories of the
+repository, which is visible at https://github.com/nvi-inc/fsl10. In
+addition to special instructions, there may be needed software/drivers
+in the sub-directories. The following table lists the cases that are
+currently covered. Some of these solutions may be useful for other
+hardware with the same issues. If you have the listed hardware or
+issue, we recommend reading the instructions before beginning the
+installation.
+
+.Special installation instructions available
+[cols="1,3,3"]
+|=============================================================
+| Directory | Hardware |Issue
+
+| https://github.com/nvi-inc/fsl10/tree/master/X11SCA-F[X11SCA-F] | Supermicro X11SCA-F motherboard|Newer driver required for Intel 1000e NIC
+|=============================================================
+
+====
 Modern motherboards offer two forms of booting: native UEFI or BIOS
 emulation ("Legacy"). UEFI is the preferred approach.  Either mode of
 boot is supported by this installation guide, and you will be given
@@ -134,6 +157,7 @@ set-up of additional disks is covered in the <<Post Install>> section
 (which references the <<raid.adoc#,RAID notes for FSL10>> document).
 As mentioned in the warning above, you should start with the smallest disk.
 
+
 === Boot from the installation medium
 
 Connect an active network cable to your lowest numbered interface
@@ -151,25 +175,26 @@ At the *Installer boot menu*:
 
 . _Highlight_ *Install* (or *Graphical install* -- only the installer
   interface differs -- but this may not work on some video hardware)
-    * BIOS: press kbd:[Tab]; or
-    * UEFI: press kbd:[e], then kbd:[{downarrow}] three times (*vmlinuz*), then kbd:[End]
-
++
+* UEFI: press kbd:[e], then kbd:[{downarrow}] three times (*vmlinuz*), then kbd:[End]
 // The above does not work for asciidoctor-pdf for PDF, use this instead:
 //    * UEFI: press kbd:[e], then the *downarrow* three times (*vmlinuz*), then kbd:[End]
-
++
 NOTE: If kbd:[e] doesn't work, UEFI is not available.  It may be possible to enable it in the BIOS.
-
-[start=2]
++
+* BIOS: press kbd:[Tab] 
 . To the end of the displayed command, add the additional options:
-
++
    locale=en_US.UTF8 netcfg/disable_dhcp=true time/zone=UTC
-
++
 NOTE: Whilst typing a */* (slash) it may automatically be changed (escaped) to
       *\/* (i.e. preceded by a backslash). This is normal behaviour and harmless.
 
 . Press:
-    * BIOS: kbd:[Enter]
++
     * UEFI: kbd:[F10] 
++
+    * BIOS: kbd:[Enter]
 
 NOTE: You may omit the *netcfg/disable_dhcp=true* if you want to use DHCP to
 configure the network settings of this machine, though this is not advised.
@@ -257,7 +282,7 @@ When prompted, select *Manual*
 .. Installer may warn: *You have selected an entire device to partition…*. Select *Yes*
 
 . Select the *FREE SPACE* under the first device
-
++
 NOTE: If some other file system, like *xfs*, or other old setup is
 displayed, you will need to delete it first.  You may be able to do
 this by deleting individual partitions until you have a single *FREE
@@ -270,19 +295,17 @@ SPACE* area.  For more complicated layouts, it may be more expedient,
     media device.  Then select *All files in one partition
     (recommended for new users)*.  You may be prompted to confirm
     deleting RAID and/or LVM, which you must do to continue.  Then you
-    should be able to select and delete remaining partitions
-    one-by-one. You should end up with a single *FREE SPACE* area,
-    which you can select and then continue with the process below.
+    should be able to continue with step 1 above, by selecting your disk.
 
 . Select *Create a new partition*
 
 .  Then for
-** BIOS: Enter *1MB* in the size, choose *Primary* (rather than *Logical*) if asked for the partition type, then select *Beginning* of the disk.
 ** UEFI:  Enter *1GB* in the size, then select *Beginning* of the disk.
+** BIOS: Enter *1MB* in the size, choose *Primary* (rather than *Logical*) if asked for the partition type, then select *Beginning* of the disk.
 
 . Then for
-** BIOS: Select *Use as* then select *Reserved BIOS boot area*, or alternatively *Do not use the partition* if the former option is not available.
 ** UEFI: Select *Use as* then select *EFI System Partition (ESP)*
+** BIOS: Select *Use as* then select *Reserved BIOS boot area*, or alternatively *Do not use the partition* if the former option is not available.
 
 . Now press *Done setting up the partition*.
 
@@ -1106,8 +1129,8 @@ described in this document (or reasonable defaults) are shown in parentheses.
 [NOTE]
 ====
 
-You could instead add parameters to the boot line (by entering kbd:[Tab] for BIOS or
-kbd:[e] for UEFI on the *... Rescue mode* line instead), following the
+You could instead add parameters to the boot line (by entering kbd:[e] for UEFI or
+kbd:[Tab] for BIOS on the *... Rescue mode* line instead), following the
 directions in the <<Set boot options and boot installer>> section above.
 This is not necessary nor usually helpful, but if you use this approach the
 most useful parameters are probably *netcfg/disable_dhcp=true* and/or

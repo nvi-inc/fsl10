@@ -19,12 +19,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 #
 
-#mdstat for FSL7 and later
+#mdstat for FSL10 and later
 cat /proc/mdstat
 echo
-echo 'Disk       Serial Number'
-for disk in $(ls /dev/sd?); do
-	if [ -b $disk ]; then
-		echo "$disk  " $(lsblk --nodeps -no serial $disk)
-	fi
-done
+lsblk --nodeps -o NAME,HCTL,MODEL,SIZE,SERIAL /dev/sd*[!0-9]
