@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.1.1 - June 2020
+Version 1.2.0 - June 2020
 
 :sectnums:
 :experimental:
