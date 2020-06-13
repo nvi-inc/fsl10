@@ -24,11 +24,15 @@
 usage() { echo "Usage: $0 [-A][-h]"; echo -e "  where\t-A\tAllow \"Secondary\" disk to be loaded at start"; echo -e "  \t-h\tdisplay this help and exit"; }
 
 ACCEPT_LOAD=0
+DRY_RUN=0
 VERBOSE=0
-while getopts "Avh" arg; do
+while getopts "Anvh" arg; do
 	case $arg in
 		A)
 			ACCEPT_LOAD=1
+			;;
+		n)
+			DRY_RUN=1
 			;;
 		v)
 			VERBOSE=1
@@ -39,6 +43,8 @@ while getopts "Avh" arg; do
 			;;
 	esac
 done
+
+[ $DRY_RUN -eq 0 ] || echo -e "\n!! NB: running in DRY RUN mode ie. no action will actually be taken !!\n"
 
 disk="/dev/sdb"
 devname=$(basename $disk)
@@ -115,7 +121,7 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
         	echo "ERROR: \"Secondary\" disk $disk is currently part of RAID /dev/md0!!"
 		exit 1
 	elif [ ! -z $raid ]; then
-		if grep ^"$raid" /proc/mdstat | grep " sda" > /dev/null; then
+		if grep ^"$raid" /proc/mdstat | grep -q " sda"; then
         		echo -n "ERROR: \"Primary\" disk /dev/sda is in a common RAID array: "
 			mdadm --detail --scan /dev/$raid
 			exit 1
@@ -124,12 +130,39 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 		if [ $VERBOSE -ne 0 ]; then
 			echo -n "Detected /dev/$part in \"foreign\" RAID array: "
 			mdadm --detail /dev/$raid
+		fi
+		if pvdisplay /dev/$raid 2>/dev/null | grep -q "/dev/$raid" ; then
+			VG=$(pvs --noheadings -o vg_name /dev/$raid | tr -d " ")
+			VG_UUID=$(pvs --noheadings -o vg_uuid /dev/$raid | tr -d " ")
+			LVS=$(pvs --noheadings -o lv_name /dev/$raid | tr -d " " | sort -u)
+			if [ $VERBOSE -ne 0 ]; then
+				echo "In use as LVM physical volume:"
+				pvdisplay /dev/$raid
+				echo -n "Which contains LV(s):"
+				for lv in $LVS; do
+					echo -n " $VG/$lv"
+				done; echo
+				echo -n "Delete RAID+LVM contents (Control-C aborts)? "
+				read $ans
+				[ $DRY_RUN -eq 0 ] && lvremove -v -f -S vg_uuid=$VG_UUID
+				[ $DRY_RUN -eq 0 ] && vgremove -v -f -S vg_uuid=$VG_UUID
+				[ $DRY_RUN -eq 0 ] && pvremove -v -ff -y /dev/$raid
+			else
+				[ $DRY_RUN -eq 0 ] && lvremove -f -S vg_uuid=$VG_UUID > /dev/null
+				[ $DRY_RUN -eq 0 ] && vgremove -f -S vg_uuid=$VG_UUID > /dev/null
+				[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$raid > /dev/null
+			fi
+		elif [ $VERBOSE -ne 0 ]; then
 			echo -n "Delete RAID contents (Control-C aborts)? "
 			read $ans
 		fi
-		pvremove -ff -y /dev/$raid 2>/dev/null
-		mdadm -S /dev/$raid
-		mdadm --zero-superblock --force /dev/$part 2>/dev/null
+		if [ $VERBOSE -ne 0 ]; then
+			[ $DRY_RUN -eq 0 ] && mdadm -S /dev/$raid
+			[ $DRY_RUN -eq 0 ] && mdadm --zero-superblock --force /dev/$part 2>/dev/null
+		else
+			[ $DRY_RUN -eq 0 ] && mdadm -S /dev/$raid > /dev/null 2>&1
+			[ $DRY_RUN -eq 0 ] && mdadm --zero-superblock --force /dev/$part >/dev/null 2>&1
+		fi
 	else
 		# Standalone partition or part of a local RAID volume
 		if [ $VERBOSE -ne 0 ] && [ ! -z "$(sgdisk -i$partnum $disk | grep 'BIOS boot')" ]; then
@@ -151,13 +184,16 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				mdadm --examine /dev/$part
 				echo -n "Delete RAID contents (Control-C aborts)? "
 				read $ans
+				[ $DRY_RUN -eq 0 ] && mdadm --zero-superblock --force /dev/$part 2>/dev/null
+			else
+				[ $DRY_RUN -eq 0 ] && mdadm --zero-superblock --force /dev/$part > /dev/null 2>&1
 			fi
-			mdadm --zero-superblock --force /dev/$part 2>/dev/null
 		elif pvdisplay /dev/$part 2>/dev/null | grep -q "/dev/$part" ; then
 			VG=$(pvs --noheadings -o vg_name /dev/$part | tr -d " ")
+			VG_UUID=$(pvs --noheadings -o vg_uuid /dev/$part | tr -d " ")
 			LVS=$(pvs --noheadings -o lv_name /dev/$part | tr -d " " | sort -u)
 			if [ $VERBOSE -ne 0 ]; then
-				echo "Detected raw LVM physical volume:"
+				echo "Detected LVM physical volume:"
 				pvdisplay /dev/$part
 				echo -n "Which contains LV(s):"
 				for lv in $LVS; do
@@ -165,12 +201,14 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 				done; echo
 				echo -n "Delete LVM contents (Control-C aborts)? "
 				read $ans
+				[ $DRY_RUN -eq 0 ] && lvremove -v -f -S vg_uuid=$VG_UUID
+				[ $DRY_RUN -eq 0 ] && vgremove -v -f -S vg_uuid=$VG_UUID 
+				[ $DRY_RUN -eq 0 ] && pvremove -v -ff -y /dev/$part
+			else
+				[ $DRY_RUN -eq 0 ] && lvremove -f -S vg_uuid=$VG_UUID > /dev/null
+				[ $DRY_RUN -eq 0 ] && vgremove -f -S vg_uuid=$VG_UUID > /dev/null
+				[ $DRY_RUN -eq 0 ] && pvremove -ff -y /dev/$part > /dev/null
 			fi
-			for lv in $LVS; do
-				lvremove -f $VG/$lv
-			done
-			vgreduce -f $VG /dev/$part
-			pvremove -ff -y /dev/$part
 		elif [ $VERBOSE -ne 0 ]; then
 			echo "Detected unrecognised partition: /dev/$part"
 			echo -n "Wipe partition (Control-C aborts)? "
@@ -179,29 +217,33 @@ for part in $(cd /dev/;ls $devname?* 2>/dev/null); do
 	fi
 	if [ $VERBOSE -ne 0 ]; then
 		echo -n "Wiping partition /dev/$part ... "
-		wipefs -a /dev/$part
+		[ $DRY_RUN -eq 0 ] && wipefs -a /dev/$part
 		echo -e "done.\n"
 	else
-		wipefs -aq /dev/$part > /dev/null
+		[ $DRY_RUN -eq 0 ] && wipefs -aq /dev/$part > /dev/null
 	fi
 done
 if [ $VERBOSE -ne 0 ]; then
 	echo -n "Erase partition table of disk $disk (Control-C aborts)? "
 	read $ans
 	if $(partprobe -ds $disk | grep -q msdos); then
-		sfdisk --delete $disk
+		[ $DRY_RUN -eq 0 ] && sfdisk --delete $disk
 	else
-		sgdisk -Z -o $disk
+		[ $DRY_RUN -eq 0 ] && sgdisk -Z -o $disk
 	fi
-	wipefs -a $disk
+	[ $DRY_RUN -eq 0 ] && wipefs -a $disk
 else
 	if $(partprobe -ds $disk | grep -q msdos); then
-		sfdisk --delete $disk > /dev/null
+		[ $DRY_RUN -eq 0 ] && sfdisk --delete $disk > /dev/null
 	else
-		sgdisk -Z -o $disk > /dev/null
+		[ $DRY_RUN -eq 0 ] && sgdisk -Z -o $disk > /dev/null
 	fi
-	wipefs -aq $disk > /dev/null
+	[ $DRY_RUN -eq 0 ] && wipefs -aq $disk > /dev/null
 fi
-echo -e "\n\"Secondary\" disk $disk is now blank!"
+if [ $DRY_RUN -eq 0 ]; then
+	echo -e "\n\"Secondary\" disk $disk is hopefully now blank!"
+else
+	echo -e "\n\"Secondary\" disk $disk is hopefully _NOT_ blank! ;-)"
+fi
 
 exit 0

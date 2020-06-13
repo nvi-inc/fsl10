@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.1.0 - May 2020
+Version 1.2.0 - June 2020
 
 :sectnums:
 :experimental:
@@ -302,8 +302,9 @@ status of the RAID. It is most useful for checking whether a recovery
 is in process or has ended, but is also useful for showing the current
 state of the RAID, including any anomalies.
 
-The script also lists the serial numbers for all block devices (such
-as disks) that are currently connected.
+The script also lists various useful details for all block devices (such
+as disks) that are currently connected, including their model and serial
+numbers where applicable.
 
 === refresh_secondary
 
@@ -476,6 +477,12 @@ automatically be "Allowed" by both this script and
 *refresh_secondary*, which also supports this feature.  This allows
 you to then run *refresh_secondary* immediately without having to 
 *shutdown*, turn the disk off, reboot, start the script, and turn the disk on.
+
+NOTE: On the 32-bit *i386* platform, due to a broken *vgre,pve* binary, this
+script can give WARHINGs when erasing disks that were used for LVM.  These
+warnings can safely be ignored - ths disk will be successfully blanked (despite
+*vgremove* having segmentation-faulted instead of performing the requisite
+action thereby causing *pvremove* to complain about the VG still being active.)
 
 === recover_raid
 
