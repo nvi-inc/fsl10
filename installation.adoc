@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.2.0 - June 2020
+Version 1.2.1 - June 2020
 
 :sectnums:
 :experimental:
@@ -251,7 +251,7 @@ Backspace over the default hostname *debian* and type in the name
 you require (if not already retrieved via DNS), then press  kbd:[Enter].
 Enter the required Internet Domain name (if not found) and press  kbd:[Enter].
 
-=== Enter a suitable *root* password
+=== Enter a suitable root password
 
 Twice as prompted.
 
@@ -483,7 +483,7 @@ NOTE: If the login screen is painfully slow and your CPU does not
 include a GPU, you can probably fix the slowness by disabling
 *Wayland* in *gdm3*. However, the result may be that rebooting or
 shutting down will typically have an enforced 90-120 second delay (see
-    the <<Fix for slow reboot/shutdown with *Wayland* disabled>> section for a _possible_
+    the <<Fix for slow reboot/shutdown with Wayland disabled>> section for a _possible_
     fix). You may find the slow login screen preferable. To disable
 *Wayland*, edit */etc/gdm3/daemon.conf* and uncomment the line
 *WaylandEnable=false*.  Then *gdm3* will need to be restarted either
@@ -504,7 +504,7 @@ Enter *root* and press kbd:[Enter], then enter the *root* password you set
 earlier.
 
 
-=== Remove the dummy *Desktop User* (optional)
+=== Remove the dummy Desktop User (optional)
 
 Unless you want another account that that is set up to use the default
 desktop environment, delete *desktop* with:
@@ -539,7 +539,7 @@ create the new file */etc/apt/apt.conf.d/00proxies* using *vi* containing:
 
 to use a proxy *proxy.some.where* at port 8080 for example.
 
-=== Edit */etc/apt/sources.list*
+=== Edit /etc/apt/sources.list
 
 Using your favourite text editor, eg *vi*, and comment out all *cdrom* entries
 (unless you don't have a decent Internet connection and need to use DVDs,
@@ -623,7 +623,7 @@ So that the update mechanism will work correctly, run
 
 == Third Stage Installation 
 
-=== *fsadapt*
+=== fsadapt
 
 In the */root/fsl10* directory, start *fsadapt* with
 
@@ -744,7 +744,7 @@ Once you locate the release you want, you should use it in place of
    cd /usr2/fs-git
    git checkout -q 10.0.0
 
-=== Set */usr2/fs* link, set */usr2/fs-git* permissions, and install default copies of all the FS related directories
+=== Set /usr2/fs link, set /usr2/fs-git permissions, and install default copies of all the FS related directories
 
    make install
 
@@ -1232,7 +1232,7 @@ A useful minimum set of features to apply would be to install *ufw*
 and block everything except *ssh* and further restrict *ssh* access with
 TCP Wrappers.
 
-===== *ufw* set-up
+===== ufw set-up
 
 To install and configure *ufw* to only allow *ssh* for incoming conections, use the commands:
 
@@ -1263,7 +1263,7 @@ hosts and/or sub-domains instead of *ALL*. Please see
 *man{nbsp}hosts_access* for more information about configuring TCP
 Wrappers
 
-=== Customize *root*'s *.bashrc* file
+=== Customize root's .bashrc file
 
 There are a few changes you should consider for *root*'s *.bashrc* file.
 
@@ -1393,7 +1393,7 @@ update-exim4.conf
 
 When finished, reboot.
 
-=== Disable *Desktop User*
+=== Disable Desktop User
 
 If you do not need the functionality available in the Desktop
 environment, you can disable the *desktop* account. You can re-enable
@@ -1422,7 +1422,7 @@ You can undo the *ssh* block  be removing the line (if it only has
 *desktop*) or removing *desktop* from the line and then restarting
 *sshd*.
 
-=== Remove *ModemManager* package
+=== Remove ModemManager package
 
 If you use serial ports, it is strongly advised that you remove the
 ModemManager package to avoid conflicts over access to the ports.
@@ -1432,7 +1432,7 @@ Execute this command:
 apt-get purge modemmanger
 ....
 
-=== Remove *Anacron* package
+=== Remove Anacron package
 
 If you enabled the weekly update job in *fsadapt* (it is strongly
 recommended), we recommend that you also remove the *anacron* package
@@ -1589,7 +1589,7 @@ the line below is the account name) that has received mail
 
     mail -f /var/mail/user
 
-=== Generate FQDN in *HELO* for outgoing mail
+=== Generate FQDN in HELO for outgoing mail
 
 If mail from your system is being rejected by some servers because
 *exim4* is not providing a Fully Qualified Domain Name (FQDN), in its *HELO*
@@ -1701,7 +1701,7 @@ systemctl restart gdm3
 
 or rebooting.
 
-=== Fix for slow reboot/shutdown with *Wayland* disabled
+=== Fix for slow reboot/shutdown with Wayland disabled
 
 #TODO: Still slow for some cases (exact ones still not clear)#
 
@@ -1721,7 +1721,7 @@ systemctl daemon-reload
 +
 or reboot.
 
-=== Use *KeepAlive* to prevent VLAN firewall inactivity time-out
+=== Use KeepAlive to prevent VLAN firewall inactivity time-out
 
 If there is a VLAN firewall in use on the local network, it may be
 necessary to use *KeepAlive* for TCP connections to prevent inactivity
@@ -1787,7 +1787,7 @@ chmod 644 ~oper/.ssh/config
 chown oper.rtx ~oper/.ssh/config
 ----
 
-=== Remove login banners for commands run by *ssh* on remote systems
+=== Remove login banners for commands run by ssh on remote systems
 
 If you use *ssh* as *oper* (and maybe *prog*), to run commands on
 other systems as part of FS operations, you may get login banners
@@ -1805,5 +1805,5 @@ This will allow errors to be displayed while suppressing the login
 banners of remote systems. This can be set selectively per remote
 system.
 
-Please check the end of the <<Use *KeepAlive* to prevent VLAN firewall inactivity time-out>>
+Please check the end of the <<Use KeepAlive to prevent VLAN firewall inactivity time-out>>
 section for setting the ownership and  permissions on *~/.ssh/config*.

@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.0 - June 2020
+Version 1.2.1 - June 2020
 
 :experimental:
 :toc:
@@ -257,7 +257,7 @@ discussed.
 Need FS NTP configuration. That is more secure than the benchmark since
 it uses `ignore` by default.
 
-=== 2.3.4 Ensure `telnet` client is not installed
+=== 2.3.4 Ensure telnet client is not installed
 
 Would prefer to keep the `telnet` client, it is useful for debugging
 ASCII device protocol devices, which we have.  The security weakness
@@ -305,7 +305,7 @@ latter required 'purge'.
 
 Remediation makes it less secure. A default policy of `ignore` is better.
 
-=== 2.3.4 Ensure `telnet` client is not installed
+=== 2.3.4 Ensure telnet client is not installed
 
 The remediation does not make the test pass, that required 'purge'.
 
@@ -395,7 +395,7 @@ The *root_tmp* script will do three things:
 There may be other issues with using the *noexec* option for */tmp*,
 but we don't have any specifics at this time.
 
-=== Enabling user promotion to *oper*, *prog* and *root*
+=== Enabling user promotion to oper, prog and root
 
 The model of FSL assumes *oper* and *prog* accounts will be used for
 operations and programming respectively. However, some institutes may
@@ -591,7 +591,7 @@ auth required pam_tally2.so deny=5
 Small integer values (20 or less) should not be a signficant risk with
 long and complicated passwords and a lock-out of several minutes.
 
-=== *refresh_spare_usr2 with* CIS hardening
+=== refresh_spare_usr2 with CIS hardening
 
 IMPORTANT: Please read the
 <<raid.adoc#_refresh_spare_usr2,refresh_spare_usr2>> section in the
@@ -615,9 +615,9 @@ The remainder of this sub-section describes the steps need to enable
 use of the script with CIS hardening. The possibility of running it as
 *root* or from a different account is allowed for the instructions.
 
-==== On *operational* computer
+==== On operational computer
 
-===== Use *visudo* to add:
+===== Use visudo to add:
 
 ....
 spare          ALL=(ALL) NOPASSWD: /usr/local/sbin/send_usr2
@@ -634,7 +634,7 @@ cd /usr2; tar --one-file-system -cf - .
 
 Permissions: *rwxr-xr--*, ownership *root:root*.
 
-===== Create *spare* account:
+===== Create spare account:
 
 NOTE: That the user's home directory is on */home* (by default), not */usr2*.
 
@@ -644,9 +644,9 @@ adduser --uid 503 --gid 990 spare
 
 IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.
 
-==== On *spare* computer
+==== On spare computer
 
-===== In *refresh_spare_usr2*, customize as usual and change:
+===== In refresh_spare_usr2, customize as usual and change:
 
 ....
 ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | (cd /usr2; tar xpf - --totals)
@@ -659,7 +659,7 @@ ssh spare@operational sudo -s send_usr2 | (cd /usr2; tar xpf - --totals)
 
 where *operational* is the name or IP of your operational computer.
 
-===== If *root* will run the script
+===== If root will run the script
 
 Create a key (unless *root* already has one). In any event, copy it to
 the *spare* account on your operational computer:
@@ -671,7 +671,7 @@ ssh-copy-id spare@operational
 
 where *operational* is the name or IP of your operational computer.
 
-===== For a different user than *root* to run the script
+===== For a different user than root to run the script
 
 IMPORTANT: They must not have their current directory on */usr2* when they run the script.
 
@@ -695,9 +695,9 @@ ssh-copy-id spare@operational
 where *<user>* is the user that wll run the script and *operational*
 is the name or IP of your operational computer.
 
-==== On *operational* computer
+==== On operational computer
 
-===== Lock out *spare* account from normal login (but must have a shell):
+===== Lock out spare account from normal login (but must have a shell):
 
 This will disable password login for this user:
 
