@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.1 - June 2020
+Version 1.2.2 - June 2020
 
 :experimental:
 :toc:
@@ -636,10 +636,10 @@ Permissions: *rwxr-xr--*, ownership *root:root*.
 
 ===== Create spare account:
 
-NOTE: That the user's home directory is on */home* (by default), not */usr2*.
+NOTE: The user's home directory is on */home* (by default), not */usr2*.
 
 ----
-adduser --uid 503 --gid 990 spare
+adduser spare
 ----
 
 IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.
