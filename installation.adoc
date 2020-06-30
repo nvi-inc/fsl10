@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.2.1 - June 2020
+Version 1.2.2 - June 2020
 
 :sectnums:
 :experimental:
@@ -1453,10 +1453,12 @@ The following tersely summarizes some *ufw* settings that may be useful:
 ufw allow OpenSSH
 #NTP
 ufw allow ntp
+#anywhere from subnet
+ufw allow from 192.168.4.0/24
 #RDBE multicast to addresses from subnet
-ufw allow in proto udp to 239.0.2.0/24 from 128.171.102.0/24
+ufw allow in proto udp to 239.0.2.0/24 from 192.168.4.0/24
 #? RDBE multicast to group from subnet ?
-#ufw allow in proto igmp to 239.0.2.0/24 from 128.171.102.0/24
+#ufw allow in proto igmp to 239.0.2.0/24 from 192.168.4.0/24
 ....
 
 === Configure e-mail
