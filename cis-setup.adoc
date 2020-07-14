@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.2 - June 2020
+Version 1.2.3 - July 2020
 
 :experimental:
 :toc:
@@ -421,8 +421,8 @@ run *visudo* then add at end:
 To allow *operators* to use *refresh_secondary*, *shutdown*, and *reboot*, add (respectively):
 
    %operators      ALL=(ALL) /usr/local/sbin/refresh_secondary
-   %operators      ALL=(ALL) /usr/sbin/shutdown
-   %operators      ALL=(ALL) /usr/sbin/reboot
+   %operators      ALL=(ALL) /sbin/shutdown
+   %operators      ALL=(ALL) /sbin/reboot
 
 To use these commands the *operators* will need to enter (respectively) from their AUID accounts:
 
@@ -547,7 +547,7 @@ make sure the *UID* and *GID* for each user with a home direcory on
 */usr2* is the same on both computers for the system-to-system backup
 of */usr2* to work properly.
 
-    adduser dhorsley --home /usr2/dehorsley
+    adduser dhorsley --home /usr2/dhorsley
 
 Then add each user to these groups as appropriate, e.g.:
 
@@ -638,11 +638,16 @@ Permissions: *rwxr-xr--*, ownership *root:root*.
 
 NOTE: The user's home directory is on */home* (by default), not */usr2*.
 
-----
-adduser spare
-----
+NOTE: The *UID* and *GID* values of *2000* are chosen to make it
+easier to keep the values in sync for users on both machines. In other
+words, it is not necessary to worry about jumping over a low value on
+the *spare* machine when values are assigned sequentially, as is the
+default.  If you think you might have more than 1000 users or groups,
+you might want to increase the values for the *spare* account.
 
-IMPORTANT: Make sure group *rtx* is not denied in */etc/ssh/sshd_config*.
+----
+adduser spare --uid 2000 --guid 2000
+----
 
 ==== On spare computer
 
