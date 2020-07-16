@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.3 - July 2020
+Version 1.2.4 - July 2020
 
 :experimental:
 :toc:
@@ -632,7 +632,7 @@ spare          ALL=(ALL) NOPASSWD: /usr/local/sbin/send_usr2
 cd /usr2; tar --one-file-system -cf - .
 ----
 
-Permissions: *rwxr-xr--*, ownership *root:root*.
+Permissions: *rwxr--r--*, ownership *root:root*.
 
 ===== Create spare account:
 
@@ -646,7 +646,8 @@ default.  If you think you might have more than 1000 users or groups,
 you might want to increase the values for the *spare* account.
 
 ----
-adduser spare --uid 2000 --guid 2000
+addgroup spare --gid 2000
+adduser spare --uid 2000 --gid 2000
 ----
 
 ==== On spare computer
@@ -659,15 +660,16 @@ ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | (cd /usr2; tar 
 
 to
 ....
-ssh spare@operational sudo -s send_usr2 | (cd /usr2; tar xpf - --totals)
+ssh spare@operational -o LogLevel=ERROR sudo send_usr2 | (cd /usr2; tar xpf - --totals)
 ....
 
 where *operational* is the name or IP of your operational computer.
 
-===== If root will run the script
+===== Create and copy a key for root
 
-Create a key (unless *root* already has one). In any event, copy it to
-the *spare* account on your operational computer:
+If *root* already has one, you only need the second command below to copy it to the *spare* account:
+
+NOTE: It is recommended to not set a passphrase.
 
 ----
 ssh-keygen
@@ -683,22 +685,11 @@ IMPORTANT: They must not have their current directory on */usr2* when they run t
 Use *visudo* to add
 
 ....
-<user>         ALL=(ALL) /usr/local/sbin/refresh_spare_usr2
+%operators         ALL=(ALL) /usr/local/sbin/refresh_spare_usr2
 ....
 
-where *<user>* is the user that will run the command (it could be *oper*).
-
-Create a key for the user (unless one already
-    exists). In any event, copy it to the *spare* account on your operational computer:
-
-----
-su - <user>
-ssh-keygen
-ssh-copy-id spare@operational
-----
-
-where *<user>* is the user that wll run the script and *operational*
-is the name or IP of your operational computer.
+It could be limited to a specific user (but not *oper* or *prog*)
+by replacing *%operators* with the user account name.
 
 ==== On operational computer
 
