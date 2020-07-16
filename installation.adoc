@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.2.3 - July 2020
+Version 1.2.4 - July 2020
 
 :sectnums:
 :experimental:
@@ -633,7 +633,7 @@ In the */root/fsl10* directory, start *fsadapt* with
 
 Using the arrow keys and kbd:[Space] make your selections and press kbd:[Enter].
 
-*  For NASA stations select *govt* and *noident*.
+*  For government computers select *govt* and *noident*.
 *  If you are not using a GPIB board or USB dongle, you can deselect the GPIB option.
 
 ==== FS Adaptation: Setup (Window 2)
@@ -1286,7 +1286,7 @@ This sub-section requires using *nm-connection-editor* on a graphic
 display (*nmtui* may be an option on a text terminal, but it has not
 been fully verified). You will probably need to be *root* or
 *desktop* to do this. When you run this program and select a
-connection, e.g., *Wired connecton 1* under *Ethernet*, the *Edit*
+connection, e.g., *Wired connection 1* under *Ethernet*, the *Edit*
 button should become active.  If it stays greyed out, you don't have
 sufficent permission. All the sub-sections below assume you are in
 program and have sufficent permision,
@@ -1589,7 +1589,7 @@ to end of *oper*'s *.profile* file (if using *bash* as the login
 shell) or *.login* file (*tcsh*).
 
 . Lastly, check the default mailbox directory */var/mail/* for
-account that may have messages that arrived before the e-mail
+accounts that may have messages that arrived before the e-mail
 system was fully configured.  Be sure to resolve any system
 messages that may have been received. You can check to see what
 accounts have mail with:
