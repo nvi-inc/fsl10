@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.2.0 - June 2020
+Version 1.2.1 - June 2020
 
 :sectnums:
 :experimental:
@@ -96,9 +96,22 @@ periodic updates of the shelf disk.
 
 NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the *secondary* controller,
 
+TIP: If you do not have access to the *root* account, you may
+have *sudo* access to the privileged commands. If so, you will need
+to run the *shutdown -h now* and *refresh_secondary* commands with
+*sudo*.  This is true for other privileged commands used elsewhere in
+this document.
+
 . Wait until the RAID is not recovering, check with *mdstat*
 . Shutdown the system, e.g., *shutdown -h now*
 . Take the disk from *primary* slot, put it on the *shelf*
++
+
+We recommend that you label the disk immediately, including the date
+(and possibly the time). In addition to getting the disk labeled
+before it is put away, it will reduce the chances that is confused
+with the _old_ *shelf* disk.
+
 . Move the disk from the *secondary* slot to the *primary* slot, keyed-on
 . Move the _old_ *shelf* disk to the *secondary* slot, keyed-off
 . Boot (*primary* keyed-on, *secondary* keyed-off)
@@ -560,18 +573,20 @@ this document for completeness. In a two computer configuration
 *operational* computer's */usr2* partition on the *spare* computer.
 Normally this partition holds all the operational FS programs and
 data. The script can be found in */root/fsl10/RAID*.  Full
-instructions for its installation are included in the script.
+instructions for its installation are included in the script. The
+script will give a warning about its use and prompt for permission to
+proceed when it it is run.
 
 WARNING: It should installed on the *spare* computer _only_.
 
 WARNING: When this script is run, neither computer should have anyone logged in
-with a home directory on */usr2* nor should there be any activity occuring that
+with a home directory on */usr2* nor should there be any activity occurring that
 will affect */usr2*.
 
 NOTE: Despite what the script says, it is possible to run the script
 by using *su* or *sudo* from a non-root account as long as there is no
 activity involving */usr2* and the user's current directory is not on
-*/usr2*.
+*/usr2*. For the latter issue, *cd*-ing to */tmp* is a reasonable choice.
 
 IMPORTANT: For this script to work usefully, the *operational* and
 *spare* computers should have the same set-up including particularly the
