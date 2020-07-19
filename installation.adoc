@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.2.4 - July 2020
+Version 1.2.5 - July 2020
 
 :sectnums:
 :experimental:
@@ -1827,3 +1827,43 @@ system.
 
 Please check the end of the <<Use KeepAlive to prevent VLAN firewall inactivity time-out>>
 section for setting the ownership and  permissions on *~/.ssh/config*.
+
+=== Printer setup
+
+. Make sure your printer is connected, to the computer or the network, as appropriate.
++
+TIP: Newer computers usually do not have a parallel port
+(IEEE 1284).  If not, and your printer requires a
+parallel connection, you should be able to obtain a
+USB/Parallel converter for less than US$20.
+
+. Login in to the X-display or remotely using an X-capable display.
+
+. Start *firefox*
+
+. Enter URL: *localhost:631*
+
+. Select *Add printers and classes*.
++
+
+You may be prompted to enter credentials. If your account is a member
+of the *lpadmin* group, you can use your own credentials; if not, those of the
+*root* account or another account that is a member of *lpadmin* will be required.
+
+. Add your printers.
++
+Connected printers may be automatically offered to be added.  You may
+also be able to find printers using the *Find Printer* function. If
+CUPS offers you the wrong type of printer to be automatically added or
+it is unclear what driver to select for a printer, you may be able to
+get some useful information to help with manually installing your
+printer by searching the Internet for the string "cups" and your
+printer model.
++
+Some printers will work with an *AppSocket* connection of the form *socket://hostname*.
+
+. Be sure to select a printer as the default (usually by selecting
+*Printers* at the top of the page, then select the printer to be set as the
+default, then from the *Administration* drop down: *Set As Server Default*).
+
+. Quit *firefox*
