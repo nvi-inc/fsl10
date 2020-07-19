@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.4 - July 2020
+Version 1.2.5 - July 2020
 
 :experimental:
 :toc:
@@ -395,17 +395,17 @@ The *root_tmp* script will do three things:
 There may be other issues with using the *noexec* option for */tmp*,
 but we don't have any specifics at this time.
 
-=== Enabling user promotion to oper, prog and root
+=== Enabling user promotion to oper/prog and root
 
 The model of FSL assumes *oper* and *prog* accounts will be used for
-operations and programming respectively. However, some institutes may
+operations and programming respectively. However, some organizations may
 have security and auditing restrictions that mean operators must
-log-in to their own account (possibly named with their Agency User ID,
+log-in using their own account (possibly named with their Agency User ID,
     AUID).  As the Field System currently operates, users will then
 need to switch to the *oper* or *prog* account after login. Likewise,
      if a user is allowed to elevate to *root*, they will need to do
      so after log-in to their own account. This sub-section covers how to
-     enable this capability. The next sub-section covers how to add a
+     enable this capability. The next sub-section <<Adding AUID accounts>> covers how to add an
      AUID account. The method described here, and in the next sub-section,
      uses *dhorsley* as an example user.
 
@@ -539,29 +539,36 @@ with:
 This sub-section describes how to add AUID accounts to be used with the
 ability to promote to *oper*, *prog*, and *root* as described in the
 previous sub-section. As in the previous sub-section, the following method
-uses *dhorsley* as an example user.  Add any needed user accounts as
-appropriate:
+uses *dhorsley* as an example user.
 
+. Add any needed user accounts as appropriate:
++
 IMPORTANT: If you are configuring a spare computer, you will need to
 make sure the *UID* and *GID* for each user with a home direcory on
 */usr2* is the same on both computers for the system-to-system backup
 of */usr2* to work properly.
-
++
     adduser dhorsley --home /usr2/dhorsley
 
-Then add each user to these groups as appropriate, e.g.:
-
+. Add each user to these groups as appropriate, e.g.:
++
+NOTE: This step assumes that the *operators* and *programmers* groups have been created as described in the previous sub-section <<Enabling user promotion to oper/prog and root>>.
++
     adduser dhorsley operators
-
++
 and/or:
-
++
     adduser dhorsley programmers
 
-If the account will be used by an operator and/or programmer, the X11
+. If the user should be able to manage printers, use:
+
+    adduser dhorsley lpadmin
+
+. If the account will be used by an operator and/or programmer, the X11
 environment needs to be set-up. The following command will move an
 existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and create a new
 */usr2/dhorsley* with a useful skeleton for use with the FS (you will
-    be prompted for the user name):
+    be prompted for the account name):
 
     /usr2/fs/misc/auid_update
 
