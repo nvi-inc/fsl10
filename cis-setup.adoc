@@ -713,3 +713,60 @@ usermod -L spare
 ----
 chage -I -1 -M 99999 spare
 ----
+
+=== Setting hostname alias
+
+These steps set a more user friendly alias for the computers of the
+form `fs1-xx` and `fs2-xx` where `xx` is the station's two letter
+code.  This provides a compact alias for local usage, even for sites
+with more than one system, and makes the system identifiable for
+remote users in a systematic way. These steps should be executed for
+both the *operational* and *spare* computers.
+
+. Edit `/etc/hosts` and add the new aliases to the appropriate lines.
+. Create a file `/etc/hostname_alias` that contains the new alias.
+.. Execute
++
+    cd /etc
+    cp hostname hostname_alias
+
+.. Edit the new file and change the contents to the new alias.
+. Change the system's mailname
+.. Edit the file `/etc/mailname` and change its contents to the new name, without a domain name unless that is required by remote mail hosts. If so,
+<<installation.adoc#_generate_fqdn_in_helo_for_outgoing_mail,Generate FQDN in HELO for outgoing mail>> in the FSL10 Installation document may also be helpful.
+.. Edit `/etc/exim4/update-exim4.conf.conf`, change the value of `hostnames=` to the new alias
+.. Execute
++
+     update-exim4.conf
+     systemctl restart exim4
+
+. For the *spare* computer only:
+
+.. Update `/usr/local/sbin/refresh_spare_usr2` to use the new alias of the *operational* computer in the `ssh` line.
+
+.. You will need to update the new alias for the *operational*
+computer to be recognized as a known host to the *root* account on the
+*spare* computer. You can do that by using `ssh` to
+`spare@operational` where `operational` is new alias for the
+*operational* computer. The command will give you guidance for which
+lines need to be deleted in `/root/.ssh/known_hosts`. After deleting
+those lines, reconnect using the same `ssh` command and answer `yes`
+to confirm connecting. Finally, logout of the `spare` account on
+*operational* computer.
+
+. Use the new alias in the user prompts and `xterm` titles for *oper*, *prog*, and all non-system-administrator AUID accounts. In the
+`.bashrc` file for each user to be changed:
+
+.. Before the `if` block that sets `PS1` add:
+
+    hostalias_file=/etc/hostname_alias
+    if [[ -f "$hostalias_file" ]]; then
+        hostalias=$(cat $hostalias_file)
+    else
+        hostalias=$(hostname)
+    fi
+
+.. In the two statements setting `PS1` in the `if` block, change the use of `\h` to `$hostalias`.
+
+.. In the statement setting `PS1` in the `case` block that sets the `xterm` window title, change the use of `\h` to `$hostalias`.
+
