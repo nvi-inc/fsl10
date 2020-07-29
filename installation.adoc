@@ -859,15 +859,15 @@ Run the script:
   
 When the script says it is waiting for the second disk, key it on.
 
-Once your reach the message that it is recovering, you can resume using
+Once you reach the message that it is recovering, you can resume using
 the computer as usual. You can stop the updating of the *recovery*
-message wth kbd:[Ctrl+C] as described in the output. If later you want
-to check the progress of the status of the RAID resync, you can use:
+message with kbd:[Ctrl+C] as described in the output. You can also
+safely reboot at this point, if it is needed.
+
+If later you want to check the progress of the status of the RAID
+re-sync, you can use:
 
     mdstat
-
-While the operating system can resume syncing the RAID if you reboot,
-it is best to avoid in case the boot partition is not yet fully synced.
 
 When the syncing is complete, you can repeat the process of the
 previous sub-section and this sub-section if you have a third disk that needs

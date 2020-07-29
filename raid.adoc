@@ -437,6 +437,9 @@ screen saver may make it difficult to see the progress after awhile,
        check the progress later with *mdstat*. The system can be used
        normally while it refreshing, but it may be a little slow.
 
+Once the progress indicator is updating, it is safe to reboot the
+computer if it is needed.
+
 === blank_secondary
 
 This script should only be used with expert advice.
