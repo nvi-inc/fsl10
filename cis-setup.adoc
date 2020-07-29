@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.5 - July 2020
+Version 1.2.6 - July 2020
 
 :experimental:
 :toc:
