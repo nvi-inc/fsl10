@@ -1860,7 +1860,7 @@ get some useful information to help with manually installing your
 printer by searching the Internet for the string "cups" and your
 printer model.
 +
-Some printers will work with an *AppSocket* connection of the form *socket://hostname*.
+Some printers will work with an *AppSocket/HP JetDirect* connection of the form *socket://hostname*.
 
 . Be sure to select a printer as the default (usually by selecting
 *Printers* at the top of the page, then select the printer to be set as the
