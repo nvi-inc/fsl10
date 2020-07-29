@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.7 - July 2020
+Version 1.2.8 - July 2020
 
 :experimental:
 :toc:
@@ -714,42 +714,6 @@ usermod -L spare
 chage -I -1 -M 99999 spare
 ----
 
-=== Using refresh_spare_usr2 with CIS hardening
-
-NOTE: The purpose of the `script` command below is to record the
-output to help verify success afterwards in case the screen output is
-no longer available when it is checked for. It can also be helpful for
-diagnosing what went wrong if there was a problem.
-
-. As part of a monthly backup, you would usually start a disk rotation
-on both the *operational* and *spare* computers first. Once both
-computers are recovering, you should log out of both machines.
-
-+
-
-IMPORTANT: Before proceeding, make sure that no one is logged into
-either computer and that no processes are running on */usr2* on either
-machine, particularly the FS.
-
-. Login on the *spare* computer with *ssh*, or on a local virtual console text terminal, using an AUID account
-. Execute:
-+
-    cd /tmp
-    script refresh.txt
-    time sudo refresh_spare_usr2; exit
-+
-Answer the question `y` if it is safe to proceed.
-. Check to see that it finished with no problems.
-+
-If the output of the script is no longer on the display, you can
-inspect */tmp/refresh.txt* (until the next reboot) to determine if there was a problem. You
-may need to login again to do this.
-
-. If it finished with no problems, you can reboot as soon as is
-convenient. You may reboot even if the RAID is recovering, but you can
-wait until the recovery is complete. The only requirement is to reboot
-before the FS is run again on the *spare* computer.
-
 === Setting hostname alias
 
 These steps set a more user friendly alias for the computers of the
@@ -806,3 +770,38 @@ to confirm connecting. Finally, logout of the `spare` account on
 
 .. In the statement setting `PS1` in the `case` block that sets the `xterm` window title, change the use of `\h` to `$hostalias`.
 
+== Using refresh_spare_usr2 with CIS hardening
+
+NOTE: The purpose of the `script` command below is to record the
+output to help verify success afterwards in case the screen output is
+no longer available when it is checked for. It can also be helpful for
+diagnosing what went wrong if there was a problem.
+
+. As part of a monthly backup, you would usually start a disk rotation
+on both the *operational* and *spare* computers first. Once both
+computers are recovering, you should log out of both machines.
+
++
+
+IMPORTANT: Before proceeding, make sure that no one is logged into
+either computer and that no processes are running on */usr2* on either
+machine, particularly the FS.
+
+. Login on the *spare* computer with *ssh*, or on a local virtual console text terminal, using an AUID account
+. Execute:
++
+    cd /tmp
+    script refresh.txt
+    time sudo refresh_spare_usr2; exit
++
+Answer the question `y` if it is safe to proceed.
+. Check to see that it finished with no problems.
++
+If the output of the script is no longer on the display, you can
+inspect */tmp/refresh.txt* (until the next reboot) to determine if there was a problem. You
+may need to login again to do this.
+
+. If it finished with no problems, you can reboot as soon as is
+convenient. You may reboot even if the RAID is recovering, but you can
+wait until the recovery is complete. The only requirement is to reboot
+before the FS is run again on the *spare* computer.
