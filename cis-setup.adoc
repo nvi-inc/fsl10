@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.6 - July 2020
+Version 1.2.7 - July 2020
 
 :experimental:
 :toc:
@@ -716,12 +716,20 @@ chage -I -1 -M 99999 spare
 
 === Using refresh_spare_usr2 with CIS hardening
 
-IMPORTANT: Make sure no one is logged into either computer before proceeding.
-
 NOTE: The purpose of the `script` command below is to record the
 output to help verify success afterwards in case the screen output is
 no longer available when it is checked for. It can also be helpful for
 diagnosing what went wrong if there was a problem.
+
+. As part of a monthly backup, you would usually start a disk rotation
+on both the *operational* and *spare* computers first. Once both
+computers are recovering, you should log out of both machines.
+
++
+
+IMPORTANT: Before proceeding, make sure that no one is logged into
+either computer and that no processes are running on */usr2* on either
+machine, particularly the FS.
 
 . Login on the *spare* computer with *ssh*, or on a local virtual console text terminal, using an AUID account
 . Execute:
