@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.2.6 - July 2020
+Version 1.2.7 - August 2020
 
 :sectnums:
 :experimental:
@@ -1379,18 +1379,33 @@ Use your local subnet (class A, B, or C) for the *localnet* line.
 +
 ./etc/mailname
 +
-Use fully qualified node name
+Use fully qualified node name.
++
+[NOTE]
+====
+
+If your system doesn't have a FQDN or you don't want to show it in
+e-mail messages, you may be able to use a fake one. A FQDN may be
+necessary to allow messages to be sent successfully to some remote
+hosts and *mailman* mail lists. A possible strategy for this is to
+append *.net* to the node name you use in this file and the next. The
+node name in these two files can be different than the official
+hostname. However, these two mail related files should be consistent.
+You might consider *fs1-_xx_.net* (or *fs2-_xx_.net*), where *_xx_* is
+your station two letter code (lower case).
+
+====
 +
 ./etc/exim4/update-exim4.conf.conf
 +
-Look for *hostnames=*, use fully qualified name.
-
+Look for *hostnames=*, use fully qualified domain name.
++
 Then execute:
-
++
 ....
 update-exim4.conf
 ....
-
++
 When finished, reboot.
 
 === Disable Desktop User
