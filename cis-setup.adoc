@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.9 - August 2020
+Version 1.2.10 - August 2020
 
 :experimental:
 :toc:
@@ -803,7 +803,14 @@ IMPORTANT: Before proceeding, make sure that no one is logged into
 either computer and that no processes are running on */usr2* on either
 machine, particularly the FS.
 
-. Login on the *spare* computer with *ssh*, or on a local virtual console text terminal, using an AUID account
+. Login on the *spare* computer with *ssh*, or on a local virtual
+console text terminal, using an AUID account
+
++
+
+IMPORTANT: If you logged in using *ssh* do not open an *xterm* to work
+in. Instead work in the window where you logged in.
+
 . Execute:
 +
     cd /tmp

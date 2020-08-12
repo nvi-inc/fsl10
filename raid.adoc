@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.2.3 - July 2020
+Version 1.2.4 - August 2020
 
 :sectnums:
 :experimental:
@@ -109,7 +109,7 @@ this document.
 
 We recommend that you label the disk immediately, including the date
 (and possibly the time). In addition to getting the disk labeled
-before it is put away, it will reduce the chances that is confused
+before it is put away, it will reduce the chances that it is confused
 with the _old_ *shelf* disk.
 
 . Move the disk from the *secondary* slot to the *primary* slot, keyed-on

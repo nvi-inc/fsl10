@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.2.7 - August 2020
+Version 1.2.8 - August 2020
 
 :sectnums:
 :experimental:
@@ -1791,6 +1791,10 @@ alias fs='LD_PRELOAD=libkeepalive.so fs'
 ----
 
 You will need to terminate the FS, log out, and log back in to activate these changes.
+
+NOTE: If you run the FS from a script, you will need to include the
+setting of *LD_PRELOAD* explicitly in the script since scripts do not
+pick up aliases.
 
 A similar alias can used to allow other individual applications,
 to avoid the inactivity time-outs. (A better
