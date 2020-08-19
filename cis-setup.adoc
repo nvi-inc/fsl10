@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.2.10 - August 2020
+Version 1.2.11 - August 2020
 
 :experimental:
 :toc:
@@ -542,13 +542,32 @@ previous sub-section. As in the previous sub-section, the following method
 uses *dhorsley* as an example user.
 
 . Add any needed user accounts as appropriate:
+
+    adduser dhorsley --home /usr2/dhorsley
+
 +
 IMPORTANT: If you are configuring a spare computer, you will need to
-make sure the *UID* and *GID* for each user with a home direcory on
+make sure the *UID* and *GID* for each user with a home directory on
 */usr2* is the same on both computers for the system-to-system backup
 of */usr2* to work properly.
 +
-    adduser dhorsley --home /usr2/dhorsley
+
+[NOTE]
+====
+
+For normal operations, AUID users' home directories should be on
+*/usr2*. However, for some maintenance accounts, it may make sense to
+have the home directory some where else, typically on */home*. In that
+case, use this command instead:
+
+    adduser dhorsley
+
+The final step of this section will need to be adjusted accordingly.
+
+The *UID* and *GID* of the account should still be kept in agreement
+between the two computers.
+
+====
 
 . Add each user to these groups as appropriate, e.g.:
 +
@@ -571,6 +590,20 @@ existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and create a new
     be prompted for the account name):
 
     /usr2/fs/misc/auid_update
+
++
+[NOTE]
+====
+
+If the user's home directory is not on */usr2*, but is for example on
+*/home*, the following commands should be used instead:
+
+    cd /home
+    mv dhorsley dhorsley.FSCOPY
+    cd /usr2/fs/st.default/auid
+    find . -print|cpio -pmdu /home/dhorsley
+    chown -R dhorsley.dhorsley /home/dhorsley
+====
 
 === Adjust number of login failures before lock-out
 
