@@ -1,0 +1,40 @@
+#!/bin/bash
+# For systems with GPT LVM RAID arrays, drops the first disk out of the
+# /dev/md0 array to allow non destructive testing in a convenient way.
+
+usage() { echo "Usage: $0 [-h]"; echo -e "  \t-h\tdisplay this help and exit"; }
+
+while getopts "h" arg; do
+	case $a in
+		h | *)
+			usage
+			exit 0
+			;;
+	esac
+done
+
+if [ ! -b /dev/md0 ]; then
+        echo "ERROR: RAID /dev/md0 does not exist!!"
+        exit 1
+fi
+if ! mdadm --detail /dev/md0 2>&1 | grep -q ": clean $" ; then
+        echo "ERROR: RAID /dev/md0 is not in a clean state!"
+        exit 1
+fi
+
+# Perform sanity checks on primary disk first
+if ! mdadm --detail /dev/md0 | grep -q /dev/sda2; then
+        echo "ERROR: \"Primary\" disk /dev/sda is not part of RAID /dev/md0!!"
+	exit 1
+fi
+if [ "$(cat /sys/block/sda/removable)" != "0" ]; then
+	echo "WARNING: \"Primary\" disk /dev/sda is removable:"
+	echo -n " /dev/sda: "$(lsblk --nodeps -no tran /dev/sda | tr [:lower:] [:upper:]) 
+	echo -n " "$(lsblk --nodeps -no type /dev/sda)
+	echo -n ", model" $(lsblk --nodeps -no model /dev/sda)
+	echo ", s/n "$(lsblk --nodeps -no serial /dev/sda)
+	echo -n "Press <Enter> if you wish to continue (Control-C aborts) "
+	read $ans
+fi
+
+mdadm /dev/md0 -f /dev/sda2
