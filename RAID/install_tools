@@ -48,4 +48,9 @@ cd /usr/local/sbin
 cp -a ~/fsl10/RAID/recover_raid .
 chown root:root recover_raid
 chmod a+r,u+x,go-wx recover_raid
+echo "setting up drop_primary"
+cd /usr/local/sbin
+cp -a ~/fsl10/RAID/drop_primary .
+chown root:root drop_primary
+chmod a+r,u+x,go-wx drop_primary
 echo "done"
