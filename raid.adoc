@@ -121,7 +121,7 @@ with the _old_ *shelf* disk.
 . If the script rejects the disk (and stops with an error), seek expert advice. Be sure to note any messages so they can be reported.
 . If the disk is accepted, let the refresh run to completion (the progress report can be aborted as indicated). The system can be used in the meantime, but may be a little slow.
 
-== Test upgrade of FS - system updates - or other significant changes
+== Recoverable testing
 
 This section describes a method for testing updates in a way that provides a
 relatively easy recovery option if a problem occurs. Should that recovery fail
@@ -491,8 +491,8 @@ you to then run *refresh_secondary* immediately without having to
 *shutdown*, turn the disk off, reboot, start the script, and turn the disk on.
 
 NOTE: On the 32-bit *i386* platform, due to a broken *vgre,pve* binary, this
-script can give WARHINGs when erasing disks that were used for LVM.  These
-warnings can safely be ignored - ths disk will be successfully blanked (despite
+script can give WARNINGs when erasing disks that were used for LVM.  These
+warnings can safely be ignored - the disk will be successfully blanked (despite
 *vgremove* having segmentation-faulted instead of performing the requisite
 action thereby causing *pvremove* to complain about the VG still being active.)
 
@@ -509,8 +509,8 @@ RAID */dev/md0*:
 
 . Exists.
 . Is in a clean state, i.e., both disks are present and no recovery is
-  currently in progress.'
-. Contains the *primary* disk (^sda*) as a member.
+  currently in progress.
+. Contains the *primary* disk (*sda*) as a member.
 
 If the *primary* disk is removable, the user will be provided with some
 information about the disk and given an opportunity to continue with
@@ -630,7 +630,7 @@ accounts, particularly for those that have home directories on */usr2*,
 IMPORTANT: It is recommended that the script be used (including for initial testing)
   immediately after a disk rotation to provide the ample opportunities
   for recovery if there is a problem. In particular, for initial
-  testing the procedure in the <<Test upgrade of FS - system updates - or other significant changes>>
+  testing the procedure in the <<Recoverable testing>>
   section should be used.
 
 TIP: It is possible to recover fairly easily, using the script as a guide,
@@ -648,7 +648,7 @@ can log-out of both computers and then login into the *spare* computer
 again to start *refresh_spare_usr2*.
 
 The recovery of the RAIDs will
-increase the amount of time that the *refresh_spare_urs2* takes to
+increase the amount of time that the *refresh_spare_usr2* takes to
 complete.  It has been observed in some cases to approximately double
 the time required.
 
@@ -770,7 +770,7 @@ include *.skd*, *.snp*, and *.prc* files (such volatile files can be
     more easily restored by generating them again). It also can be
 used to recover from a bad OS patch (which is extremely unlikely),
      which is easier if patches are applied just after a disk
-     rotation (see also the <<Test upgrade of FS - system updates - or other significant changes>> section).
+     rotation (see also the <<Recoverable testing>> section).
 
 In this case, the *shelf* disk can be used to restore the system to
 the state at the time of the most recent rotation.  To do this, follow

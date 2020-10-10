@@ -895,8 +895,7 @@ the weekly *cron* job is described below in the section
 TIP: It is recommended that a disk rotation be performed before any
 update is installed. This will make recovery much easier if a problem with the
 update is discovered.  Please see the FSL10 Raid document section
-<<raid.adoc#_test_upgrade_of_fs_system_updates_or_other_significant_changes,Test
-upgrade of FS - system updates - or other significant changes>> for a
+<<raid.adoc#_recoverable_testing,Recoverable testing>> for a
 streamlined method to manage testing of updates.
 
 If updates are needed, the weekly *cron* job will send a message to *root*
@@ -994,8 +993,7 @@ appropriately _after_ the initial reboot and then (to keep these
 
 If an update fails, e.g., an updated kernel fails to boot or another problem is discovered,
 you can recover as described in FSL10 RAID document
-<<raid.adoc#_test_upgrade_of_fs_system_updates_or_other_significant_changes,Test
-upgrade of FS - system updates - or other significant changes>>
+<<raid.adoc#_recoverable_testing,Recoverable testing>>
 section, if you were following that method, or from a shelf disk
 according to the FSL10 RAID document <<raid.adoc#_recover_from_a_shelf_disk,Recover from
 a shelf disk>> section if not and you have a good shelf disk.
