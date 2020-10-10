@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.2.8 - August 2020
+Version 1.2.9 - October 2020
 
 :sectnums:
 :experimental:
@@ -698,11 +698,12 @@ You can install some useful tools for working with the RAID, if you're actually 
    ~/fsl10/RAID/install_tools
 
 The rest of this document assumes the first three of these tools have
-been installed.  The four tools are:
+been installed.  The five tools are:
 
    * *mdstat* allows all users to check on the RAID status
    * *refresh_secondary* allows *root* to refresh a secondary disk that is from the same RAID and has been booted on its own
    * *blank_secondary* allows *root* to initialize a secondary disk, must be used with extreme care
+   * *drop_primary* allows *root* deliberately to drop the primary disk out of the RAID for use as a backup
    * *recover_raid* allows *root* to re-add a disk that fell out of (or was removed from) the RAID back into it
 
 TIP: More information about RAID operation can be found in the <<raid.adoc#,RAID notes for FSL10>> document.

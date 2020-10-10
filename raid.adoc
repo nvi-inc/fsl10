@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.2.4 - August 2020
+Version 1.2.5 - October 2020
 
 :sectnums:
 :experimental:
@@ -132,11 +132,7 @@ Seek expert advice for this, but the basic plan is given below:
 
 . If a rotation hasn't just been completed, perform one (as an extra backup)
 . Before proceeding verify that there is no recovery in progress, check with *mdstat*
-. Drop the *primary* disk out of the RAID (as a backup) using the command:
-+
-....
-mdadm /dev/md0 -f /dev/sda2
-....
+. Drop the *primary* disk out of the RAID (as a backup) by running *drop_primary*
 . Install and test the update
 
 If the update is deemed *successful*:
@@ -339,7 +335,7 @@ Any *primary* disk (*sda*) will be rejected that:
 . Is not part of the RAID (*md0*)
 . Has a boot scheme other than the BIOS or UEFI set up as described in the FSL10 Installation Document.
 
-If the *primary* disk is removable, the user will provided with some
+If the *primary* disk is removable, the user will be provided with some
 information about the disk and given an opportunity to continue with
 kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
 identified as the *primary*, one would not want to continue. However
@@ -407,7 +403,7 @@ been on the *shelf* unused since it was last rotated, it is safe to
 refresh and should be accepted by all the checks. In other words,
         normal disk rotation should work with no problems.
 
-If the *secondary* disk is removable, the user will provided with some
+If the *secondary* disk is removable, the user will be provided with some
 information about the disk and given an opportunity to continue with
 kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
 identified as the *secondary*, one would not want to continue. However
@@ -474,7 +470,7 @@ out of an abundance of caution.
 
 . Has a partition that is included in any RAID.
 
-If the *primary* disk is removable, the user will provided with some
+If the *primary* disk is removable, the user will be provided with some
 information about the disk and given an opportunity to continue with
 kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
 identified as the *primary*, one would not want to continue. However
@@ -499,6 +495,34 @@ script can give WARHINGs when erasing disks that were used for LVM.  These
 warnings can safely be ignored - ths disk will be successfully blanked (despite
 *vgremove* having segmentation-faulted instead of performing the requisite
 action thereby causing *pvremove* to complain about the VG still being active.)
+
+=== drop_primary
+
+This script is only for use with expert advice.
+
+This script can be used to drop a *primary* disk (*sda*) out of a RAID pair
+(by marking as failed) so that it can act as a safety backup during major
+upgrades or other significant changes.
+
+Initially, the script performs some sanity checks to confirm that the
+RAID */dev/md0*:
+
+. Exists.
+. Is in a clean state, i.e., both disks are present and no recovery is
+  currently in progress.'
+. Contains the *primary* disk (^sda*) as a member.
+
+If the *primary* disk is removable, the user will be provided with some
+information about the disk and given an opportunity to continue with
+kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
+identified as the *primary*, one would not want to continue. However
+for some machines the SATA disk that is the *primary* may be marked
+removable if it is hot swappable, but would still be appropriate to
+use. 
+
+NOTE: This script is non-destructive in nature and its effect can 
+easily be reversed by running the *recover_raid* script mentioned
+below.
 
 === recover_raid
 
