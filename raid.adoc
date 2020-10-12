@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.2.5 - October 2020
+Version 1.3.0 - October 2020
 
 :sectnums:
 :experimental:
@@ -490,7 +490,7 @@ automatically be "Allowed" by both this script and
 you to then run *refresh_secondary* immediately without having to 
 *shutdown*, turn the disk off, reboot, start the script, and turn the disk on.
 
-NOTE: On the 32-bit *i386* platform, due to a broken *vgre,pve* binary, this
+NOTE: On the 32-bit *i386* platform, due to a broken *vgremove* binary, this
 script can give WARNINGs when erasing disks that were used for LVM.  These
 warnings can safely be ignored - the disk will be successfully blanked (despite
 *vgremove* having segmentation-faulted instead of performing the requisite
