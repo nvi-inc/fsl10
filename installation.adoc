@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.2.8 - August 2020
+Version 1.3.0 - October 2020
 
 :sectnums:
 :experimental:
@@ -698,11 +698,12 @@ You can install some useful tools for working with the RAID, if you're actually 
    ~/fsl10/RAID/install_tools
 
 The rest of this document assumes the first three of these tools have
-been installed.  The four tools are:
+been installed.  The five tools are:
 
    * *mdstat* allows all users to check on the RAID status
    * *refresh_secondary* allows *root* to refresh a secondary disk that is from the same RAID and has been booted on its own
    * *blank_secondary* allows *root* to initialize a secondary disk, must be used with extreme care
+   * *drop_primary* allows *root* deliberately to drop the primary disk out of the RAID for use as a backup
    * *recover_raid* allows *root* to re-add a disk that fell out of (or was removed from) the RAID back into it
 
 TIP: More information about RAID operation can be found in the <<raid.adoc#,RAID notes for FSL10>> document.
@@ -894,8 +895,7 @@ the weekly *cron* job is described below in the section
 TIP: It is recommended that a disk rotation be performed before any
 update is installed. This will make recovery much easier if a problem with the
 update is discovered.  Please see the FSL10 Raid document section
-<<raid.adoc#_test_upgrade_of_fs_system_updates_or_other_significant_changes,Test
-upgrade of FS - system updates - or other significant changes>> for a
+<<raid.adoc#_recoverable_testing,Recoverable testing>> for a
 streamlined method to manage testing of updates.
 
 If updates are needed, the weekly *cron* job will send a message to *root*
@@ -993,8 +993,7 @@ appropriately _after_ the initial reboot and then (to keep these
 
 If an update fails, e.g., an updated kernel fails to boot or another problem is discovered,
 you can recover as described in FSL10 RAID document
-<<raid.adoc#_test_upgrade_of_fs_system_updates_or_other_significant_changes,Test
-upgrade of FS - system updates - or other significant changes>>
+<<raid.adoc#_recoverable_testing,Recoverable testing>>
 section, if you were following that method, or from a shelf disk
 according to the FSL10 RAID document <<raid.adoc#_recover_from_a_shelf_disk,Recover from
 a shelf disk>> section if not and you have a good shelf disk.
