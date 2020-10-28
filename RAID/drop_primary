@@ -38,7 +38,7 @@ if [ ! -b /dev/md0 ]; then
         exit 1
 fi
 if ! mdadm --detail /dev/md0 2>&1 | grep -qE ": (clean|active) $" ; then
-        echo "ERROR: RAID /dev/md0 is not in a clean state!"
+        echo "ERROR: RAID /dev/md0 is not in a clean or active state!"
         exit 1
 fi
 
