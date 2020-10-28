@@ -32,7 +32,7 @@ if [ ! -b $raid ]; then
 	exit 1
 fi
 
-if mdadm --detail $raid 2>&1 | grep -q ": clean $" ; then
+if mdadm --detail $raid 2>&1 | grep -qE ": (clean|active) $" ; then
 	echo "ERROR: RAID $raid does not need recovery!!"
 	exit 1
 fi
