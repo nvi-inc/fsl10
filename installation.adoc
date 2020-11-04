@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.3.0 - October 2020
+Version 1.3.2 - November 2020
 
 :sectnums:
 :experimental:
@@ -141,6 +141,13 @@ UTC, and the motherboard can boot from the installation media.
 While you are in the motherboard menu, make sure that hot-swapping is
 enabled for at least the secondary controller. This will be useful for
 disk rotation.
+
+TIP: For UEFI, some motherboards may switch to booting to the UEFI
+shell if they fail to find a hard disk that will boot. This might
+happen, for example, if you attempt to boot from a blank disk. If you
+become stuck booting to the UEFI shell, you may need to enter the
+motherboard's _setup_ utility `boot` menu and restore booting from the
+hard disks.
 
 == First Stage Installation
 
@@ -930,10 +937,17 @@ to be sent to *root* with the NEWS information.
 
 === Kernel updates
 
-Kernel updates, require extra care and testing. There are two types of
-kernel updates. If there is a kernel update available, the weekly *cron* job output will include a warning
-at the end with additional instructions depending on which type is
-available.  The two types are:
+WARNING: Kernel updates require extra care and testing. If you are
+using a RAID, you should consider using the
+<<raid.adoc#_recoverable_testing,Recoverable testing>>
+procedure to give more, and easier, options for recovery in case there
+is a problem.  That procedure contains special instructions for kernel
+update testing.
+
+If there is a kernel update available, the weekly *cron* job output
+will include a warning at the end with additional instructions
+depending on which type is available.  There are two types of kernel
+updates:
 
 . ABI updates, e.g., from *4.9.0-11-amd64* to
    *4.9.0-12-amd64* (with *11* and *12* being the ABI versions), which change the kernel ABI (Application Binary
@@ -1007,7 +1021,7 @@ previous kernel. You can change back permanently to the previous
 kernel by purging the new kernel and its headers. To do this, use:
 
     dpkg -l|grep linux-image
-    dpkg -l|grep linux_headers
+    dpkg -l|grep linux-headers
 
 to determine the ABI version to be removed. For example, for the
 first command above, you may get:
@@ -1020,7 +1034,7 @@ The package with *12* would be the later version that should be purged:
     apt-get purge linux-image-4.9.0-12-amd64
 
 Likewise with the linux-headers. For example, for the *12* ABI
-version, there will be two packages you should delete, e.g.:
+version, there will be two packages you should purge:
 
     linux-headers-4.9.0-12-amd64
     linux-headers-4.9.0-12-common
