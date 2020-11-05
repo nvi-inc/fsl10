@@ -143,7 +143,7 @@ follow the steps in the three additional **TIP**s included below.
 [TIP]
 ====
 
-If you are testing a kernel update, you must to take extra steps
+If you are testing a kernel update, you must take extra steps
 between installing and testing the update. After installing it:
 
 .. Shutdown the system
@@ -164,7 +164,7 @@ If the update is deemed *successful*:
 [TIP]
 ====
 
-If you are testing a kernel update, you must to turn on the disk
+If you are testing a kernel update, you must turn on the disk
 in the primary slot again before *recover_raid* can succeed.
 
 ====
@@ -175,7 +175,7 @@ in the primary slot again before *recover_raid* can succeed.
 [TIP]
 ====
 
-If you are testing a kernel update, you must to reboot after the
+If you are testing a kernel update, you must reboot after the
 recovery completes to return the disk in the primary slot to being
 *sda*.
 
