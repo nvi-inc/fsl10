@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.3.2 - November 2020
+Version 1.3.3 - November 2020
 
 :sectnums:
 :experimental:
@@ -780,9 +780,41 @@ recovery options. If there are other FSL10 computers at the site, it
 may be possible in extreme cases to press those computers and/or disks into
 service, particularly if they have been maintained in parallel.
 
-A few example recovery scenarios are described below. In any scenario,
-  if disks and/or a computer have failed, they should be repaired or
-  replaced as soon as feasible.
+A few example recovery scenarios are described below in rough order of
+likelihood of being needed. None of them are very likely to be needed,
+particularly those beyond the first two.
+
+IMPORTANT: In any scenario, if disks and/or a computer have failed,
+  they should be repaired or replaced as soon as feasible.
+
+=== Operational computer failure
+
+This might be caused by a power supply or other hardware failure.
+If the contents of the *operational* RAID are not damaged, the RAID pair
+can be moved to the *spare* computer until the *operational* computer is
+repaired. Once the RAID has been moved, whether the contents have
+been damaged can be assessed. It will be necessary to move
+connections for any serial/GPIB devices to the spare computer as well.
+
+[TIP]
+====
+
+If the disks do not connect to network after first
+booting in a different computer:
+
+. Shut the system down.
+. Remove the power cord.
+. Press and hold the power button for 15 or more seconds.
++
+The goal is drain any residual energy in the computer in order to completely
+reset the NIC.
+
+. Reboot and try again.
+
+This has been seen to solve the problem, perhaps because it forces the
+NIC to re-register with ARP. Waiting longer may also solve the problem.
+
+====
 
 === One disk in the operational computer RAID fails
 
@@ -805,12 +837,12 @@ this state, it should use the working disk. At the first opportunity,
 === Operational computer RAID corrupted
 
 As well as a large scale corruption, this can include recovery from
-accidental loss of important non-volatile files. Volatile files
-include *.skd*, *.snp*, and *.prc* files (such volatile files can be
-    more easily restored by generating them again). It also can be
-used to recover from a bad OS patch (which is extremely unlikely),
-     which is easier if patches are applied just after a disk
-     rotation (see also the <<Recoverable testing>> section).
+accidental loss of important non-volatile files. This would generally
+not include *.skd*, *.snp*, and *.prc* files; those can be more easily
+restored by generating them again. It also can be used to recover
+from a bad OS patch (which is extremely unlikely). That is easier to
+manage if the patches were applied just after a disk rotation (see
+also the <<Recoverable testing>> section).
 
 In this case, the *shelf* disk can be used to restore the system to
 the state at the time of the most recent rotation.  To do this, follow
@@ -832,15 +864,6 @@ This approach could also be used for a similar problem with the
 This approach of this section should not be used if a problem with the *operational*
 computer caused the damage to its RAID. In that case, follow
 the <<Operational computer RAID corrupted and operational computer failure>> sub-section below.
-
-=== Operational computer failure
-
-This might be caused by a power supply or other hardware failure.
-If the contents of the *operational* RAID are not damaged, the RAID pair
-can be moved to the *spare* computer until the *operational* computer is
-repaired. Once the RAID has been moved, whether the contents have
-been damaged can be assessed. It will be necessary to move
-connections for any serial/GPIB devices to the spare computer as well.
 
 === Operational computer RAID corrupted and operational computer failure
 
