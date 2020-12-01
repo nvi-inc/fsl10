@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.3.3 - November 2020
+Version 1.3.4 - November 2020
 
 :sectnums:
 :experimental:
@@ -89,12 +89,18 @@ These recommendations are intended to provide consistent procedures and make it 
 . If you have a spare computer (and/or additional systems), keep the disks in the same sequence on all the computers
 . Do not turn a disk off while the system is running. The only time a key switch state should be changed while the system is running is to add a disk for a blank or refresh operation.
 
+. Set your  BIOS to allow hot swapping of disks for both the *primary*
+and *secondary* controllers. This is necessary to use the RAID procedures
+described in this document.
+
 == Disk Rotation
 
 This section describes the disk rotation procedure. It is used to make
 periodic updates of the shelf disk.
 
-NOTE: Your BIOS must be set to allow hot swapping of disks, particularly for the *secondary* controller,
+NOTE: Your BIOS must be set to allow hot swapping of disks,
+particularly for the *secondary* controller (it should also be set for
+the *primary* controller).
 
 TIP: If you do not have access to the *root* account, you may
 have *sudo* access to the privileged commands. If so, you will need
@@ -130,69 +136,48 @@ described in the <<Recover from a shelf disk>> section below.
 
 Seek expert advice for this, but the basic plan is given below:
 
-TIP: If you are testing a
-<<installation.adoc#_kernel_updates,kernel update>>, please be sure to
-follow the steps in the three additional **TIP**s included below.
+NOTE: Your BIOS must be set to allow hot swapping of disks
+for both the *primary* and *secondary* controllers.
 
 . If a rotation hasn't just been completed, perform one (as an extra backup)
 . Before proceeding verify that there is no recovery in progress, check with *mdstat*
-. Drop the *primary* disk out of the RAID (as a backup) by running *drop_primary*
+. Shutdown the system, e.g., *shutdown -h now*
+. Key-off the *primary* slot
+. Reboot (*primary* keyed-off, *secondary* keyed-on)
 . Install and test the update
 +
-
-[TIP]
-====
-
-If you are testing a kernel update, you must take extra steps
-between installing and testing the update. After installing it:
-
-.. Shutdown the system
-.. Turn off the disk in the primary slot
-.. Reboot
-
-Then proceed to testing.
-
-====
-
+The update and testing will occur on the secondary disk only.
 
 If the update is deemed *successful*:
 
-[start=5]
-. Run *recover_raid* to add the *primary* disk back into the RAID.
+[start=7]
+. Key-on the *primary* slot
+. Run *recover_raid* to add the *primary* slot disk back into the RAID.
 +
+The *recover_raid* script will fail if the disk hasn't spun up and been recognized by the kernel. It is perfectly
+fine to try several times until it succeeds.
 
-[TIP]
-====
-
-If you are testing a kernel update, you must turn on the disk
-in the primary slot again before *recover_raid* can succeed.
-
-====
-
-. Once the recovery completes (this may only take a few minutes), the system has been successfully updated.
+. Once the recovery completes (this may only take a few minutes), reboot the system.
 +
+This step is necessary to return the disk in the primary slot to be *sda*.
 
-[TIP]
-====
-
-If you are testing a kernel update, you must reboot after the
-recovery completes to return the disk in the primary slot to being
-*sda*.
-
-====
+. Once the system has booted, the system has been successfully updated.
 
 Alternatively, if the update is deemed to have *failed*, the system can be
  recovered as follows:
 
-[start=5]
+[start=7]
 . Shutdown the system, e.g., *shutdown -h now*
 . Key-off the *secondary* slot
+. Key-on the *primary* slot
 . Reboot (*primary* keyed-on, *secondary* keyed-off)
 . Run *blank_secondary*
 . Key-on the *secondary* slot when prompted
 . Answer *y* to blank
 . Run *refresh_secondary*
 . Once the refresh is complete (this may take several hours), you have recovered to the original state.
++
+The system can be used for operations while the refresh is in progress.
 
 == Recover from a shelf disk
 
@@ -212,7 +197,8 @@ WARNING: Do *not* use this procedure if a problem with computer caused
 the damage to the RAID.
 
 NOTE: Your BIOS must be set to allow hot swapping of disks,
-    particularly for the *secondary* controller,
+particularly for the *secondary* controller (it should also be set for
+the *primary* controller).
 
 . Shutdown the system, e.g., *shutdown -h now*
 . Take the disks from both the *primary* and *secondary* slots, set them aside.
