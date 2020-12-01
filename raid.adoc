@@ -522,6 +522,34 @@ warnings can safely be ignored - the disk will be successfully blanked (despite
 *vgremove* having segmentation-faulted instead of performing the requisite
 action thereby causing *pvremove* to complain about the VG still being active.)
 
+=== drop_primary
+
+This script is only for use with expert advice.
+
+This script can be used to drop a *primary* disk (*sda*) out of a RAID pair
+(by marking as failed) so that it can act as a safety backup during major
+upgrades or other significant changes.
+
+Initially, the script performs some sanity checks to confirm that the
+RAID */dev/md0*:
+
+. Exists.
+. Is in a clean state, i.e., both disks are present and no recovery is
+  currently in progress.
+. Contains the *primary* disk (*sda*) as a member.
+
+If the *primary* disk is removable, the user will be provided with some
+information about the disk and given an opportunity to continue with
+kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
+identified as the *primary*, one would not want to continue. However
+for some machines the SATA disk that is the *primary* may be marked
+removable if it is hot swappable, but would still be appropriate to
+use. 
+
+NOTE: This script is non-destructive in nature and its effect can 
+easily be reversed by running the *recover_raid* script mentioned
+below.
+
 === recover_raid
 
 This script is only for use with expert advice.
