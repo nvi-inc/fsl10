@@ -57,4 +57,12 @@ if [ "$(cat /sys/block/sda/removable)" != "0" ]; then
 	read $ans
 fi
 
+while ! mdadm --detail /dev/md0 2>&1 | grep -q ": clean $" ; do
+	echo -ne "\rWaiting for a clean state ... "
+	sync;sync
+	sleep 1;
+done
+echo -ne "\r                              \r"
+sync;sync
+sleep 1;
 mdadm /dev/md0 -f /dev/sda2
