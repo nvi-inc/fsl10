@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.3.4 - November 2020
+Version 1.3.5 - December 2020
 
 :sectnums:
 :experimental:
@@ -147,6 +147,24 @@ for both the *primary* and *secondary* controllers.
 . Install and test the update
 +
 The update and testing will occur on the secondary disk only.
+
+[TIP]
+====
+
+If an update is relatively minor or the envisaged testing is intended to be
+of short duration and success is likely, expert users may wish to make use of the
+*drop_primary* script to split the RAID pairing in place of the reboot cycle method
+described above. Note that some (hopefully minor) data loss is possible on the
+primary (backup) disk as it is removed from the RAID whilst all the filesystems
+are still mounted read/write. Hence this script should only be used on a unloaded
+or single-user system.  The advantage of using this script is that returning the
+system to normal operation after a successful update requires only the use of
+*recover_raid* - no reboot is required at all.
+WARNING: Do NOT use the *drop_primary* script for kernel updates or any other
+such testing that could affect *grub* and/or require you to reboot in order
+to evaluate the success thereof.
+
+====
 
 If the update is deemed *successful*:
 
