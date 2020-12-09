@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.3.3 - November 2020
+Version 1.3.4 - December 2020
 
 :sectnums:
 :experimental:
@@ -719,14 +719,23 @@ See also the <<Setup additional disk>> sub-section in the <<Post Install>> secti
 
 === Download the Field System
 
+[subs="+quotes"]
+....
+   cd /usr2
+   git clone https://github.com/nvi-inc/fs fs-git
+   cd /usr2/fs-git
+   git checkout -q _tag_
+....
+
+were _tag_ is the latest available release, be it the 10.0.0-beta2 pre-release
+(as at the time of writing), 10.0.0-rc1, 10.0.0 or later.
+
 [IMPORTANT]
 ====
 
-The *git checkout* command below uses, as its last parameter,  the
-most recent release available, or expected, at the time this was
-written. That should work for an initial installation, but may not
-give you the most up-to-date release. To find more recent releases, go
-to:
+Although 10.0.0 is the most recent release envisaged at the time this was
+written and should suffice for an initial installation, it may well not
+be the most up-to-date release. To find more recent releases, go to:
 
 https://github.com/nvi-inc/fs/releases
 
@@ -746,15 +755,7 @@ NOTE: Until there is an official release of *10.0.0*, only
 pre-releases with a trailing *-string* will be available. In this
 case, you should typically use the most recent.
 
-Once you identify the release you want, you should use it in place of
-*10.0.0* at the end of the *git checkout* command below.
-
 ====
-
-   cd /usr2
-   git clone https://github.com/nvi-inc/fs fs-git
-   cd /usr2/fs-git
-   git checkout -q 10.0.0
 
 === Run FS install script
 
