@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.3.4 - December 2020
+Version 1.3.5 - December 2020
 
 :sectnums:
 :experimental:
@@ -35,6 +35,31 @@ and some tuning. They are not the only method for accomplishing these
 goals, but have been well tested. Experts can of course use their own
 means, but the farther they deviate from this model, the less support
 we will be able to provide.
+
+The standard configuration uses a RAID1 system with removable disks.
+Normally, two disks would be in use at a given time. A third disk is
+used as a back-up and rotated into use periodically. More disks can be
+used for further redundancy. You can of course provide our own back-up
+system and can install the system to a single disk if you do not want
+to use the software RAID.
+
+If you are using the RAID configuration, you may wish to review the
+<<raid.adoc#_recommended_practices,Recommended practices>> sub-section
+of the <<raid.adoc#,RAID notes for FSL10>> document before installing.
+However, all of the practices listed there can implemented after the
+installation steps below are complete.
+
+TIP: Removable disks should be used with a carrier/receiver system
+that can tolerate a large number of insertions; "`bare`" disks should
+not be inserted repetitively. Two receivers would normally be mounted
+in the computer chassis. Each disk would be in its own carrier. We can
+provide a recommendation for a carrier/receiver system if you need
+one.
+
+Please note that for each step in this guide, we recommend you
+carefully read all the included caveats and notes as the material is
+not always logically sequential, i.e., instructions may proceed
+explanations that impact what you actually type.
 
 .FSL distributions
 |=============================================================
@@ -55,12 +80,6 @@ we will be able to provide.
 |   10     | stretch    |     9.0      | 4.9.0  | 2020
 |          | buster     |    10.0      | 4.19.0 |     
 |=============================================================
-
-Please note that for each step in this guide, we recommend you
-carefully read all the included caveats and notes as the material is
-not always logically sequential, i.e., instructions may proceed
-explanations that impact what you actually type.
-
 
 == Choosing architecture and creating installation media
 
@@ -152,12 +171,12 @@ hard disks.
 == First Stage Installation
 
 WARNING: This guide assumes that you have two disks installed in the machine
-in order to set them up as a RAID pair. For RAID to work seamlessly with a
+in order to set them up as a RAID pair. For the RAID to work seamlessly with a
 third disk later, you must make sure that the smallest disk of the three
 disks available is used as the first of this initial RAID pair. Use of a
 single disk (for a test install etc.) is also annotated below.
 
-TIP: Installing to a single disk is recommended and has some
+TIP: Installing to a single disk initially is recommended and has some
 advantages. It is faster and you can control when the syncing for the
 second disk occurs, such as when you leave for the evening.  The
 set-up of additional disks is covered in the <<Post Install>> section
@@ -727,15 +746,16 @@ See also the <<Setup additional disk>> sub-section in the <<Post Install>> secti
    git checkout -q _tag_
 ....
 
-were _tag_ is the latest available release, be it the 10.0.0-beta2 pre-release
-(as at the time of writing), 10.0.0-rc1, 10.0.0 or later.
+where _tag_ is the latest available release, be it the 10.0.0-beta3
+pre-release (as of the time of writing), 10.0.0, or later.
 
 [IMPORTANT]
 ====
 
-Although 10.0.0 is the most recent release envisaged at the time this was
-written and should suffice for an initial installation, it may well not
-be the most up-to-date release. To find more recent releases, go to:
+Although 10.0.0 is the next release planned at the time this was
+written, and should suffice for an initial installation, it may well
+not be the most up-to-date release when you are installing. To find
+more recent releases, go to:
 
 https://github.com/nvi-inc/fs/releases
 
@@ -744,8 +764,8 @@ so-called _feature_ release) with no trailing *-_string_*, e.g.,
     *10.0.0*. However, if there is a more recent _patch_ release (not
             ending *.0*) for the most recent feature release, you
     should use the most recent patch release.  For example, if
-    *10.0.0* is the most recent feature release and there are
-    corresponding patch releases,  *10.0.1* and *10.0.2*, the last
+    *10.1.0* is the most recent feature release and there are
+    corresponding patch releases,  *10.1.1* and *10.1.2*, the last
     one, ending *.2*, is probably the best choice.
 
 NOTE: Releases _numbered_ before *10.0.0* are listed mostly for historical

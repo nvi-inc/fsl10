@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.3.5 - December 2020
+Version 1.3.6 - December 2020
 
 :sectnums:
 :experimental:
@@ -68,8 +68,9 @@ from the RAID is booted without its partner.
 
 These recommendations are intended to provide consistent procedures and make it easier to understand any issues, if they occur.
 
-. Always use the lower number controller (slot) as the *primary*, label it as such, and the other slot as *secondary*
+. Always use the lowest numbered interface as the *primary* and the next lowest numbered as *secondary*
 . Make the upper (or left) slot the *primary*, the lower (or right) slot the *secondary*. If necessary, change the internal cabling to make it so.
+. Label the slots as *primary* and *secondary* as appropriate.
 . Always boot for a refresh/blank with the *primary* slot turned on and the *secondary* slot turned off: so it is clear which is the active disk
 . Label the disks (so visible when in use) with the system name and number them 1, 2, and 3, ...
 . Label the disks (so visible when in use) with their serial numbers, either from *mdstat* when only one disk inserted or by examining the disk
