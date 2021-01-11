@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.3.5 - December 2020
+Version 1.3.6 - January 2021
 
 :sectnums:
 :experimental:
@@ -39,9 +39,9 @@ we will be able to provide.
 The standard configuration uses a RAID1 system with removable disks.
 Normally, two disks would be in use at a given time. A third disk is
 used as a back-up and rotated into use periodically. More disks can be
-used for further redundancy. You can of course provide our own back-up
-system and can install the system to a single disk if you do not want
-to use the software RAID.
+used for further redundancy. You can of course provide your own
+back-up method and can install the system to a single disk if you do
+not want to use the software RAID.
 
 If you are using the RAID configuration, you may wish to review the
 <<raid.adoc#_recommended_practices,Recommended practices>> sub-section
@@ -255,22 +255,27 @@ Typically only shown if two or more network interfaces are
 found, which might include a virtual firewire interface in some cases.
 Select the interface you require (usually *eno1*) and press  kbd:[Enter].
 
-====
-Unless you are using DHCP (which is not advisable) you will be prompted to:
-Type in the required static IP address in the form *xxx.xxx.xxx.xxx* (where
-*xxx* is any integer from 0 - 255 inclusive) and press  kbd:[Enter].
-Type in the required netmask in the form *255.yyy.yyy.yyy* (where *yyy* is
-typically 0, 64, 128, 192 or 255) and press  kbd:[Enter].
-Type in the required gateway IP address in the form *xxx.xxx.xxx.xxx* (where
-*xxx* is any integer from 0 - 255 inclusive) and press  kbd:[Enter].
-Type in the required nameserver IP addresses, space separated, in the form
-*xxx.xxx.xxx.xxx* (where *xxx* is any integer from 0 - 255 inclusive) and
-press  kbd:[Enter].
+Unless you are using DHCP (which is not advisable) you will be
+prompted to:
+
+. Type in the required static IP address in the form *xxx.xxx.xxx.xxx*
+(where *xxx* is any integer from 0 - 255 inclusive) and press
+kbd:[Enter].
+
+. Type in the required netmask in the form *255.yyy.yyy.yyy* (where
+*yyy* is typically 0, 64, 128, 192 or 255) and press kbd:[Enter].
+
+. Type in the required gateway IP address in the form
+*xxx.xxx.xxx.xxx* (where *xxx* is any integer from 0 - 255 inclusive)
+and press kbd:[Enter].
+
+. Type in the required nameserver IP addresses, space separated, in
+the form *xxx.xxx.xxx.xxx* (where *xxx* is any integer from 0 - 255
+inclusive) and press kbd:[Enter].
 
 Alternatively, if you are only using the installer to initialize new disks,
 you may want to use *Go Back* and directly select *Detect disks* from the
 main menu to skip forward to <<Setup partitions>> below.
-====
 
 === Set a hostname
 Backspace over the default hostname *debian* and type in the name
