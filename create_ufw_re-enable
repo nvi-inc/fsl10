@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# Copyright (c) 2021 NVI, Inc.
+#
+# This file is part of FSL10 Linux distribution.
+# (see http://github.com/nvi-inc/fsl10).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+set -e
+# create boot job to disable and then enable UFW
+#
+systemctl disable ufw_re-enable || :
+rm -f /etc/systemd/system/ufw_re-enable.service
+touch /etc/systemd/system/ufw_re-enable.service
+cat >>/etc/systemd/system/ufw_re-enable.service <<EOT
+[Unit]
+Description=Disable/re-enable ufw on startup
+After=ufw.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/ufw_re-enable
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOT
+rm -f /usr/local/sbin/ufw_re-enable
+touch /usr/local/sbin/ufw_re-enable
+cat >> /usr/local/sbin/ufw_re-enable <<EOT
+#!/bin/bash
+set -e
+ufw disable
+ufw --force enable
+exit 0
+EOT
+chmod u+x /usr/local/sbin/ufw_re-enable
+systemctl enable ufw_re-enable.service
