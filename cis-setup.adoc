@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.3.0 - October 2020
+Version 1.3.1 - March 2021
 
 :experimental:
 :toc:
@@ -394,6 +394,20 @@ The *root_tmp* script will do three things:
 
 There may be other issues with using the *noexec* option for */tmp*,
 but we don't have any specifics at this time.
+
+. Sometimes the firewall (UFW) does not work properly after rebooting.
+This has been noticed for remote access to _gromet_ for met. data on
+port 50001. There are no other known issues. An apparent fix for this
+is to disable and re-enable the firewall. If you have this problem and
+the same solution works, a one-time service at start-up can be created
+to perform this action:
+
+  cd /root/fsl10
+  ./create_ufw_re-enable
++
+
+The new service will run at the next reboot. It is configured to run
+_after_ UFW has been started.
 
 === Enabling user promotion to oper/prog and root
 
