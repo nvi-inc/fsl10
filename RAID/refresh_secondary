@@ -130,7 +130,7 @@ if [ $(cat /sys/block/md0/size) -gt $(cat /sys/block/$devname/size) ] ||
 	echo "ERROR: \"Secondary\" device $devname is too small to house RAID /dev/md0"
 	exit 1
 fi
-if [ ! -z "$(sgdisk -i1 $disk | grep 'GUID code')" ] &&
+if [ -b $part1 ] && [ ! -z "$(sgdisk -i1 $disk | grep 'GUID code')" ] &&
    (( [ $boot = "MBR" ] && ! $(partprobe -ds $disk | grep -q msdos) ) ||
     ( [ $boot = "BIOS" ] && [ -z "$(sgdisk -i1 $disk | grep 'BIOS boot')" ] ) ||
     ( [ $boot = "EFI" ] && [ -z "$(sgdisk -i1 $disk | grep 'EFI System')" ] )); then
