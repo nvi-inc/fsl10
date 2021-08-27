@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020-2021 NVI, Inc.
 #
 # This file is part of FSL10 Linux distribution.
 # (see http://github.com/nvi-inc/fsl10).
@@ -20,50 +20,113 @@
 #
 
 set -e
-echo "*******************************************************************"
-echo "*  This is a script to refresh the contents of the spare computer *"
-echo "*    '/usr2' partition if you have both an Operational and Spare  *"
-echo "*    computer. Please refer to:                                   *"
-echo "*      https://nvi-inc.github.io/fsl10/raid.html                  *"
-echo "*    for more information.                                        *"
-echo "*******************************************************************"
-echo ""
-echo "CAUTION: This script will automatically overwrite everything on the"
-echo "         /usr2 partition of the computer it is run on.  Use it only"
-echo "         on the Spare computer.  It will stop any processes that"
-echo "         are using the /usr2 partition.  Rebooting afterwards is"
-echo "         recommended."
-echo ""
-echo "This script must be executed by 'root' on the Spare computer. "
-echo "You must be logged-in as 'root', do not use 'su', 'ssh', or"
-echo "'sudo/'root_account' to  become 'root' locally.  Remote login"
-echo "via 'ssh' as 'root' is okay, if that is permitted.  Make sure"
-echo "all other users are logged-out before proceeding."
-echo ""
-if ! [ ${EUID:-`id -u`} = 0 ]; then
-   echo "You are not running with root priviledges!"
-   exit 1
+
+usage() {
+    cat << EOF
+Usage: $0 [options]
+Refresh /usr2 on Spare machine
+
+Options:
+ -f       Run in foreground
+EOF
+}
+
+# Check if pv (Pipe Viewer) is installed.
+# Used for progress meter
+if command -v pv &> /dev/null; then
+    pv=$(which pv)
+else
+    pv=
 fi
-echo -e "Do you wish to continue with the REFRESH? (y=yes, n=no) : \c" 
-badans=true
-while [ "$badans" = "true" ]
-do
-  read ans
-  case "$ans" in
-    y|yes) echo -e "\nO.K. Continuing with refresh ... "
-           badans=false
-           ;;
-    n|no)  echo -e "\nO.K. Exiting."
-           exit
-           ;;
-    *)     echo -e "\nPlease answer with y=yes or n=no : \c"
-  esac
+
+safe_pv() {
+    if [[ -z "$pv" || -n "$background" ]]; then
+        cat
+    elif [[ ! "$size" =~ ^[1-9][0-9]*k$ ]]; then
+# defensive
+        $pv
+    else
+        $pv -s "$size"
+    fi
+}
+background=1
+while getopts f opt; do
+    case $opt in
+        f)
+            background=
+            ;;
+        *)
+            usage >&2
+            exit 1
+            ;;
+        :)
+          fatal "Option -$OPTARG requires an argument."
+          ;;
+    esac
 done
-#------------- Comment out these two lines ----------------
-echo "This script must be customized before first use, and it hasn't been."
-echo "See script for details."
+shift $((OPTIND - 1))
+
+special=special_arg_to_run_subscript
+subscript=
+if [[ "$1" = "$special" ]]; then
+  subscript=1
+fi
+
+log=$2
+
+if [[ -z "$subscript" ]]; then
+    cat << EOF
+***************************************************************************
+*  This is a script to refresh the contents of the spare computer '/usr2' *
+*  partition if you have both an Operational and Spare computer.  Please  *
+*  refer to: https://nvi-inc.github.io/fsl10/raid.html for more details.  *
+***************************************************************************
+
+CAUTION: This script will automatically overwrite everything on the '/usr2'
+         partition of the computer it is run on.  Use it only on the Spare
+         computer.  It will stop any processes that are using the '/usr2'
+         partition.  Rebooting afterwards is recommended.
+
+This script must be executed by 'root' on the Spare computer.  You must be
+logged-in as 'root' or promote to 'root' using 'su' or 'sudo'/'root_account'
+and NOT have your working directory on '/usr2'.  If you promoted with 'su' or
+'sudo'/'root_account' that session may have its working directory on '/usr2'
+unless the '-f' option is used to refresh in foreground.  Make sure all other
+users are logged-out on both computers before proceeding.
+
+EOF
+    if [[ "$PWD/" =~ ^/usr2/ ]]; then
+       echo "You are on '/usr2'. Try again, but 'cd /tmp' first."
+       exit 1
+    fi
+
+    if ! [ ${EUID:-`id -u`} = 0 ]; then
+       echo "You are not running with root priviledges!"
+       exit 1
+    fi
+
+    echo -e "Do you wish to continue with the REFRESH? (y=yes, n=no) : \c"
+    badans=true
+    while [ "$badans" = "true" ]
+    do
+      read ans
+      case "$ans" in
+        y|yes) echo -e "\nO.K. Continuing with refresh ... "
+               badans=false
+               ;;
+        n|no)  echo -e "\nO.K. Exiting."
+               exit
+               ;;
+        *)     echo -e "\nPlease answer with y=yes or n=no : \c"
+      esac
+    done
+
+#--------------------- Comment out the next two lines ---------------------
+echo "This script must be customized before use.  See script for details."
+exit
+#--------------------------------------------------------------------------
 #
-#To customize this script (as 'root') on the Spare computer:
+# To customize this script (as 'root') on the Spare computer:
 #   1. MAKE ABSOLUTELY SURE YOU ARE WORKING ON THE SPARE COMPUTER
 #   2. Execute the commands:
 #        cd /usr/local/sbin
@@ -71,37 +134,110 @@ echo "See script for details."
 #        chown root.root refresh_spare_usr2
 #        chmod a+r,u+wx,go-wx refresh_spare_usr2
 #   3. Edit '/usr/local/sbin/refresh_spare_usr2':
-#        A. comment out the two echo commands above (add leading '#'s).
-#        B  change the 'operational' on the ssh command below to the node name
-#           (a fully qualified hostname may be needed) or IP address of the
-#           operational machine
-#        C. uncomment (delete the leading '#'s) in the last 24 commands
-#            below (#echo "Refreshing ..." ... #echo "Done. ...").
-#        D. Save the results
-#   4. Test it the first time just after the Spare computer's disk hase been rotated.
+#        A. Comment out the two commands above (add leading '#'s).
+#        B  Change the 'operational' on the TWO ssh command below to the
+#           alias, FQDN, or IP address of your operational machine
+#        C. Save the results
+#   4. Test it the first time just after the Spare computer's disk have
+#      been rotated.
 #
-#----------- Uncomment from here to the end --------------
-#echo "Refreshing spare computer disk /usr2 partition ..."
-#if [ -z "`cat /proc/mounts | cut -d ' ' -f2 | grep /usr2`" ]; then
-# echo "Can't proceed, /usr2 is not mounted"
-# exit
-#fi
-#device=$(grep " /usr2 " /proc/mounts | cut -d' ' -f1)
-#type=$(grep " /usr2 " /proc/mounts | cut -d' ' -f3)
-#fuser -k -M -m /usr2 || :
-#umount /usr2
-#UUID=$(tune2fs -l $device | grep UUID | grep -o '[^ ]*$')
-#echo "Executing \"mke2fs -F -t $type -U $UUID $device\" ..."
-#mke2fs -F -t $type -U $UUID $device
-#mount /usr2
-#echo ""
-#echo "You may be prompted for your operational machine's root password, then"
-#echo "there will be a long pause without any output unless there are errors. If"
-#echo "there are errors, please note them and report them to Ed.Himwich@nviinc.com."
-#echo "When the transfer finishes, a summary of the transfer will be printed."
-#echo "The refresh is finished when you see a line that starts: 'Done. ...',"
-#echo "and get a prompt. Please follow the directions on the 'Done. ...' line."
-#echo ""
-#ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | (cd /usr2; tar xpf - --totals)
-#echo ""
-#echo "Done. Wait until 'mdstat' does not show an active recovery and then reboot."
+    if [[ -n "$background" ]]; then
+        cat << EOF
+
+    Going to background, you should log out now or you may be logged out
+    automatically.  Don't login again to either computer until you expect the
+    'refresh_spare_usr2' to have finished.  An email with the log file will be
+    sent to 'root' when the script finishes.
+
+EOF
+        dir=/root/refresh_spare_usr2_logs
+        if [[ ! -d  "$dir" ]]; then
+           mkdir "$dir"
+        fi
+        log="$dir/$(date +"%Y.%b.%d.%H.%M.%S")".log
+        echo "Log file is $log"
+        echo ""
+        exec 1>>$log
+        exec 2>&1
+        nohup "$0" "$special" "$log" &
+        exit
+    fi
+fi
+
+echo "Refreshing spare computer disk /usr2 partition ..."
+date="$(date)"
+echo "Starting at $date"
+if [ -z "`cat /proc/mounts | cut -d ' ' -f2 | grep /usr2`" ]; then
+ echo "Can't proceed, /usr2 is not mounted"
+ exit
+fi
+
+device=$(grep " /usr2 " /proc/mounts | cut -d' ' -f1)
+type=$(grep " /usr2 " /proc/mounts | cut -d' ' -f3)
+
+if [[ -z "$subscript" ]]; then
+    cat << EOF
+
+    If you are logged out automatically, the 'refresh_spare_usr2' failed.  You
+    were probably on '/usr2' before you switched to 'root'.  Try again, but
+    'cd /tmp' before switching to 'root'.
+
+EOF
+fi
+
+fuser -k -M -m /usr2 || :
+umount /usr2
+UUID=$(tune2fs -l $device | grep UUID | grep -o '[^ ]*$')
+echo "Executing \"mke2fs -F -t $type -U $UUID $device\" ..."
+mke2fs -F -t $type -U $UUID $device
+mount /usr2
+echo "Completed \"mount /usr2\""
+echo ""
+
+if [[ -z "$subscript" ]]; then
+    if [[ -n "$pv" ]]; then
+        cat << EOF
+    You may be prompted for your operational machine's root password twice and
+    then you will see a progess meter.
+EOF
+    else
+       cat << EOF
+    You may be prompted for your operational's machines root password once and
+    then there will be a long pause without any output unless there are errors.
+EOF
+    fi
+    cat << EOF
+
+    When the transfer finishes, a summary of the transfer will be printed and
+    you will see a line that starts: 'Done. ...', and get a prompt. Please
+    follow the directions on the 'Done. ...' line.  An email will be sent to
+    'root' when the script finishes.
+
+EOF
+fi
+
+cat << EOF
+    If there are errors, please note them and report them at
+    https://github.com/nvi-inc/fsl10/issues.
+
+EOF
+
+if [[ -n "$pv" && -z "$background" ]]; then
+    size="$(ssh root@operational df|grep /usr2|tr -s ' '|cut -d ' ' -f 3)"k
+else
+    size=
+fi
+
+time ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | safe_pv | (cd /usr2; tar xpf - --totals)
+
+cat << EOF
+
+Done. Wait until 'mdstat' does not show an active recovery and then reboot.
+EOF
+
+if [[ -z "$subscript" ]]; then
+    echo ""
+    echo "Started at $date" | /usr/bin/mail -s "foreground refresh_spare_usr2 finished" root
+else
+    cat "$log" | /usr/bin/mail -s "background refresh_spare_usr2 finished" root
+fi
