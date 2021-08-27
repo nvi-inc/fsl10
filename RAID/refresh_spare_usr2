@@ -101,7 +101,7 @@ EOF
     fi
 
     if ! [ ${EUID:-`id -u`} = 0 ]; then
-       echo "You are not running with root priviledges!"
+       echo "You are not running with root privileges!"
        exit 1
     fi
 
@@ -127,7 +127,7 @@ exit
 #--------------------------------------------------------------------------
 #
 # To customize this script (as 'root') on the Spare computer:
-#   1. MAKE ABSOLUTELY SURE YOU ARE WORKING ON THE SPARE COMPUTER
+#   1. MAKE ABSOLUTELY SURE YOU ARE WORKING ON THE SPARE COMPUTER.
 #   2. Execute the commands:
 #        cd /usr/local/sbin
 #        cp -a /root/fsl10/RAID/refresh_spare_usr2 refresh_spare_usr2
@@ -135,9 +135,10 @@ exit
 #        chmod a+r,u+wx,go-wx refresh_spare_usr2
 #   3. Edit '/usr/local/sbin/refresh_spare_usr2':
 #        A. Comment out the two commands above (add leading '#'s).
-#        B  Change the 'operational' on the TWO ssh command below to the
-#           alias, FQDN, or IP address of your operational machine
-#        C. Save the results
+#        B  Change the 'operational' in the 'node=operational' line below
+#           to the alias (preferred), FQDN, or IP address of your
+#           operational machine.
+#        C. Save the result.
 #   4. Test it the first time just after the Spare computer's disk have
 #      been rotated.
 #
@@ -222,13 +223,16 @@ cat << EOF
 
 EOF
 
+user=root
+node=operational
+
 if [[ -n "$pv" && -z "$background" ]]; then
-    size="$(ssh root@operational df|grep /usr2|tr -s ' '|cut -d ' ' -f 3)"k
+    size="$(ssh $user@$node df|grep /usr2|tr -s ' '|cut -d ' ' -f 3)"k
 else
     size=
 fi
 
-time ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | safe_pv | (cd /usr2; tar xpf - --totals)
+time ssh "$user@$node" 'cd /usr2; tar --one-file-system -cf - .' | safe_pv | (cd /usr2; tar xpf - --totals)
 
 cat << EOF
 
