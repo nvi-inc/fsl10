@@ -24,7 +24,7 @@ set -e
 usage() {
     cat << EOF
 Usage: $0 [options]
-Refresh /usr2 on Spare machine
+Refresh '/usr2' on Spare machine
 
 Options:
  -f       Run in foreground
@@ -101,7 +101,7 @@ EOF
     fi
 
     if ! [ ${EUID:-`id -u`} = 0 ]; then
-       echo "You are not running with root privileges!"
+       echo "You are not running with 'root' privileges!"
        exit 1
     fi
 
@@ -123,7 +123,7 @@ EOF
 
 #--------------------- Comment out the next two lines ---------------------
 echo "This script must be customized before use.  See script for details."
-exit
+exit 1
 #--------------------------------------------------------------------------
 #
 # To customize this script (as 'root') on the Spare computer:
@@ -171,12 +171,12 @@ EOF
     exit
 fi
 
-echo "Refreshing spare computer disk /usr2 partition ..."
+echo "Refreshing spare computer disk '/usr2' partition ..."
 date="$(date)"
 echo "Starting at $date"
 if [ -z "`cat /proc/mounts | cut -d ' ' -f2 | grep /usr2`" ]; then
- echo "Can't proceed, /usr2 is not mounted"
- exit
+ echo "Can't proceed, '/usr2' is not mounted"
+ exit 1
 fi
 
 device=$(grep " /usr2 " /proc/mounts | cut -d' ' -f1)
@@ -204,13 +204,14 @@ echo ""
 if [[ -z "$background" ]]; then
     if [[ -n "$pv" ]]; then
         cat >/dev/tty << EOF
-    You may be prompted for your operational machine's root password twice and
-    then you will see a progess meter.
+    You may be prompted for your operational machine's 'root' password twice
+    and then you will see a progess meter.
 EOF
     else
        cat >/dev/tty << EOF
-    You may be prompted for your operational's machines root password once and
-    then there will be a long pause without any output unless there are errors.
+    You may be prompted for your operational's machines 'root' password once
+    and then there will be a long pause without any output unless there are
+    errors.
 EOF
     fi
     cat >/dev/tty << EOF
