@@ -44,9 +44,9 @@ safe_pv() {
         cat
     elif [[ ! "$size" =~ ^[1-9][0-9]*k$ ]]; then
 # defensive
-        $pv
+        $pv --force 2>/dev/tty
     else
-        $pv -s "$size"
+        $pv --force -s "$size" 2>/dev/tty
     fi
 }
 background=1
@@ -142,6 +142,14 @@ exit
 #   4. Test it the first time just after the Spare computer's disk have
 #      been rotated.
 #
+
+# setup for log file
+    dir=/root/refresh_spare_usr2_logs
+    if [[ ! -d  "$dir" ]]; then
+       mkdir "$dir"
+    fi
+    log="$dir/$(date +"%Y.%b.%d.%H.%M.%S")".log
+
     if [[ -n "$background" ]]; then
         cat << EOF
 
@@ -151,18 +159,16 @@ exit
     sent to 'root' when the script finishes.
 
 EOF
-        dir=/root/refresh_spare_usr2_logs
-        if [[ ! -d  "$dir" ]]; then
-           mkdir "$dir"
-        fi
-        log="$dir/$(date +"%Y.%b.%d.%H.%M.%S")".log
         echo "Log file is $log"
         echo ""
-        exec 1>>$log
-        exec 2>&1
-        nohup "$0" "$special" "$log" &
-        exit
+        nohup "$0" "$special" "$log" 1>>$log 2>&1 &
+    else
+        echo ""
+        echo "Log file is $log"
+        echo ""
+        "$0" -f "$special" "$log" 2>&1 |tee "$log"
     fi
+    exit
 fi
 
 echo "Refreshing spare computer disk /usr2 partition ..."
@@ -176,7 +182,7 @@ fi
 device=$(grep " /usr2 " /proc/mounts | cut -d' ' -f1)
 type=$(grep " /usr2 " /proc/mounts | cut -d' ' -f3)
 
-if [[ -z "$subscript" ]]; then
+if [[ -z "$background" ]]; then
     cat << EOF
 
     If you are logged out automatically, the 'refresh_spare_usr2' failed.  You
@@ -195,24 +201,24 @@ mount /usr2
 echo "Completed \"mount /usr2\""
 echo ""
 
-if [[ -z "$subscript" ]]; then
+if [[ -z "$background" ]]; then
     if [[ -n "$pv" ]]; then
-        cat << EOF
+        cat >/dev/tty << EOF
     You may be prompted for your operational machine's root password twice and
     then you will see a progess meter.
 EOF
     else
-       cat << EOF
+       cat >/dev/tty << EOF
     You may be prompted for your operational's machines root password once and
     then there will be a long pause without any output unless there are errors.
 EOF
     fi
-    cat << EOF
+    cat >/dev/tty << EOF
 
     When the transfer finishes, a summary of the transfer will be printed and
     you will see a line that starts: 'Done. ...', and get a prompt. Please
-    follow the directions on the 'Done. ...' line.  An email will be sent to
-    'root' when the script finishes.
+    follow the directions on the 'Done. ...' line.  An email with the log file
+    will be sent to 'root' when the script finishes.
 
 EOF
 fi
@@ -239,9 +245,9 @@ cat << EOF
 Done. Wait until 'mdstat' does not show an active recovery and then reboot.
 EOF
 
-if [[ -z "$subscript" ]]; then
-    echo ""
-    echo "Started at $date" | /usr/bin/mail -s "foreground refresh_spare_usr2 finished" root
+if [[ -z "$background" ]]; then
+    cat "$log" | /usr/bin/mail -s "foreground refresh_spare_usr2 finished" root &
+    echo "" >/dev/tty
 else
     cat "$log" | /usr/bin/mail -s "background refresh_spare_usr2 finished" root
 fi
