@@ -33,8 +33,8 @@ Options:
  -s       Suppress sending email
  -y       Yes: proceed without prompting for confirmation
 
-This is a script to refresh the contents of the Spare system '/usr2'
-partition if you have both an Operational and Spare systems.
+This is a script to refresh the contents of the Spare system '/usr2' partition
+if you have both Operational and Spare systems.
 
 CAUTION: This script will automatically overwrite everything on the '/usr2'
          partition of the system it is run on.  Use it only on the Spare
@@ -44,19 +44,15 @@ CAUTION: This script will automatically overwrite everything on the '/usr2'
 This script must be executed by 'root' on the Spare system.  You must be
 logged-in as 'root' or promote to 'root' using 'su' or 'sudo'/'root_account'
 and NOT have your working directory on '/usr2'.  If you promoted with 'su' or
-'sudo'/'root_account' that session may have its working directory on '/usr2'
+'sudo'/'root_account', that session may have its working directory on '/usr2'
 unless the '-f' option is used to refresh in foreground.  Make sure all other
 users are logged-out on both systems before using this script.
 
-This script must be customized before it is used.  There are direction for this
+This script must be customized before it is used.  Directions for that are
 embedded in the script.
 
-NOTE: If background mode (the default) is to be used, then the 'ssh' keys for
-      the 'root' account on the Spare system must be copied to the target
-      account on the Operational system.  In addition, the Operational system
-      must allow 'ssh' logins to that account from the Spare system.  If either
-      of these requirements can't be met, it should still be possible to use
-      the '-f' option to run the script in foreground mode.
+For foreground refreshes, a progress meter with an ETA will be displayed if the
+'pv' package is installed.
 
 The script creates a log file of what happened during the refreshing operation
 in /root/refresh_spare_usr2_logs directory. The log file name includes a
@@ -118,9 +114,9 @@ safe_pv() {
         cat
     elif [[ ! "$size" =~ ^[1-9][0-9]*k$ ]]; then
 # defensive
-        $pv --force 2>/dev/tty
+        $pv -W 2>/dev/tty
     else
-        $pv --force -s "$size" 2>/dev/tty
+        $pv -W -s "$size" 2>/dev/tty
     fi
 }
 background=1
@@ -218,10 +214,11 @@ exit 1
 #           Operational system  (There are additional instructions a little
 #           after that line for more customizations for CIS hardened systems.)
 #        C. Save the result.
-#   4. For background operation, the 'ssh' keys for 'root' on the Spare
-#      system must be copied to the target account on the Operational system.
-#      The Operational system must also allow 'ssh' connections to that
-#      account from the Spare system.
+#   4. The 'ssh' keys for 'root' on the Spare system should be copied to the
+#      target account on the Operational system.  That system should also be
+#      set to allow 'ssh' connections to that account from the Spare system.
+#      If these two things cannot be done, the target account must allow
+#      password login; in which case, background operation will not function.
 #   5. Test it the first time just after the Spare system's disk has been
 #      rotated.
 #
@@ -313,16 +310,16 @@ echo ""
 if [[ -z "$background" ]]; then
     if [[ -n "$pv" ]]; then
         cat >/dev/tty << EOF
-    You may see two login messages for your Operational system.  If you are
-    prompted for the 'root' or other password on that system each time, you
-    should provide it.  Then you will see a progess meter during the transfer.
+    You may see two login messages from your Operational system.  If you are
+    prompted for the 'root' or other password on that system (twice), you
+    should provide it.  Then you will see a progress meter during the transfer.
 EOF
     else
        cat >/dev/tty << EOF
-    You may see a login message for your Operational system  If you are
-    prompted for the 'root' or other password on that system you should provide
-    it.  Then there will be a long pause without any output unless there are
-    errors.
+    You may see a login message from your Operational system  If you are
+    prompted for the 'root' or other password on that system, you should
+    provide it.  Then there will be a long pause without any output unless
+    there are errors.
 EOF
     fi
     cat >/dev/tty << EOF
@@ -348,7 +345,7 @@ EOF
 
 remote_user=root
 # Use your Operational system name in place of 'operational' in the next line
-remote_node=operatonal
+remote_node=operational
 remote_command='cd /usr2; tar --one-file-system -cf - .'
 
 # Uncomment the next two lines for CIS hardened systems
