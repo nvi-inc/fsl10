@@ -27,7 +27,7 @@ usage() {
 Usage: $0 [options]
 This script refreshes '/usr2' on the Spare system.
 
-Options:
+OPTIONS
  -f       Run in foreground
  -h       Help: this output
  -s       Suppress sending email
@@ -46,35 +46,28 @@ logged-in as 'root' or promote to 'root' using 'su' or 'sudo'/'root_account'
 and NOT have your working directory on '/usr2'.  Make sure all other users are
 logged-out on both systems before using this script.
 
-To run the script, it is recommended to log in as 'root' on a text console or
-'ssh' into the machine using a non-'root' account, 'cd /tmp', and finally
-promote to 'root'.
+To run the script, it is recommended that you login on a text console as
+'root'.  You could also login as a non-'root' user either on a text console or
+by 'ssh' from another system.  For either approach as a non-'root' user, you
+should 'cd /tmp' and then promote to 'root'.
 
 If the '-f' option is used to refresh in foreground and you promoted to 'root',
 then the original session must not have its working directory on '/usr2', nor
 be an X session opened by an account that has its home directory on '/usr2'.  A
 refresh will work for both of those cases without the '-f' option, but you will
-be abruptly logged out when the refresh starts.
-
-This script must be customized before it is used.  Directions for that are
-embedded in the script.
-
-WARNING: It may not be possible to setup the script to login into the
-         Operational system with 'ssh' keys.  It may still be possible to
-         connect with a password; in which case, the script will only work if
-         used with '-f', foreground mode.  Using the CIS hardening approach may
-         be a usable alternative if there are obstacles with using 'ssh' keys
-         to log into the 'root' account.  See the comments in the script for
-         more information,
-
-For foreground refreshes, a progress bar with an ETA will be displayed if the
-'pv' package is installed.
+be automatically logged out while the refresh continues in background.
 
 The script creates a log file of what happened during the refresh operation in
 '/root/refresh_spare_usr2_logs' directory. The log file name includes a
 time-stamp of when the refresh was started.
 
 An email is sent to 'root' with the log file contents when the script finishes.
+
+The script has two modes, background, which is the default, and foreground
+using the '-f' option.
+
+For foreground refreshes, a progress bar with an ETA will be displayed if the
+'pv' package is installed.
 
 The refresh is normally performed in background.  When the script is first
 installed on a system, it is recommended to run it in foreground with the '-f'
@@ -92,6 +85,24 @@ or an email, before performing the finishing up steps: checking that 'mdstat'
 does not show an active recovery and then rebooting.  Those finishing up steps
 are also need for foreground mode, but it should be apparent from the screen
 output when the refresh has finished.
+
+The script may take up to three times longer to complete if both the
+Operational and Spare systems are refreshing their secondary disks concurrently
+than when the systems are quiescent.
+
+INSTALLATION
+
+This script must be customized before it is used.  Directions for that are
+embedded in the script.
+
+It may not be possible to setup the script to login into the Operational system
+with 'ssh' keys.  If not, it may still be possible to connect with a password;
+in which case, the script will only work if used with '-f', foreground mode.
+Using the CIS hardening approach may be a usable alternative if there are
+obstacles with using 'ssh' keys to log into the 'root' account.  See the
+comments in the script for more information.
+
+CRITICAL PHASE
 
 The critical phase of operation of the script occurs between the printing of
 
