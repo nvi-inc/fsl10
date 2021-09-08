@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.3.1 - March 2021
+Version 1.3.2 - September 2021
 
 :experimental:
 :toc:
@@ -645,122 +645,6 @@ auth required pam_tally2.so deny=5
 Small integer values (20 or less) should not be a signficant risk with
 long and complicated passwords and a lock-out of several minutes.
 
-=== refresh_spare_usr2 with CIS hardening setup
-
-IMPORTANT: Please read the
-<<raid.adoc#_refresh_spare_usr2,refresh_spare_usr2>> section in the
-'RAID Notes for FSL10' document for important information on the
-*refresh_spare_usr2* script.
-
-NOTE: Despite what the script says, it is possible to run the script
-by using *su* or *sudo*/*root_account* from a non-root account as long
- as there is no activity involving */usr2* and
-the user's current directory is not on */usr2*.
-
-For a user other than *root* to use the script, _after_ they have made
-sure they are not currently on */usr2* (*cd*-ing away if necessary),
-     they should use the command 
-
-....
-sudo refresh_spare_usr2
-....
-
-The remainder of this sub-section describes the steps need to enable
-use of the script with CIS hardening. The possibility of running it as
-*root* or from a different account is allowed for the instructions.
-
-==== On operational computer
-
-===== Use visudo to add:
-
-....
-spare          ALL=(ALL) NOPASSWD: /usr/local/sbin/send_usr2
-....
-
-===== Create file:
-
-./usr/local/sbin/send_usr2
-[source,bash]
-----
-#!/bin/bash
-cd /usr2; tar --one-file-system -cf - .
-----
-
-Permissions: *rwxr--r--*, ownership *root:root*.
-
-===== Create spare account:
-
-NOTE: The user's home directory is on */home* (by default), not */usr2*.
-
-NOTE: The *UID* and *GID* values of *2000* are chosen to make it
-easier to keep the values in sync for users on both machines. In other
-words, it is not necessary to worry about jumping over a low value on
-the *spare* machine when values are assigned sequentially, as is the
-default.  If you think you might have more than 1000 users or groups,
-you might want to increase the values for the *spare* account.
-
-----
-addgroup spare --gid 2000
-adduser spare --uid 2000 --gid 2000
-----
-
-==== On spare computer
-
-===== In refresh_spare_usr2, customize as usual and change:
-
-....
-ssh root@operational 'cd /usr2; tar --one-file-system -cf - .' | (cd /usr2; tar xpf - --totals)
-....
-
-to
-....
-ssh spare@operational -o LogLevel=ERROR sudo send_usr2 | (cd /usr2; tar xpf - --totals)
-....
-
-where *operational* is the name or IP of your operational computer.
-
-===== Create and copy a key for root
-
-If *root* already has one, you only need the second command below to copy it to the *spare* account:
-
-NOTE: It is recommended to not set a passphrase.
-
-----
-ssh-keygen
-ssh-copy-id spare@operational
-----
-
-where *operational* is the name or IP of your operational computer.
-
-===== For a different user than root to run the script
-
-IMPORTANT: They must not have their current directory on */usr2* when they run the script.
-
-Use *visudo* to add
-
-....
-%operators         ALL=(ALL) /usr/local/sbin/refresh_spare_usr2
-....
-
-It could be limited to a specific user (but not *oper* or *prog*)
-by replacing *%operators* with the user account name.
-
-==== On operational computer
-
-===== Lock out spare account from normal login (but must have a shell):
-
-This will disable password login for this user:
-
-----
-usermod -L spare
-----
-
-===== Disable password aging and inactivity time-out for this account:
-
-----
-chage -I -1 -M 99999 spare
-----
-
 === Setting hostname alias
 
 These steps set a more user friendly alias for the computers of the
@@ -833,45 +717,213 @@ to confirm connecting. Finally, logout of the `spare` account on
 
 .. In the statement setting `PS1` in the `case` block that sets the `xterm` window title, change the use of `\h` to `$hostalias`.
 
+=== Installing refresh_spare_usr2 with CIS hardening
+
+NOTE: This subsection follows the FS manual font conventions.
+
+IMPORTANT: Please read the
+<<raid.adoc#_refresh_spare_usr2,refresh_spare_usr2>> section of the
+<<raid.adoc#,RAID Notes for FSL10>> document for important information
+on the __refresh_spare_usr2__ script.
+
+This sub-section describes the steps needed to enable use of the
+_refresh_spare_usr2_ script with CIS hardening.
+
+. On the _operational_ system:
+
+.. Use _visudo_ to add:
+
++
+
+....
+spare          ALL=(ALL) NOPASSWD: /usr/local/sbin/send_usr2
+....
+
+.. Create file:
+
++
+
+./usr/local/sbin/send_usr2
+[source,bash]
+----
+#!/bin/bash
+cd /usr2; tar --one-file-system -cf - .
+----
+
++
+
+Permissions: `rwxr--r--`, ownership `root:root`.
+
+.. Create _spare_ account:
+
++
+
+NOTE: The user's home directory is on _/home_ (by default), not
+_/usr2_.
+
++
+
+NOTE: The UID and GID values of `2000` are chosen to make it easier to
+keep the values in sync for users on both systems. In other words, it
+is not necessary to worry about jumping over a low value on the
+_spare_ system when values are assigned sequentially, as is the
+default. If you think you might have more than 1000 users or groups,
+you might want to increase the values for the _spare_ account.
+
++
+
+----
+addgroup spare --gid 2000
+adduser spare --uid 2000 --gid 2000
+----
+
++
+
+. On the _spare_ system
+
+.. Customize _refresh_spare_usr2_
+
+
++
+
+The uncustomized script is provided in
+_/root/fsl10/RAID/refresh_spare_usr2_. Follow the directions in the
+comments, being sure to _uncomment_ the two lines for CIS hardened
+systems. Their commented out form is:
+
++
+
+....
+#remote_user=spare
+#remote_command='sudo send_usr2'
+....
+
+.. Create and copy a key for _root_
+
++
+
+If _root_ already has one, you only need the second command below to
+copy it to the _spare_ account:
+
++
+
+NOTE: It is recommended to not set a passphrase.
+
++
+
+[subs="+quotes"]
+----
+ssh-keygen
+ssh-copy-id spare@_operational_
+----
+
++
+
+where `_operational_` is the alias, name, or IP of your _operational_
+system.
+
+.. Enable _sudo_ to run the script
+
++
+
+Use _visudo_ to add
+
++
+
+....
+%operators         ALL=(ALL) /usr/local/sbin/refresh_spare_usr2
+....
+
++
+
++
+
+It could be limited to a specific user (but not _oper_ or _prog_)
+by replacing `%operators` with the user account name.
+
+. On the _operational_ system
+
+.. Lock out spare account from normal login (but it must have a
+shell). This will disable password login, but not _ssh_ login with
+keys, for this user:
+
+
++
+
+----
+usermod -L spare
+----
+
+.. Disable password aging and inactivity time-out for this account:
+
++
+
++
+
+----
+chage -I -1 -M 99999 spare
+----
+
 == Using refresh_spare_usr2 with CIS hardening
 
-NOTE: The purpose of the `script` command below is to record the
-output to help verify success afterwards in case the screen output is
-no longer available when it is checked for. It can also be helpful for
-diagnosing what went wrong if there was a problem.
+NOTE: This section follows the FS manual font conventions.
 
 . As part of a monthly backup, you would usually start a disk rotation
-on both the *operational* and *spare* computers first. Once both
-computers are recovering, you should log out of both machines.
+on both the _operational_ and _spare_ systems first. Once both
+systems are recovering, you should log out of both systems.
 
 +
 
 IMPORTANT: Before proceeding, make sure that no one is logged into
-either computer and that no processes are running on */usr2* on either
-machine, particularly the FS.
+either system and that no processes are running on _/usr2_ on either
+system, particularly the FS.
 
-. Login on the *spare* computer with *ssh*, or on a local virtual
-console text terminal, using an AUID account
+. Login to the _spare_ system with an AUID account on a local virtual
+console text terminal or from another system (not the _operational_
+system) using _ssh_.
+
 
 +
 
-IMPORTANT: If you logged in using *ssh* do not open an *xterm* to work
+IMPORTANT: If you logged in using _ssh_ do not open an _xterm_ to work
 in. Instead work in the window where you logged in.
 
 . Execute:
 +
     cd /tmp
-    script refresh.txt
-    time sudo refresh_spare_usr2; exit
+    sudo refresh_spare_usr2
 +
-Answer the question `y` if it is safe to proceed.
-. Check to see that it finished with no problems.
+Answer the question `*y*` if it is safe to proceed.
+
+. Log out of the system, if you weren't logged out automatically.
+
+. Check to see that it finished with no problems before logging in
+again on either system.
+
 +
-If the output of the script is no longer on the display, you can
-inspect */tmp/refresh.txt* (until the next reboot) to determine if there was a problem. You
-may need to login again to do this.
+
+An email will be sent to _root_ when the refresh finishes. If your
+email to _root_ is being forwarded to a mailbox off the system, you
+can use receipt of that message (and that it shows no errors) as the
+indication that it finished successfully.
+
++
+
+If emails to _root_ are _not_ being forwarded off the system and you
+_can_ login as _root_ on a text console, you can check _root_'s email
+for the message.
+
++
+
+Alternatively, you can use the time it took previous refreshes to
+finish to estimate how log this one may take. You can examine the logs
+(before starting the refresh) in _/root/refresh_spare_usr2_logs_ to
+see how long previous refreshes took. Typically a new refresh will
+take a little longer than the most recent previous refresh. You can
+check the log for the current refresh after at least that much time
+has elapsed.
 
 . If it finished with no problems, you can reboot as soon as is
 convenient. You may reboot even if the RAID is recovering, but you can
 wait until the recovery is complete. The only requirement is to reboot
-before the FS is run again on the *spare* computer.
+before the FS is run again on the _spare_ system.

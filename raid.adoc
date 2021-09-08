@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.3.7 - January 2021
+Version 1.3.8 - September 2021
 
 :sectnums:
 :experimental:
@@ -639,109 +639,133 @@ little slow.
 
 === refresh_spare_usr2
 
+NOTE: This subsection follows the FS manual font conventions.
+
 This script is not part of RAID operations per se, but is included in
-this document for completeness. In a two computer configuration
-(*operational* and *spare*), it is used to make a copy of the
-*operational* computer's */usr2* partition on the *spare* computer.
+this document for completeness. In a two system configuration
+(_operational_ and _spare_), it is used to make a copy of the
+_operational_ system's _/usr2_ partition on the _spare_ system.
 Normally this partition holds all the operational FS programs and
-data. The script can be found in */root/fsl10/RAID*.  Full
+data. The script can be found in _/root/fsl10/RAID_. Full
 instructions for its installation are included in the script. The
 script will give a warning about its use and prompt for permission to
 proceed when it it is run.
 
-WARNING: It should installed on the *spare* computer _only_.
+IMPORTANT: It should be installed on the _spare_ system _only_.
 
-WARNING: When this script is run, neither computer should have anyone logged in
-with a home directory on */usr2* nor should there be any activity occurring that
-will affect */usr2*.
+WARNING: When this script is run, neither system should have anyone
+logged in with a home directory on _/usr2_ nor should there be any
+activity occurring that will affect _/usr2_.
 
-NOTE: Despite what the script says, it is possible to run the script
-by using *su* or *sudo* from a non-root account as long as there is no
-activity involving */usr2* and the user's current directory is not on
-*/usr2*. For the latter issue, *cd*-ing to */tmp* is a reasonable
-choice. If after entering `y` to proceed, you are unceremoniously
-logged out, it probably means you still had your current directory
-somewhere on */usr2*. In this case, no harm was done. You can try
-re-running the script, but this time please be sure to *cd* off
-*/usr2* first.
-
-IMPORTANT: For this script to work usefully, the *operational* and
-*spare* computers should have the same set-up including particularly the
+WARNING: For this script to work usefully, the _operational_ and
+_spare_ systems should have the same set-up including particularly the
 same user accounts with same UIDs and GIDs in parallel for all
-accounts, particularly for those that have home directories on */usr2*,
-  as well as other OS set-up information the FS may depends such as
-  */etc/hosts* and */etc/ntp.conf*.
+accounts, particularly for those that have home directories on
+_/usr2_, as well as other OS set-up information the FS may depend ons
+such as _/etc/hosts_ and _/etc/ntp.conf_.
 
-IMPORTANT: It is recommended that the script be used (including for initial testing)
-  immediately after a disk rotation to provide the ample opportunities
-  for recovery if there is a problem. In particular, for initial
-  testing the procedure in the <<Recoverable testing>>
-  section should be used.
+IMPORTANT: It is recommended that the script be used (including for
+initial testing) immediately after a disk rotation to provide the
+ample opportunities for recovery if there is a problem. In particular,
+for initial testing the procedure in the <<Recoverable testing>>
+section above should be used.
 
-TIP: It is possible to recover fairly easily, using the script as a guide,
-from most operations performed by the script if they are accidentally
-terminated with a kbd:[Ctrl+C]. A significant exception to this is the
-*mke2fs* command. For this reason, the script displays the command to
-the terminal to allow the user to cut-and-paste the command to
-re-execute it, in case that is ever needed.
+TIP: If the script is accidentally terminated with a kbd:[Ctrl+C] (in
+foreground) or otherwise aborted, it is usually possible to recover by
+rerunning the script. A significant exception is if the abort occurs
+during the _mke2fs_ command. For this reason, the script prints that
+command to the log (and the terminal, when run in foreground) to allow
+the user to copy-and-paste the command to re-execute it, in case that
+is ever needed. Steps for recovery from an abort, which are fairly
+easy, are discussed in the `CRITICAL PHASE` section of the
+`*refresh_spare_usr2{nbsp}-h*` output.
 
 [TIP]
 ====
-A recommended monthly back strategy is to do a disk rotation on
-both computers. Once the RAIDs on both computers are "recovering" you
-can log-out of both computers and then login into the *spare* computer
-again to start *refresh_spare_usr2*.
 
-The recovery of the RAIDs will
-increase the amount of time that the *refresh_spare_usr2* takes to
-complete.  It has been observed in some cases to approximately double
-the time required.
+A recommended monthly backup strategy is to do a disk rotation on both
+systems. Once the RAIDs on both systems are _recovering_ you can
+log-out of both systems and then login into the _spare_ system again
+to start _refresh_spare_usr2_.
 
-Once *refresh_spare_usr2* completes, it is safe to reboot, even if
-a recovery is still ongoing. The only requirement is to
-reboot the *spare* computer before the FS is run on it again.
+The recovery of the RAIDs will increase the amount of time that the
+_refresh_spare_usr2_ takes to complete. It has been observed in some
+cases to approximately double the time required.
 
-A feature of this approach is that will make the *spare* computer
-shelf disk a deeper back-up than the *spare* computer RAID disks.
+Once _refresh_spare_usr2_ completes, it is safe to reboot, even if a
+recovery is still ongoing. The only requirement is to reboot the
+_spare_ system before the FS is run on it again.
+
+A feature of this approach is that will make the _spare_ system shelf
+disk a deeper back-up than the _spare_ system RAID disks.
 
 ====
 
 ==== Using refresh_spare_usr2
 
-NOTE: The purpose of the `script` command below is to record the
-output to help verify success afterwards in case the screen output is
-no longer available when it is checked for. It can also be helpful for
-diagnosing what went wrong if there was a problem.
-
 . As part of a monthly backup, you would usually start a disk rotation
-on both the *operational* and *spare* computers first. Once both
-computers are recovering, you should log out of both machines.
+on both the _operational_ and _spare_ systems first. Once both systems
+are recovering, you should log out of both systems.
 
 +
 
 IMPORTANT: Before proceeding, make sure that no one is logged into
-either computer and that no processes are running on */usr2* on either
-machine, particularly the FS.
+either system and that no processes are running on _/usr2_ on either
+system, particularly the FS.
 
-. Login on the *spare* computer on a local virtual console text terminal as *root*.
+. Login on the _spare_ system on a local virtual console text terminal
+as _root_.
+
++
+
+An alternative is to login as a non-_root_ user either on a text
+console or by _ssh_ from another system. In this case, you should
+`*cd{nbsp}/tmp*` and then either promote to _root_ using _su_ or run
+the script with _sudo_.
+
 
 . Execute:
-+
-    script refresh.txt
-    time refresh_spare_usr2; exit
-+
-Answer the question `y` if it is safe to proceed.
-. Check to see that it finished with no problems.
+
+refresh_spare_usr2
+
 +
 
-If the output of the script is no longer on the display, you can
-inspect */refresh.txt* to determine if there was a problem. You may
-need to login again to do this.
+Answer the question `*y*` if it is safe to proceed.
+
++
+
+. Log out of the system, if you weren't logged out automatically.
+
+. Check to see that it finished with no problems before logging in
+again on either system.
+
++
+
+An email will be sent to _root_ when the refresh finishes. If your
+email to _root_ is being forwarded to a mailbox off the system, you
+can use receipt of that message (and that it shows no errors) as the
+indication that it finished successfully.
+
++
+
+If emails to _root_ are _not_ being forwarded off the system and you
+_can_ login as _root_ on a text console, you can check _root_'s email
+for the message.
+
++
+
+Alternatively, you can use the time it took previous refreshes to
+finish to estimate how log this one may take. You can examine the logs
+(before starting the refresh) in _/root/refresh_spare_usr2_logs_ to
+see how long previous refreshes took. Typically a new refresh will
+take a little longer than the most recent previous refresh. You can
+check the log for the current refresh after at least that much time
+has elapsed.
 
 . If it finished with no problems, you can reboot as soon as is
 convenient. You may reboot even if the RAID is recovering, but you can
 wait until the recovery is complete. The only requirement is to reboot
-before the FS is run again on the *spare* computer.
+before the FS is run again on the _spare_ system.
 
 == Multiple computer set-up
 
