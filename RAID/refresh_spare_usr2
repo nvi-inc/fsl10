@@ -90,17 +90,27 @@ The script may take up to three times longer to complete if both the
 Operational and Spare systems are refreshing their secondary disks concurrently
 than when the systems are quiescent.
 
-INSTALLATION
+USING THE SYSTEMS WHILE THE SCRIPT IS RUNNING
 
-This script must be customized before it is used.  Directions for that are
-embedded in the script.
+Do not login to an account on the spare system with a home directory on the
+'/usr2' partition (logging in as 'root' on a text console is okay) or otherwise
+access that partition during the refresh.
 
-It may not be possible to setup the script to login into the Operational system
-with 'ssh' keys.  If not, it may still be possible to connect with a password;
-in which case, the script will only work if used with '-f', foreground mode.
-Using the CIS hardening approach may be a usable alternative if there are
-obstacles with using 'ssh' keys to log into the 'root' account.  See the
-comments in the script for more information.
+It is possible to use the operational system during the refresh if necessary,
+but this should be avoided if possible and activity on the '/usr2' partition
+should be as limited as possible.  You should not expect any changes on the
+operational system '/usr2' that occur after the refresh starts to be propagated
+to the spare system.  If any files on the operational system '/usr2' are
+deleted from it before they could be copied, there may be error messages like:
+
+  tar: ...: Cannot stat: No such file or directory
+
+for those files (named in place of the '...') and a final summary error
+message:
+
+  tar: Exiting with failure status due to previous errors
+
+but without other errors the refresh should still generally succeed.
 
 CRITICAL PHASE
 
@@ -125,6 +135,18 @@ file, or if the '-f' option was used, may be visible on the screen.  If the
 re-execution of 'mke2fs ...' fails because '/usr2' is mounted, you will need to
 execute 'umount /usr2' before trying again.  After 'mke2fs' has been
 re-executed successfully, execute 'mount /usr2' and try the script again.
+
+INSTALLATION
+
+This script must be customized before it is used.  Directions for that are
+embedded in the script.
+
+It may not be possible to setup the script to login into the Operational system
+with 'ssh' keys.  If not, it may still be possible to connect with a password;
+in which case, the script will only work if used with '-f', foreground mode.
+Using the CIS hardening approach may be a usable alternative if there are
+obstacles with using 'ssh' keys to log into the 'root' account.  See the
+comments in the script for more information.
 
 EOF
 }
@@ -266,11 +288,14 @@ exit 1
         cat << EOF
 
     Going to background, you should log out now or you may be logged out
-    automatically.  Don't login again to either system until you expect the
-    'refresh_spare_usr2' to have finished.
+    automatically.
 
-    After it has finished wait until 'mdstat' does not show an active recovery
-    and then reboot.
+    It is best to NOT login into either the spare or operational system while
+    'refresh_spare_usr2' is running, but see the 'USING THE SYSTEMS WHILE THE
+    SCRIPT IS RUNNING' section of the '-h' help output for more details.
+
+    After the refresh has finished wait, until 'mdstat' does not show an active
+    recovery and then reboot.
 
 EOF
 
@@ -357,6 +382,10 @@ EOF
 EOF
     fi
     cat >/dev/tty << EOF
+
+    It is best to NOT login into either the spare or operational system while
+    'refresh_spare_usr2' is running, but see the 'USING THE SYSTEMS WHILE THE
+    SCRIPT IS RUNNING' section of the '-h' help output for more details.
 
     When the transfer finishes, a summary of the transfer will be printed and
     you will see a line that starts: 'Done. ...', and get a prompt. Please

@@ -897,8 +897,14 @@ Answer the question `*y*` if it is safe to proceed.
 
 . Log out of the system, if you weren't logged out automatically.
 
-. Check to see that it finished with no problems before logging in
-again on either system.
+. Wait until the script has finished before resuming other activities
+on the systems.
+
++
+
+CAUTION: Generally speaking, it is best to _not_ login to either the
+_spare_ or _operational_ system while the script is running, but see
+the <<note,NOTE>> below for more information.
 
 +
 
@@ -921,7 +927,38 @@ finish to estimate how log this one may take. You can examine the logs
 see how long previous refreshes took. Typically a new refresh will
 take a little longer than the most recent previous refresh. You can
 check the log for the current refresh after at least that much time
-has elapsed.
+has elapsed to verify that it has finished.
+
++
+
+[[note]]
+[NOTE]
+====
+
+Do not login to an account on the _spare_ system with a home directory
+on the _/usr2_ partition (logging in as _root_ on a text console is
+okay) or otherwise access that partition during the refresh.
+
+It is possible to use the _operational_ system during the refresh if
+necessary, but this should be avoided if possible and activity on the
+_/usr2_ partition should be as limited as possible.  You should not
+expect any changes on the _operational_ system _/usr2_ that occur
+after the refresh starts to be propagated to the _spare_ system.  If
+any files on the _operational_ system _/usr2_ are deleted from it
+before they could be copied, there may be error messages like:
+
+[subs="+quotes"]
+....
+tar: _file_: Cannot stat: No such file or directory
+....
+
+for those ``_file_``s and a final summary error message:
+
+  tar: Exiting with failure status due to previous errors
+
+but without other errors the refresh should still generally succeed.
+
+====
 
 . If it finished with no problems, you can reboot as soon as is
 convenient. You may reboot even if the RAID is recovering, but you can
