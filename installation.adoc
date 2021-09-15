@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.3.7 - March 2021
+Version 1.4.0 - September 2021
 
 :sectnums:
 :experimental:

@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.3.8 - September 2021
+Version 1.4.0 - September 2021
 
 :sectnums:
 :experimental:
@@ -719,9 +719,9 @@ as _root_.
 +
 
 An alternative is to login as a non-_root_ user either on a text
-console or by _ssh_ from another system. In this case, you should
-`*cd{nbsp}/tmp*` and then either promote to _root_ using _su_ or run
-the script with _sudo_.
+console or by _ssh_ from another system (not the _operational_
+system). In this case, you should `*cd{nbsp}/tmp*` and then either
+promote to _root_ using _su_ or run the script with _sudo_.
 
 
 . Execute:
