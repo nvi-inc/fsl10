@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.4.1 - September 2021
+Version 1.4.2 - September 2021
 
 :sectnums:
 :experimental:
@@ -757,7 +757,7 @@ as _root_.
 An alternative is to login as a non-_root_ user either on a text
 console or by _ssh_ from another system (not the _operational_
 system). In this case, you should promote to _root_ using _su_ or run
-the script with _sudo_.
+the script with _sudo_ (or _root_account_ for CIS hardened systems).
 
 
 . Execute:
@@ -770,10 +770,10 @@ Answer the question `*y*` if it is safe to proceed.
 
 +
 
-. Log out of the system, if you weren't logged out automatically.
+. Log out of the system.
 
-. Wait until the script has finished before resuming other activities
-on the systems.
+. Wait until the script has finished before logging in again and
+resuming other activities on the systems.
 
 +
 
@@ -783,14 +783,14 @@ on the systems.
 Generally speaking, it is best to _not_ login to either the _spare_ or
 _operational_ system while the script is running.
 
-If logging in on the _spare_ commuter, it is best to _not_ login to an
+If you do login to the _spare_ commuter, it is best to _not_ use an
 account with a home directory on the _/usr2_ partition (logging in as
 _root_ on a text console is okay) or otherwise access that partition
-during the refresh.  Accounts with home directories on the spare
-system _/usr2_ partition may not be fully configured until after the
-refresh completes. As a result, some accounts that you are use to
-logging into  with _ssh_ keys may require a password until the keys
-are transferred.
+while the script is running. Accounts with home directories on the
+spare system _/usr2_ partition may not be fully configured until after
+the refresh completes. As a result, some accounts that you are use to
+logging into with _ssh_ keys may require a password until the keys are
+transferred.
 
 It is possible to use the operational system during the refresh if
 necessary, but this should be avoided if possible and activity on the
