@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.4.0 - September 2021
+Version 1.4.1 - September 2021
 
 :sectnums:
 :experimental:
@@ -651,34 +651,10 @@ instructions for its installation are included in the script. The
 script will give a warning about its use and prompt for permission to
 proceed when it it is run.
 
+A full description of the features of the script are available from
+the `*refresh_spare_usr2{nbsp}-h*` output.
+
 IMPORTANT: It should be installed on the _spare_ system _only_.
-
-WARNING: When this script is run, neither system should have anyone
-logged in with a home directory on _/usr2_ nor should there be any
-activity occurring that will affect _/usr2_.
-
-WARNING: For this script to work usefully, the _operational_ and
-_spare_ systems should have the same set-up including particularly the
-same user accounts with same UIDs and GIDs in parallel for all
-accounts, particularly for those that have home directories on
-_/usr2_, as well as other OS set-up information the FS may depend ons
-such as _/etc/hosts_ and _/etc/ntp.conf_.
-
-IMPORTANT: It is recommended that the script be used (including for
-initial testing) immediately after a disk rotation to provide the
-ample opportunities for recovery if there is a problem. In particular,
-for initial testing the procedure in the <<Recoverable testing>>
-section above should be used.
-
-TIP: If the script is accidentally terminated with a kbd:[Ctrl+C] (in
-foreground) or otherwise aborted, it is usually possible to recover by
-rerunning the script. A significant exception is if the abort occurs
-during the _mke2fs_ command. For this reason, the script prints that
-command to the log (and the terminal, when run in foreground) to allow
-the user to copy-and-paste the command to re-execute it, in case that
-is ever needed. Steps for recovery from an abort, which are fairly
-easy, are discussed in the `CRITICAL PHASE` section of the
-`*refresh_spare_usr2{nbsp}-h*` output.
 
 [TIP]
 ====
@@ -701,6 +677,66 @@ shelf disk a deeper back-up than the _spare_ system RAID disks.
 
 ====
 
+==== Installing refresh_spare_usr2
+
+Instructions for customizing _refresh_spare_usr2_ for your system are included
+in comments in the script.  If it has not been customized yet, it will print
+a message indicating that this is needed and exit.
+
+WARNING: For this script to work most usefully, the _operational_ and
+_spare_ systems should have the same set-up including particularly the
+same user accounts with same UIDs and GIDs in parallel for all
+accounts, particularly for those that have home directories on
+_/usr2_, as well as other OS set-up information the FS may depend on
+such as _/etc/hosts_ and _/etc/ntp.conf_.
+
+[TIP]
+====
+
+If you are unable to use login to the _operational_ system with _ssh_
+keys from the _spare_ system, you may be able to use the approach
+given in the
+<<cis-setup.adoc#_installing_refresh_spare_usr2_with_cis_hardening,Installing
+refresh_spare_usr2 with CIS hardening>> subsection of the
+<<cis-setup.adoc#,CIS Hardening for FSL10>> document.
+
+If you would like the extra security provided by that approach without
+using a non-_root_ account on the _operational_ system, you can adjust
+that approach by making these changes in the indicated steps:
+
+. On the _operational_ system:
+
++
+
+[start=2]
+.. Skip using _visudo_ to add a line for _spare_.
+.. Skip creating the _spare_ account.
+
+. On the _spare_ system:
+
+.. Do _not_ uncomment the line `#remote_user=spare`.
+
+.. Use the `ssh-copy-id root@_operational_` command in place of the
+similar one shown.
+
+. On the _operational_ system:
+
+.. In place of the indicated change, modify the line in of the
+_/root/.ssh/authorized_keys_ for the _root_ key from your _spare_
+computer by replacing `ssh-rsa` at the start of that line with
+
++
+
++
+
+`command="rrsync -ro /usr2" ssh-rsa`
+
+.. Skip locking out the _spare_ account.
+
+.. Skip disabling password aging for the _spare_ account.
+
+====
+
 ==== Using refresh_spare_usr2
 
 . As part of a monthly backup, you would usually start a disk rotation
@@ -720,8 +756,8 @@ as _root_.
 
 An alternative is to login as a non-_root_ user either on a text
 console or by _ssh_ from another system (not the _operational_
-system). In this case, you should `*cd{nbsp}/tmp*` and then either
-promote to _root_ using _su_ or run the script with _sudo_.
+system). In this case, you should promote to _root_ using _su_ or run
+the script with _sudo_.
 
 
 . Execute:
@@ -741,10 +777,30 @@ on the systems.
 
 +
 
-CAUTION: Generally speaking, it is best to _not_ login to either the
-_spare_ or _operational_ system while the script is running, but see
-the <<note,NOTE>> below for more information.
+[CAUTION]
+====
 
+Generally speaking, it is best to _not_ login to either the _spare_ or
+_operational_ system while the script is running.
+
+If logging in on the _spare_ commuter, it is best to _not_ login to an
+account with a home directory on the _/usr2_ partition (logging in as
+_root_ on a text console is okay) or otherwise access that partition
+during the refresh.  Accounts with home directories on the spare
+system _/usr2_ partition may not be fully configured until after the
+refresh completes. As a result, some accounts that you are use to
+logging into  with _ssh_ keys may require a password until the keys
+are transferred.
+
+It is possible to use the operational system during the refresh if
+necessary, but this should be avoided if possible and activity on the
+_/usr2_ partition should be as limited as possible.  You should not
+expect any changes on the operational system _/usr2_ that occur after
+the refresh starts to be propagated to the spare system.  There may be
+some warnings that files cannot be found on the operational system if
+they were deleted before they were transferred.
+
+====
 +
 
 An email will be sent to _root_ when the refresh finishes. If your
@@ -760,44 +816,13 @@ for the message.
 
 +
 
-Alternatively, you can use the time it took previous refreshes to
-finish to estimate how log this one may take. You can examine the logs
-(before starting the refresh) in _/root/refresh_spare_usr2_logs_ to
-see how long previous refreshes took. Typically a new refresh will
-take a little longer than the most recent previous refresh. You can
-check the log for the current refresh after at least that much time
-has elapsed to verify that it has finished.
+Alternatively, you can examine the logs (before starting the refresh)
+in _/root/refresh_spare_usr2_logs_ to see how long previous refreshes
+took. When at least that much time has elapsed, you can login and can
+check the log for the current refresh to verify that it has finished.
 
 +
 
-[[note]]
-[NOTE]
-====
-
-Do not login to an account on the _spare_ system with a home directory
-on the _/usr2_ partition (logging in as _root_ on a text console is
-okay) or otherwise access that partition during the refresh.
-
-It is possible to use the _operational_ system during the refresh if
-necessary, but this should be avoided if possible and activity on the
-_/usr2_ partition should be as limited as possible.  You should not
-expect any changes on the _operational_ system _/usr2_ that occur
-after the refresh starts to be propagated to the _spare_ system.  If
-any files on the _operational_ system _/usr2_ are deleted from it
-before they could be copied, there may be error messages like:
-
-[subs="+quotes"]
-....
-tar: _file_: Cannot stat: No such file or directory
-....
-
-for those ``_file_``s and a final summary error message:
-
-  tar: Exiting with failure status due to previous errors
-
-but without other errors the refresh should still generally succeed.
-
-====
 
 . If it finished with no problems, you can reboot as soon as is
 convenient. You may reboot even if the RAID is recovering, but you can

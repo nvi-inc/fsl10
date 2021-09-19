@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.4.0 - September 2021
+Version 1.4.1 - September 2021
 
 :experimental:
 :toc:
@@ -727,32 +727,28 @@ IMPORTANT: Please read the
 on the __refresh_spare_usr2__ script.
 
 This sub-section describes the steps needed to enable use of the
-_refresh_spare_usr2_ script with CIS hardening.
+_refresh_spare_usr2_ script with CIS hardening. All steps must be
+executed as _root_.
 
 . On the _operational_ system:
+
+.. Install the _rrsync_ script:
+
++
+
+....
+gunzip -c /usr/share/doc/rsync/scripts/rrsync.gz >/usr/local/bin/rrsync
+ln -s /usr/local/bin/rrsync /usr/bin/rrsync
+chmod u+x,go-x /usr/local/bin/rrsync
+....
 
 .. Use _visudo_ to add:
 
 +
 
 ....
-spare          ALL=(ALL) NOPASSWD: /usr/local/sbin/send_usr2
+spare          ALL=(ALL) NOPASSWD:SETENV: /usr/bin/rrsync
 ....
-
-.. Create file:
-
-+
-
-./usr/local/sbin/send_usr2
-[source,bash]
-----
-#!/bin/bash
-cd /usr2; tar --one-file-system -cf - .
-----
-
-+
-
-Permissions: `rwxr--r--`, ownership `root:root`.
 
 .. Create _spare_ account:
 
@@ -779,14 +775,14 @@ adduser spare --uid 2000 --gid 2000
 
 +
 
-. On the _spare_ system
+. On the _spare_ system:
 
 .. Customize _refresh_spare_usr2_
 
 
 +
 
-The uncustomized script is provided in
+The un-customized script is provided in
 _/root/fsl10/RAID/refresh_spare_usr2_. Follow the directions in the
 comments, being sure to _uncomment_ the two lines for CIS hardened
 systems. Their commented out form is:
@@ -795,7 +791,7 @@ systems. Their commented out form is:
 
 ....
 #remote_user=spare
-#remote_command='sudo send_usr2'
+#remote_dir=/
 ....
 
 .. Create and copy a key for _root_
@@ -838,10 +834,18 @@ Use _visudo_ to add
 
 +
 
-It could be limited to a specific user (but not _oper_ or _prog_)
-by replacing `%operators` with the user account name.
+NOTE: It could be limited to a specific user (but not _oper_ or
+_prog_) by replacing `%operators` with the user account name.
 
-. On the _operational_ system
+. On the _operational_ system:
+
+.. Set the _spare_ account to only allow a _forced command_ with _ssh_
+by replacing the `ssh-rsa` at the start of the first (and only) line of
+_~spare/.ssh/authorized_keys_ line with:
+
++
+
+`command="sudo --preserve-env rrsync -ro /usr2" ssh-rsa`
 
 .. Lock out spare account from normal login (but it must have a
 shell). This will disable password login, but not _ssh_ login with
@@ -863,104 +867,3 @@ usermod -L spare
 ----
 chage -I -1 -M 99999 spare
 ----
-
-== Using refresh_spare_usr2 with CIS hardening
-
-NOTE: This section follows the FS manual font conventions.
-
-. As part of a monthly backup, you would usually start a disk rotation
-on both the _operational_ and _spare_ systems first. Once both
-systems are recovering, you should log out of both systems.
-
-+
-
-IMPORTANT: Before proceeding, make sure that no one is logged into
-either system and that no processes are running on _/usr2_ on either
-system, particularly the FS.
-
-. Login to the _spare_ system with an AUID account on a local virtual
-console text terminal or from another system (not the _operational_
-system) using _ssh_.
-
-
-+
-
-IMPORTANT: If you logged in using _ssh_ do not open an _xterm_ to work
-in. Instead work in the window where you logged in.
-
-. Execute:
-+
-    cd /tmp
-    sudo refresh_spare_usr2
-+
-Answer the question `*y*` if it is safe to proceed.
-
-. Log out of the system, if you weren't logged out automatically.
-
-. Wait until the script has finished before resuming other activities
-on the systems.
-
-+
-
-CAUTION: Generally speaking, it is best to _not_ login to either the
-_spare_ or _operational_ system while the script is running, but see
-the <<note,NOTE>> below for more information.
-
-+
-
-An email will be sent to _root_ when the refresh finishes. If your
-email to _root_ is being forwarded to a mailbox off the system, you
-can use receipt of that message (and that it shows no errors) as the
-indication that it finished successfully.
-
-+
-
-If emails to _root_ are _not_ being forwarded off the system and you
-_can_ login as _root_ on a text console, you can check _root_'s email
-for the message.
-
-+
-
-Alternatively, you can use the time it took previous refreshes to
-finish to estimate how log this one may take. You can examine the logs
-(before starting the refresh) in _/root/refresh_spare_usr2_logs_ to
-see how long previous refreshes took. Typically a new refresh will
-take a little longer than the most recent previous refresh. You can
-check the log for the current refresh after at least that much time
-has elapsed to verify that it has finished.
-
-+
-
-[[note]]
-[NOTE]
-====
-
-Do not login to an account on the _spare_ system with a home directory
-on the _/usr2_ partition (logging in as _root_ on a text console is
-okay) or otherwise access that partition during the refresh.
-
-It is possible to use the _operational_ system during the refresh if
-necessary, but this should be avoided if possible and activity on the
-_/usr2_ partition should be as limited as possible.  You should not
-expect any changes on the _operational_ system _/usr2_ that occur
-after the refresh starts to be propagated to the _spare_ system.  If
-any files on the _operational_ system _/usr2_ are deleted from it
-before they could be copied, there may be error messages like:
-
-[subs="+quotes"]
-....
-tar: _file_: Cannot stat: No such file or directory
-....
-
-for those ``_file_``s and a final summary error message:
-
-  tar: Exiting with failure status due to previous errors
-
-but without other errors the refresh should still generally succeed.
-
-====
-
-. If it finished with no problems, you can reboot as soon as is
-convenient. You may reboot even if the RAID is recovering, but you can
-wait until the recovery is complete. The only requirement is to reboot
-before the FS is run again on the _spare_ system.

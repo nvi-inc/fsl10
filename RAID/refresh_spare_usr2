@@ -24,38 +24,34 @@ set -e
 usage() {
     cat << EOF
 
+This script refreshes the contents of the Spare system '/usr2' partition if you
+have both Operational and Spare systems.  Rebooting afterwards is recommended.
+
+IMPORTANT: This script will overwrite everything on the '/usr2' partition of
+           the system it is run on.  Use it only on the Spare system.
+
 Usage: $0 [options]
-This script refreshes '/usr2' on the Spare system.
 
 OPTIONS
- -f       Run in foreground
- -h       Help: this output
- -s       Suppress sending email
- -y       Yes: proceed without prompting for confirmation
 
-This is a script to refresh the contents of the Spare system '/usr2' partition
-if you have both Operational and Spare systems.
+ -F       run in Foreground
+ -h       help: this output
+ -i       ignore file modifications times, forcing ALL files to be updated
+ -I       Initialize local '/usr2' and then copy ALL files and directories
+ -N       Nothing: this option is used internally and has no effect
+ -s       suppress sending email
+ -Y       Yes: proceed without prompting for confirmation
 
-CAUTION: This script will automatically overwrite everything on the '/usr2'
-         partition of the system it is run on.  Use it only on the Spare
-         system.  It will stop any processes that are using the '/usr2'
-         partition.  Rebooting afterwards is recommended.
+The '-i' option should only be rarely needed.  It is recommended to NOT use
+uppercase options except in special circumstances.
+
+DESCRIPTION
 
 This script must be executed by 'root' on the Spare system.  You must be
-logged-in as 'root' or promote to 'root' using 'su' or 'sudo'/'root_account'
-and NOT have your working directory on '/usr2'.  Make sure all other users are
-logged-out on both systems before using this script.
-
-To run the script, it is recommended that you login on a text console as
-'root'.  You could also login as a non-'root' user either on a text console or
-by 'ssh' from another system.  For either approach as a non-'root' user, you
-should 'cd /tmp' and then promote to 'root'.
-
-If the '-f' option is used to refresh in foreground and you promoted to 'root',
-then the original session must not have its working directory on '/usr2', nor
-be an X session opened by an account that has its home directory on '/usr2'.  A
-refresh will work for both of those cases without the '-f' option, but you will
-be automatically logged out while the refresh continues in background.
+logged-in as 'root' or promote to 'root' using 'su' or 'sudo'/'root_account'.
+It is best if all other sessions are logged-out of both systems and there be no
+activity on either system's '/usr2'.  See the 'USING THE INITIALIZATION OPTION'
+section below for restrictions that apply when the '-I' option is used.
 
 The script creates a log file of what happened during the refresh operation in
 '/root/refresh_spare_usr2_logs' directory. The log file name includes a
@@ -63,22 +59,19 @@ time-stamp of when the refresh was started.
 
 An email is sent to 'root' with the log file contents when the script finishes.
 
+If the script is aborted while it is running, it is usually possible to recover
+by simply rerunning it.  An important exception to this when using the '-I'
+option is described, with recovery steps, in the CRITICAL PHASE section below.
+
+The script may take up to three times longer to complete if both the
+Operational and Spare systems are refreshing their secondary disks than when
+the systems are quiescent.
+
+MODES
+
 The script has two modes, background, which is the default, and foreground
-using the '-f' option.
-
-For foreground refreshes, a progress bar with an ETA will be displayed if the
-'pv' package is installed.
-
-The refresh is normally performed in background.  When the script is first
-installed on a system, it is recommended to run it in foreground with the '-f'
-option to verify that it is working and get an idea how long the transfer will
-take.  It usually only takes a few minutes for newly installed systems.  The
-time required will gradually increase as '/usr2' on the Operational system
-accumulates more data.  The actual transfer time will be shown on the screen in
-foreground mode.  For either mode, it can also be found in the log file on
-disk, which is typically emailed to 'root' as well, when the script finishes.
-It is recommended to check and be aware of how how long transfers take, so you
-know about how long to expect the next transfer to take.
+using the '-f' option.  For background refreshes, the overall 'rsync' transfer
+statistics and overall time required  are included in the log file.
 
 For background refreshes, verify that it has finished, either from the log file
 or an email, before performing the finishing up steps: checking that 'mdstat'
@@ -86,55 +79,79 @@ does not show an active recovery and then rebooting.  Those finishing up steps
 are also need for foreground mode, but it should be apparent from the screen
 output when the refresh has finished.
 
-The script may take up to three times longer to complete if both the
-Operational and Spare systems are refreshing their secondary disks concurrently
-than when the systems are quiescent.
+For foreground refreshes, a progress report of the number of files transferred,
+elapsed time, and the rate of files be transferred is displayed if the 'pv'
+package is installed.  The number of files and the rate may appear to pause
+when very larges files are being transferred.  There is no ETA or percentage
+completion available.  The overall transfer statistics are not shown, but the
+overall time is still shown.
 
 USING THE SYSTEMS WHILE THE SCRIPT IS RUNNING
 
-Do not login to an account on the spare system with a home directory on the
-'/usr2' partition (logging in as 'root' on a text console is okay) or otherwise
-access that partition during the refresh.
+It is best to NOT login to an account on the spare system with a home directory
+on the '/usr2' partition (logging in as 'root' on a text console is okay) or
+otherwise access that partition during the refresh.  Accounts with home
+directories on the spare system '/usr2' partition may not be fully configured
+until after the refresh completes.
 
 It is possible to use the operational system during the refresh if necessary,
 but this should be avoided if possible and activity on the '/usr2' partition
 should be as limited as possible.  You should not expect any changes on the
 operational system '/usr2' that occur after the refresh starts to be propagated
-to the spare system.  If any files on the operational system '/usr2' are
-deleted from it before they could be copied, there may be error messages like:
+to the spare system.  There may be some warnings that files cannot be found on
+the operational system if they are deleted before they are transferred.
 
-  tar: ...: Cannot stat: No such file or directory
+USING THE INITIALIZATION OPTION
 
-for those files (named in place of the '...') and a final summary error
-message:
+When using the '-I' option, it is recommended that you login on a text console
+as 'root'.  Alternatively, you could login as a non-'root' user either on a
+console or by 'ssh' from another system (preferably not the operational
+system).  For either approach as a non-'root' user, you must make sure your
+working directory is not on '/usr2', for example by using 'cd /tmp', before
+running the script.  It is best to get off '/usr2' before promoting to 'root'.
 
-  tar: Exiting with failure status due to previous errors
+WARNING: All processes that are using the '/usr2' partition will be terminated.
 
-but without other errors the refresh should still generally succeed.
+In addition, if you use the -f' option to refresh in foreground, you must NOT
+have originally logged into an X session of an account that has its home
+directory on '/usr2' NOR have any ancestor (parent) process of your shell with
+its working directory on '/usr2' (if you logged in with 'ssh', this includes
+NOT working in an 'xterm' that you started before moving your working directory
+off '/usr2').  A refresh will work for both of these cases without the '-f'
+option, but you will be automatically logged out while the refresh continues in
+background.
+
+Please see the CRITICAL PHASE section below information on recovering from the
+script being aborted while using the '-I' option.
 
 CRITICAL PHASE
 
-The critical phase of operation of the script occurs between the printing of
+In many cases, if the script is unexpectedly aborted when using the '-I'
+option, if it is possible to recover simply by rerunning the script.  An
+important exception this is if the abort occurs in the 'critical phase'.
+
+The critical phase of operation occurs between the printing of
 
     Starting critical phase. Executing "umount /usr2" ...
 
 and
 
-    ... completed "mount /usr2". The critical phase is finished.
+    ... completed "mount /usr2". The critical phase has finished.
 
 If the script is interrupted or otherwise fails between these commands, it will
 usually be necessary to take corrective action.  This normally consists of
 re-executing (using copy-and-paste) the contents (everything from between the
-double quotes, typically a long string, it will probably overwrap your terminal
-width) of the output line
+double quotes, typically a long string that will probably overwrap your
+terminal width) of the output line
 
     Executing "mke2fs -F -t ..."
 
 That line is printed during the critical phase and can be found in the log
 file, or if the '-f' option was used, may be visible on the screen.  If the
-re-execution of 'mke2fs ...' fails because '/usr2' is mounted, you will need to
-execute 'umount /usr2' before trying again.  After 'mke2fs' has been
-re-executed successfully, execute 'mount /usr2' and try the script again.
+re-execution of 'mke2fs -F -t ...' fails because '/usr2' is mounted, you will
+need to execute 'umount /usr2' before trying again.  After 'mke2fs' has been
+re-executed successfully, you can execute 'mount /usr2' and try the script
+again.
 
 INSTALLATION
 
@@ -145,8 +162,8 @@ It may not be possible to setup the script to login into the Operational system
 with 'ssh' keys.  If not, it may still be possible to connect with a password;
 in which case, the script will only work if used with '-f', foreground mode.
 Using the CIS hardening approach may be a usable alternative if there are
-obstacles with using 'ssh' keys to log into the 'root' account.  See the
-comments in the script for more information.
+obstacles to logging into the 'root' account remotely, with or without using
+'ssh' keys.  See the comments in the script for more information.
 
 EOF
 }
@@ -160,31 +177,37 @@ else
 fi
 
 safe_pv() {
-    if [[ -z "$pv" || -n "$background" ]]; then
-        cat
-    elif [[ ! "$size" =~ ^[1-9][0-9]*k$ ]]; then
-# defensive
-        $pv -W 2>/dev/tty
-    else
-        $pv -W -s "$size" 2>/dev/tty
+    if [[ -n "$pv" ]]; then
+        $pv -Wlbrt 2>/dev/tty
     fi
 }
+
 background=1
 proceed=
 send_email=1
-while getopts fhsy opt; do
+initialize=
+ignore=
+while getopts FhiINsY opt; do
     case $opt in
-        f)
+        F)
             background=
             ;;
         h)
             usage
             exit
             ;;
+        i)
+            ignore=1
+            ;;
+        I)
+            initialize=1
+            ;;
+        N)
+            ;;
         s)
             send_email=
             ;;
-        y)
+        Y)
             proceed=1
             ;;
         *)
@@ -199,7 +222,7 @@ while getopts fhsy opt; do
 done
 shift $((OPTIND - 1))
 
-special=special_arg_to_run_subscript
+special=special_arg_to_run_sub-script
 subscript=
 if [[ "$1" = "$special" ]]; then
   subscript=1
@@ -209,7 +232,7 @@ log=$2
 
 if [[ -z "$subscript" ]]; then
 
-    if [[ "$PWD/" =~ ^/usr2/ ]]; then
+    if [[ -n "$initialize" && "$PWD/" =~ ^/usr2/ ]]; then
        echo "You are on '/usr2'. Try again, but 'cd /tmp' first."
        exit 1
     fi
@@ -223,8 +246,8 @@ if [[ -z "$subscript" ]]; then
 
         cat << EOF
 
-    IMPORTANT: No one else should be logged into this system and no one should
-               be logged into the Operational system.
+    IMPORTANT: It is best if no other sessions are logged in on this system and
+               no sessions should be logged in on the Operational system.
 
 EOF
 
@@ -271,8 +294,11 @@ exit 1
 #      password login; in which case, only '-f', foreground mode, will be
 #      usable.  The CIS hardening approach may be a useful alternative if there
 #      are problems with using 'ssh' keys to log into the 'root' account.  For
-#      more information, see:
-#      https://nvi-inc.github.io/fsl10/cis-setup.html#_refresh_spare_usr2_with_cis_hardening_setup
+#      more information, see the 'Installing refresh_spare_usr2 with CIS
+#      hardening' subsection of the 'CIS Hardending for FSL10 document'.  You
+#      may find the description of how to modify that approach to use the
+#      'root' account in the 'refresh_spare_usr2' subsection of the 'RAID Notes
+#      for FSL10' useful.
 #   5. Test it the first time just after the Spare system's disk has been
 #      rotated.
 #
@@ -283,6 +309,21 @@ exit 1
        mkdir "$dir"
     fi
     log="$dir/$(date +"%Y.%b.%d.%H.%M.%S")".log
+
+#set most options for sub-script
+    options=N
+    if [[ -z "$send_email" ]]; then
+         options="${options}s"
+    fi
+    if [[ -n "$ignore" ]]; then
+        options="${options}i"
+    fi
+    if [[ -n "$initialize" ]]; then
+        options="${options}I"
+    fi
+    if [[ -n "$progress" ]]; then
+        options="${options}p"
+    fi
 
     if [[ -n "$background" ]]; then
         cat << EOF
@@ -298,7 +339,6 @@ exit 1
     recovery and then reboot.
 
 EOF
-
         if [[ -n "$send_email" ]]; then
             cat << EOF
 An email with the log file will be sent to 'root' when the script finishes.
@@ -307,21 +347,13 @@ EOF
         fi
         echo "Log file is $log"
         echo ""
-        if [[ -z "$send_email" ]]; then
-            nohup "$0" -s "$special" "$log" 1>>$log 2>&1 &
-        else
-            nohup "$0"    "$special" "$log" 1>>$log 2>&1 &
-        fi
+        nohup "$0" "-$options" "$special" "$log" 1>>$log 2>&1 &
     else
         echo ""
         echo "Log file is $log"
         echo ""
-        if [[ -z "$send_email" ]]; then
-            options=-fs
-        else
-            options=-f
-        fi
-        "$0" "$options" "$special" "$log" 2>&1 |tee "$log"
+        options="${options}F"
+        "$0" "-$options" "$special" "$log" 2>&1 |tee "$log"
     fi
     exit
 fi
@@ -333,48 +365,60 @@ else
 fi
 date="$(date)"
 echo "Started at $date"
-echo ""
 
-if [ -z "`cat /proc/mounts | cut -d ' ' -f2 | grep /usr2`" ]; then
- echo "Can't proceed, '/usr2' is not mounted"
- exit 1
-fi
+if [[ -n "$initialize" ]]; then
 
-device=$(grep " /usr2 " /proc/mounts | cut -d' ' -f1)
-type=$(grep " /usr2 " /proc/mounts | cut -d' ' -f3)
+    if [ -z "`cat /proc/mounts | cut -d ' ' -f2 | grep /usr2`" ]; then
+     echo ""
+     echo "Can't proceed, '/usr2' is not mounted"
+     exit 1
+    fi
 
-if [[ -z "$background" ]]; then
-    cat << EOF
-    IMPORTANT: If you are logged out automatically, the refresh FAILED.  You
-               were probably on '/usr2' before you promoted to 'root'.  Try
-               again, but 'cd /tmp' before promoting to 'root'.
+    device=$(grep " /usr2 " /proc/mounts | cut -d' ' -f1)
+    type=$(grep " /usr2 " /proc/mounts | cut -d' ' -f3)
+
+    if [[ -z "$background" ]]; then
+        cat << EOF
+
+        IMPORTANT: If you are logged out automatically, the refresh FAILED.  You
+                   were probably on '/usr2' before you promoted to 'root'.  Try
+                   again, but 'cd /tmp' before promoting to 'root'.
 
 EOF
+    fi
+
+    fuser -k -M -m /usr2 || :
+    sleep 1
+
+    if [[ -n "$background" ]]; then
+        echo ""
+    fi
+    echo "Starting critical phase. Executing \"umount /usr2\" ..."
+    echo ""
+    umount /usr2
+    UUID=$(tune2fs -l $device | grep UUID | grep -o '[^ ]*$')
+    echo "Executing \"mke2fs -F -t $type -U $UUID $device\""
+    echo ""
+    mke2fs -F -t $type -U $UUID $device
+    mount /usr2
+    echo "... completed \"mount /usr2\".  The critical phase has finished."
+    if [[ -z "$background" ]]; then
+        echo "" >/dev/tty
+    fi
 fi
 
-fuser -k -M -m /usr2 || :
-sleep 1
-
-echo "Starting critical phase. Executing \"umount /usr2\" ..."
-echo ""
-umount /usr2
-UUID=$(tune2fs -l $device | grep UUID | grep -o '[^ ]*$')
-echo "Executing \"mke2fs -F -t $type -U $UUID $device\""
-echo ""
-mke2fs -F -t $type -U $UUID $device
-mount /usr2
-echo "... completed \"mount /usr2\".  The critical phase is finished."
-echo ""
-
 if [[ -z "$background" ]]; then
+    if [[ -z "$initialize" ]]; then
+        echo "" >/dev/tty
+    fi
     if [[ -n "$pv" ]]; then
         cat >/dev/tty << EOF
-    You may see two login messages from your Operational system.  If you are
-    prompted for the 'root' or other password on that system (twice), you
-    should provide it.  Then you will see a progress bar during the transfer.
+    You may see a login message from your Operational system.  If you are
+    prompted for the 'root' or other password on that system, you should
+    provide it.  Then a progress report will be displayed.
 EOF
     else
-       cat >/dev/tty << EOF
+        cat >/dev/tty << EOF
     You may see a login message from your Operational system  If you are
     prompted for the 'root' or other password on that system, you should
     provide it.  Then there will be a long pause without any output unless
@@ -387,9 +431,9 @@ EOF
     'refresh_spare_usr2' is running, but see the 'USING THE SYSTEMS WHILE THE
     SCRIPT IS RUNNING' section of the '-h' help output for more details.
 
-    When the transfer finishes, a summary of the transfer will be printed and
-    you will see a line that starts: 'Done. ...', and get a prompt. Please
-    follow the directions on the 'Done. ...' line.
+    When the transfer finishes, the elapsed time of the transfer will be
+    printed and you will see a line that starts: 'Done. ...', and get a prompt.
+    Please follow the directions on the 'Done. ...' line.
 
 EOF
     if [[ -n "$send_email" ]]; then
@@ -400,29 +444,27 @@ EOF
     fi
 fi
 
-cat << EOF
-    If there are errors, please report them at
-    https://github.com/nvi-inc/fsl10/issues.
-
-EOF
-
 remote_user=root
-remote_command='cd /usr2; tar --one-file-system -cf - .'
+remote_dir=/usr2/
 
 # Use your Operational system name in place of 'operational' in the next line
 remote_node=operational
 
 # Uncomment the next two lines for CIS hardened systems
 #remote_user=spare
-#remote_command='sudo send_usr2'
+#remote_dir=/
 
-if [[ -n "$pv" && -z "$background" ]]; then
-    size="$(ssh $remote_user@$remote_node df|grep /usr2|tr -s ' '|cut -d ' ' -f 3)"k
-else
-    size=
+rsync_options=-aH
+if [[ -n "$ignore" ]]; then
+    rsync_options="${rsync_options}I"
 fi
 
-time ssh "$remote_user@$remote_node" "$remote_command" | safe_pv | (cd /usr2; tar xpf - --totals)
+if [[ -z "$background" ]]; then
+    rsync_options="${rsync_options}v"
+    time rsync "$rsync_options" --delete "$remote_user@$remote_node:$remote_dir" /usr2 | safe_pv >/dev/null
+else
+    time rsync "$rsync_options" --delete --stats --human-readable "$remote_user@$remote_node:$remote_dir" /usr2
+fi
 
 cat << EOF
 
