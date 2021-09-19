@@ -43,7 +43,7 @@ OPTIONS
  -Y       Yes: proceed without prompting for confirmation
 
 The '-i' option should only be rarely needed.  It is recommended to NOT use
-uppercase options except in special circumstances.
+the uppercase options except in special circumstances.
 
 DESCRIPTION
 
@@ -71,12 +71,12 @@ MODES
 
 The script has two modes, background, which is the default, and foreground
 using the '-f' option.  For background refreshes, the overall 'rsync' transfer
-statistics and overall time required  are included in the log file.
+statistics and overall time required are listed in the log file.
 
 For background refreshes, verify that it has finished, either from the log file
-or an email, before performing the finishing up steps: checking that 'mdstat'
-does not show an active recovery and then rebooting.  Those finishing up steps
-are also need for foreground mode, but it should be apparent from the screen
+or an email, before performing the finishing-up steps: checking that 'mdstat'
+does not show an active recovery and then rebooting.  Those finishing-up steps
+are also needed for foreground mode, but it should be apparent from the screen
 output when the refresh has finished.
 
 For foreground refreshes, a progress report of the number of files transferred,
@@ -140,9 +140,9 @@ and
 
 If the script is interrupted or otherwise fails between these commands, it will
 usually be necessary to take corrective action.  This normally consists of
-re-executing (using copy-and-paste) the contents (everything from between the
+re-executing (using copy-and-paste) the command (everything from between the
 double quotes, typically a long string that will probably overwrap your
-terminal width) of the output line
+terminal width) shown in the output line
 
     Executing "mke2fs -F -t ..."
 
@@ -178,7 +178,7 @@ fi
 
 safe_pv() {
     if [[ -n "$pv" ]]; then
-        $pv -Wlbrt 2>/dev/tty
+        "$pv" -Wlbrt 2>/dev/tty
     fi
 }
 
@@ -320,9 +320,6 @@ exit 1
     fi
     if [[ -n "$initialize" ]]; then
         options="${options}I"
-    fi
-    if [[ -n "$progress" ]]; then
-        options="${options}p"
     fi
 
     if [[ -n "$background" ]]; then
