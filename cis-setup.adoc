@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.4.2 - September 2021
+Version 1.4.3 - September 2021
 
 :experimental:
 :toc:
@@ -726,18 +726,28 @@ TIP: Read the
 <<raid.adoc#,RAID Notes for FSL10>> document for important information
 on the __refresh_spare_usr2__ script.
 
-This sub-section describes the steps needed to enable use of the
+This subsection describes the steps needed to enable use of the
 _refresh_spare_usr2_ script with CIS hardening. All steps must be
-executed as _root_.
+performed as _root_ on the specified system. You should read all of
+each step or sub-step before following it.
 
 . On the _operational_ system:
 
-.. Create _spare_ account:
+.. Create _spare_ account. Execute:
+
++
+
+----
+addgroup spare --gid 2000
+adduser spare --uid 2000 --gid 2000
+----
 
 +
 
 NOTE: The user's home directory is on _/home_ (by default), not
 _/usr2_.
+
++
 
 +
 
@@ -749,18 +759,9 @@ default. If you think you might have more than 1000 users or groups,
 you might want to increase the values for the _spare_ account and
 group.
 
-+
+. On the _spare_ system.
 
-----
-addgroup spare --gid 2000
-adduser spare --uid 2000 --gid 2000
-----
-
-+
-
-. On the _spare_ system:
-
-.. Install _refresh_spare_usr2_:
+.. Install _refresh_spare_usr2_. Execute:
 
   cd /usr/local/sbin
   cp -a /root/fsl10/RAID/refresh_spare_usr2 refresh_spare_usr2
@@ -803,16 +804,7 @@ form is:
 #remote_user=spare
 ....
 
-.. Create and copy a key for _root_:
-
-+
-
-NOTE: If _root_ already has a key, you only need the second command
-below to copy it to the _spare_ account:
-
-+
-
-NOTE: It is recommended to not set a passphrase.
+.. Create and copy a key for _root_. Execute:
 
 +
 
@@ -827,11 +819,16 @@ ssh-copy-id spare@_operational_
 where `_operational_` is the alias, name, or IP of your _operational_
 system.
 
-.. Enable _sudo_ to run the script:
++
+
+NOTE: If _root_ already has a key, you only need the second command
+above to copy it to the _spare_ account:
 
 +
 
-Use _visudo_ to add:
+NOTE: It is recommended to not set a passphrase.
+
+.. Enable running the script with _sudo_. Use _visudo_ to add:
 
 +
 
@@ -849,7 +846,7 @@ account name.
 
 . On the _operational_ system:
 
-.. Install the _rrsync_ script:
+.. Install the _rrsync_ script. Execute:
 
 +
 
@@ -867,7 +864,7 @@ _~spare/.ssh/authorized_keys_ line with:
 
 `command="sudo --preserve-env rrsync -ro /usr2" ssh-rsa`
 
-.. Use _visudo_ to add:
+.. Enable _spare_ to run _rrsync_ with _sudo_. Use _visudo_ to add:
 
 +
 
@@ -877,7 +874,7 @@ spare          ALL=(ALL) NOPASSWD:SETENV: /usr/bin/rrsync
 
 .. Lock out spare account from normal login (but it must have a
 shell). This will disable password login, but not _ssh_ login with
-keys, for this user:
+keys, for this user. Execute:
 
 
 +
@@ -886,7 +883,8 @@ keys, for this user:
 usermod -L spare
 ----
 
-.. Disable password aging and inactivity time-out for this account:
+.. Disable password aging and inactivity time-out for this account,
+Execute:
 
 +
 

@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.4.4 - September 2021
+Version 1.4.5 - September 2021
 
 :sectnums:
 :experimental:
@@ -691,12 +691,13 @@ _sudo_ in a regular account acceptable.  Please see the
 refresh_spare_usr2 with CIS hardening>> subsection of the
 <<cis-setup.adoc#,CIS Hardening for FSL10>> document.
 
-All the steps below must be executed as _root_ on the specified
-system.
+All the steps below must be performed as _root_ on the specified
+system. You should read all of each step or sub-step before following
+it.
 
 . On the _spare_ system:
 
-.. Install _refresh_spare_usr2_:
+.. Install _refresh_spare_usr2_. Execute:
 
   cd /usr/local/sbin
   cp -a /root/fsl10/RAID/refresh_spare_usr2 refresh_spare_usr2
@@ -730,16 +731,7 @@ system.
 
 +
 
-.. Create and copy a key for _root_:
-
-+
-
-NOTE: If _root_ already has a key, you only need the second command
-below to copy it to the _spare_ system:
-
-+
-
-TIP: It is recommended to not set a passphrase.
+.. Create and copy a key for _root_. Execute:
 
 +
 
@@ -754,9 +746,20 @@ ssh-copy-id root@_operational_
 where `_operational_` is the alias, name, or IP of your _operational_
 system.
 
++
+
+NOTE: If _root_ already has a key, you only need the second command
+above to copy it to the _spare_ system.
+
++
+
++
+
+TIP: It is recommended to not set a passphrase.
+
 . On the _operational_ system:
 
-.. Install the _rrsync_ script:
+.. Install the _rrsync_ script. Execute:
 
 +
 
@@ -784,7 +787,7 @@ _spare_ system with:
 un-commenting the `PermitRootLogin` line and changing the second field
 from `prohibit-password` to `forced-commands-only`.
 
-... Restart `_sshd_:
+... Restart `_sshd_. Execute:
 
   systemctl restart sshd
 
@@ -800,18 +803,18 @@ IMPORTANT: Before proceeding, make sure that no one is logged into
 either system and that no processes are running on _/usr2_ on either
 system, particularly the FS.
 
-. Login on the _spare_ system on a local virtual console text terminal
-as _root_.
+. Login on the _spare_ system. The best choice for this is as _root_
+on a local virtual console text terminal.
 
 +
 
-An alternative is to login as a non-_root_ user either on a text
-console or by _ssh_ from another system (not the _operational_
-system). In this case, you should promote to _root_ using _su_ or run
-the script with _sudo_ (or _root_account_ for CIS hardened systems).
+TIP: Logging in as a non-_root_ user is acceptable. Any means can be
+used: a text console, _ssh_ from another system (preferrably not the
+_operational_ system), or the graphics X display. In these cases, you
+should promote to _root_ using _su_ (or execute the script with _sudo_
+for CIS hardened systems).
 
-
-. Execute:
+. Execute the script:
 
   refresh_spare_usr2
 
@@ -835,12 +838,6 @@ indication that it finished successfully.
 
 +
 
-If emails to _root_ are _not_ being forwarded off the system and you
-_can_ login as _root_ on a text console, you can check _root_'s email
-for the message.
-
-+
-
 Alternatively, you can examine the logs (before starting the refresh)
 in _/root/refresh_spare_usr2_logs_ to see how long previous refreshes
 took. When at least that much time has elapsed, you can login and can
@@ -857,22 +854,19 @@ _operational_ system while the script is running.
 If you do login to the _spare_ system, it is best to _not_ use an
 account with a home directory on the _/usr2_ partition (logging in as
 _root_ on a text console is okay) or otherwise access that partition
-while the script is running. Additionally, accounts with home
-directories on the spare system _/usr2_ partition may not be fully
-configured until after the refresh completes. As a result, some
-accounts that you are use to logging into with _ssh_ keys may require
-a password until the keys are transferred.
+while the script is running. In any event, activity on _/usr2_ should
+be minimized.
 
 It is possible to use the operational system during the refresh if
 necessary, but this should be avoided if possible and activity on the
-_/usr2_ partition should be as limited as possible.  You should not
-expect any changes on the operational system _/usr2_ that occur after
-the refresh starts to be propagated to the spare system. If any files
-are deleted before they can be transferred, there will be a warning
-`file has vanished: "_file_"`, for each such `_file_`, and there will
-be a summary warning that starts with `rsync warning: some files
-vanished before they could be transferred`, but without additional
-warnings or errors, the transfer should otherwise be successful.
+_/usr2_ partition should be minimized. You should not expect any
+changes on the operational system _/usr2_ that occur after the refresh
+starts to be propagated to the spare system. If any files are deleted
+before they can be transferred, there will be a warning `file has
+vanished: "_file_"`, for each such `_file_`, and there will be a
+summary warning that starts with `rsync warning: some files vanished
+before they could be transferred`, but without additional warnings or
+errors, the transfer should otherwise be successful.
 
 ====
 
