@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.4.1 - September 2021
+Version 1.4.2 - September 2021
 
 :experimental:
 :toc:
@@ -721,7 +721,7 @@ to confirm connecting. Finally, logout of the `spare` account on
 
 NOTE: This subsection follows the FS manual font conventions.
 
-IMPORTANT: Please read the
+TIP: Read the
 <<raid.adoc#_refresh_spare_usr2,refresh_spare_usr2>> section of the
 <<raid.adoc#,RAID Notes for FSL10>> document for important information
 on the __refresh_spare_usr2__ script.
@@ -731,24 +731,6 @@ _refresh_spare_usr2_ script with CIS hardening. All steps must be
 executed as _root_.
 
 . On the _operational_ system:
-
-.. Install the _rrsync_ script:
-
-+
-
-....
-gunzip -c /usr/share/doc/rsync/scripts/rrsync.gz >/usr/local/bin/rrsync
-ln -s /usr/local/bin/rrsync /usr/bin/rrsync
-chmod u+x,go-x /usr/local/bin/rrsync
-....
-
-.. Use _visudo_ to add:
-
-+
-
-....
-spare          ALL=(ALL) NOPASSWD:SETENV: /usr/bin/rrsync
-....
 
 .. Create _spare_ account:
 
@@ -764,7 +746,8 @@ keep the values in sync for users on both systems. In other words, it
 is not necessary to worry about jumping over a low value on the
 _spare_ system when values are assigned sequentially, as is the
 default. If you think you might have more than 1000 users or groups,
-you might want to increase the values for the _spare_ account.
+you might want to increase the values for the _spare_ account and
+group.
 
 +
 
@@ -777,29 +760,55 @@ adduser spare --uid 2000 --gid 2000
 
 . On the _spare_ system:
 
-.. Customize _refresh_spare_usr2_
+.. Install _refresh_spare_usr2_:
 
+  cd /usr/local/sbin
+  cp -a /root/fsl10/RAID/refresh_spare_usr2 refresh_spare_usr2
+  chown root.root refresh_spare_usr2
+  chmod a+r,u+wx,go-wx refresh_spare_usr2
+
+.. Customize _refresh_spare_usr2_, following the directions in the
+comments in the script:
+
+... Comment-out the lines (add leading ``#``s):
 
 +
 
-The un-customized script is provided in
-_/root/fsl10/RAID/refresh_spare_usr2_. Follow the directions in the
-comments, being sure to _uncomment_ the two lines for CIS hardened
-systems. Their commented out form is:
+....
+echo "This script must be customized before use.  See script for details."
+exit 1
+....
+
+... Change the `operational` in the line:
+
++
+
+....
+remote_node=operational
+....
+
++
+
+to the alias (preferred), FQDN, or IP address of your _operational_
+system.
+
+... Uncomment the line for CIS hardened systems. The commented out
+form is:
+
++
 
 +
 
 ....
 #remote_user=spare
-#remote_dir=/
 ....
 
-.. Create and copy a key for _root_
+.. Create and copy a key for _root_:
 
 +
 
-If _root_ already has a key, you only need the second command below to
-copy it to the _spare_ account:
+NOTE: If _root_ already has a key, you only need the second command
+below to copy it to the _spare_ account:
 
 +
 
@@ -818,11 +827,11 @@ ssh-copy-id spare@_operational_
 where `_operational_` is the alias, name, or IP of your _operational_
 system.
 
-.. Enable _sudo_ to run the script
+.. Enable _sudo_ to run the script:
 
 +
 
-Use _visudo_ to add
+Use _visudo_ to add:
 
 +
 
@@ -834,10 +843,21 @@ Use _visudo_ to add
 
 +
 
-NOTE: It could be limited to a specific user (but not _oper_ or
-_prog_) by replacing `%operators` with the user account name.
+NOTE: It could be setup for a specific user (but not _oper_ or _prog_
+in a CIS hardened system) by replacing `%operators` with the user
+account name.
 
 . On the _operational_ system:
+
+.. Install the _rrsync_ script:
+
++
+
+....
+gunzip -c /usr/share/doc/rsync/scripts/rrsync.gz >/usr/local/bin/rrsync
+ln -s /usr/local/bin/rrsync /usr/bin/rrsync
+chmod u+x,go-x /usr/local/bin/rrsync
+....
 
 .. Set the _spare_ account to only allow a _forced command_ with _ssh_
 by replacing the `ssh-rsa` at the start of the first (and only) line of
@@ -846,6 +866,14 @@ _~spare/.ssh/authorized_keys_ line with:
 +
 
 `command="sudo --preserve-env rrsync -ro /usr2" ssh-rsa`
+
+.. Use _visudo_ to add:
+
++
+
+....
+spare          ALL=(ALL) NOPASSWD:SETENV: /usr/bin/rrsync
+....
 
 .. Lock out spare account from normal login (but it must have a
 shell). This will disable password login, but not _ssh_ login with

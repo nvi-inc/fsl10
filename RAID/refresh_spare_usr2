@@ -24,8 +24,9 @@ set -e
 usage() {
     cat << EOF
 
-This script refreshes the contents of the Spare system '/usr2' partition if you
-have both Operational and Spare systems.  Rebooting afterwards is recommended.
+This script refreshes the contents of the Spare system disk '/usr2' partition
+if you have both Operational and Spare systems.  Rebooting afterwards is
+recommended.
 
 IMPORTANT: This script will overwrite everything on the '/usr2' partition of
            the system it is run on.  Use it only on the Spare system.
@@ -82,7 +83,7 @@ For background refreshes, the overall 'rsync' transfer statistics and final
 overall time required are listed in the log file.
 
 For foreground refreshes, a progress meter will be displayed on the terminal.
-The two leftmost fields are the cumulative bytes transfers and the overall
+The two leftmost fields are the cumulative bytes transferred and the overall
 completion percentage.  The overall 'rsync' transfer statistics are not listed,
 but the final overall time is still listed.
 
@@ -99,8 +100,8 @@ but this should be avoided if possible and activity on the '/usr2' partition
 should be as limited as possible.  You should not expect any changes on the
 operational system '/usr2' that occur after the refresh starts to be propagated
 to the spare system.  If any files are deleted before they can be transferred,
-there will be a warning 'file has vanished: "..."', where '...' is the file
-name for each such file, and there will be a summary warning that starts with
+there will be a warning 'file has vanished: "..."' for each such file, where
+'...' is file name, and there will be a summary warning that starts with
 'rsync warning: some files vanished before they could be transferred', but
 without additional warnings or errors, the transfer should otherwise be
 successful.
@@ -142,7 +143,7 @@ and
 
     ... completed "mount /usr2". The critical phase has finished.
 
-If the script is interrupted or otherwise fails between these commands, it will
+If t$e script is interrupted or otherwise fails between these outputs, it will
 usually be necessary to take corrective action.  This normally consists of
 re-executing (using copy-and-paste) the command (everything from between the
 double quotes, typically a long string that will probably overwrap your
@@ -159,15 +160,8 @@ again.
 
 INSTALLATION
 
-This script must be customized before it is used.  Directions for that are
-embedded in the script.
-
-It may not be possible to setup the script to login into the Operational system
-with 'ssh' keys.  If not, it may still be possible to connect with a password;
-in which case, the script will only work if used with '-f', foreground mode.
-Using the CIS hardening approach may be a usable alternative if there are
-obstacles to logging into the 'root' account remotely, with or without using
-'ssh' keys.  See the comments in the script for more information.
+This script must be customized before it is used.  The installation
+instructions are included in comments in the script.
 
 EOF
 }
@@ -266,33 +260,22 @@ exit 1
 #
 # To customize this script (as 'root') on the Spare system:
 #   1. MAKE ABSOLUTELY SURE YOU ARE WORKING ON THE SPARE SYSTEM.
-#   2. Execute the commands:
-#        cd /usr/local/sbin
-#        cp -a /root/fsl10/RAID/refresh_spare_usr2 refresh_spare_usr2
-#        chown root.root refresh_spare_usr2
-#        chmod a+r,u+wx,go-wx refresh_spare_usr2
-#   3. Edit '/usr/local/sbin/refresh_spare_usr2':
+#   2. Edit '/usr/local/sbin/refresh_spare_usr2':
 #        A. Comment out the two commands above (add leading '#'s).
 #        B  Change the 'operational' in the 'remote_node=operational' line
 #           below to the alias (preferred), FQDN, or IP address of your
-#           Operational system  (There are additional instructions a little
-#           after that line for more customizations for CIS hardened systems.)
-#        C. Save the result.
-#   4. The 'ssh' keys for 'root' on the Spare system should be copied to the
-#      target account on the Operational system.  That system should also be
-#      set to allow 'ssh' connections to that account from the Spare system.
-#      If these two things cannot be done, the target account must allow
-#      password login; in which case, only '-f', foreground mode, will be
-#      usable.  The CIS hardening approach may be a useful alternative if there
-#      are problems with using 'ssh' keys to log into the 'root' account.  For
-#      more information, see the 'Installing refresh_spare_usr2 with CIS
-#      hardening' subsection of the 'CIS Hardending for FSL10 document'.  You
-#      may find the description of how to modify that approach to use the
-#      'root' account in the 'refresh_spare_usr2' subsection of the 'RAID Notes
-#      for FSL10' useful.
-#   5. Test it the first time just after the Spare system's disk has been
+#           Operational system.
+#        C. For CIS hardened systems only: uncomment the line (remove the
+#           leading '#') '#remote_user=spare'.
+#        D. Save the result.
+#   3. Follow the other directions in the 'Installing refresh_spare_usr2'
+#      subsection of the 'RAID Notes for FSL10' document.
+#      The CIS hardening approach may be a useful alternative, or necessary if
+#      you have a CIS hardened system.  For more information, see the
+#      'Installing refresh_spare_usr2 with CIS hardening' subsection of the
+#      'CIS Hardening for FSL10' document.
+#   4. Test it the first time just after the Spare system's disk has been
 #      rotated.
-#
 
 # setup for log file
     dir=/root/refresh_spare_usr2_logs
@@ -433,14 +416,12 @@ EOF
 fi
 
 remote_user=root
-remote_dir=/usr2/
 
 # Use your Operational system name in place of 'operational' in the next line
 remote_node=operational
 
-# Uncomment the next two lines for CIS hardened systems
+# Uncomment the next line for CIS hardened systems
 #remote_user=spare
-#remote_dir=/
 
 rsync_options=-aH
 if [[ -n "$ignore" ]]; then
@@ -448,9 +429,9 @@ if [[ -n "$ignore" ]]; then
 fi
 
 if [[ -z "$background" ]]; then
-    time rsync "$rsync_options" --delete --no-i-r --info=progress2 "$remote_user@$remote_node:$remote_dir" /usr2 >/dev/tty
+    time rsync "$rsync_options" --delete --no-i-r --info=progress2 "$remote_user@$remote_node:/" /usr2 >/dev/tty
 else
-    time rsync "$rsync_options" --delete --stats --human-readable "$remote_user@$remote_node:$remote_dir" /usr2
+    time rsync "$rsync_options" --delete --stats --human-readable "$remote_user@$remote_node:/" /usr2
 fi
 
 cat << EOF
