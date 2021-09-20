@@ -98,8 +98,12 @@ It is possible to use the operational system during the refresh if necessary,
 but this should be avoided if possible and activity on the '/usr2' partition
 should be as limited as possible.  You should not expect any changes on the
 operational system '/usr2' that occur after the refresh starts to be propagated
-to the spare system.  There may be some warnings that files cannot be found on
-the operational system if they are deleted before they are transferred.
+to the spare system.  If any files are deleted before they can be transferred,
+there will be a warning 'file has vanished: "..."', where '...' is the file
+name for each such file, and there will be a summary warning that starts with
+'rsync warning: some files vanished before they could be transferred', but
+without additional warnings or errors, the transfer should otherwise be
+successful.
 
 USING THE INITIALIZATION OPTION
 
