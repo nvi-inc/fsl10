@@ -70,8 +70,7 @@ the systems are quiescent.
 MODES
 
 The script has two modes, background, which is the default, and foreground
-using the '-f' option.  For background refreshes, the overall 'rsync' transfer
-statistics and overall time required are listed in the log file.
+using the '-f' option.
 
 For background refreshes, verify that it has finished, either from the log file
 or an email, before performing the finishing-up steps: checking that 'mdstat'
@@ -79,12 +78,13 @@ does not show an active recovery and then rebooting.  Those finishing-up steps
 are also needed for foreground mode, but it should be apparent from the screen
 output when the refresh has finished.
 
-For foreground refreshes, a progress report of the number of files transferred,
-elapsed time, and the rate of files be transferred is displayed if the 'pv'
-package is installed.  The number of files and the rate may appear to pause
-when very larges files are being transferred.  There is no ETA or percentage
-completion available.  The overall transfer statistics are not shown, but the
-overall time is still shown.
+For background refreshes, the overall 'rsync' transfer statistics and final
+overall time required are listed in the log file.
+
+For foreground refreshes, a progress meter will be displayed on the terminal.
+The two leftmost fields are the cumulative bytes transfers and the overall
+completion percentage.  The overall 'rsync' transfer statistics are not listed,
+but the final overall time is still listed.
 
 USING THE SYSTEMS WHILE THE SCRIPT IS RUNNING
 
@@ -170,20 +170,6 @@ obstacles to logging into the 'root' account remotely, with or without using
 'ssh' keys.  See the comments in the script for more information.
 
 EOF
-}
-
-# Check if pv (Pipe Viewer) is installed.
-# Used for progress bar
-if command -v pv &> /dev/null; then
-    pv=$(which pv)
-else
-    pv=
-fi
-
-safe_pv() {
-    if [[ -n "$pv" ]]; then
-        "$pv" -Wlbrt 2>/dev/tty
-    fi
 }
 
 short_me="$(basename $0)"
@@ -462,8 +448,7 @@ if [[ -n "$ignore" ]]; then
 fi
 
 if [[ -z "$background" ]]; then
-    rsync_options="${rsync_options}v"
-    time rsync "$rsync_options" --delete "$remote_user@$remote_node:$remote_dir" /usr2 | safe_pv >/dev/null
+    time rsync "$rsync_options" --delete --no-i-r --info=progress2 "$remote_user@$remote_node:$remote_dir" /usr2 >/dev/tty
 else
     time rsync "$rsync_options" --delete --stats --human-readable "$remote_user@$remote_node:$remote_dir" /usr2
 fi
