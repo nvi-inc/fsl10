@@ -30,7 +30,7 @@ have both Operational and Spare systems.  Rebooting afterwards is recommended.
 IMPORTANT: This script will overwrite everything on the '/usr2' partition of
            the system it is run on.  Use it only on the Spare system.
 
-Usage: $0 [options]
+Usage: $short_me [options]
 
 OPTIONS
 
@@ -182,6 +182,7 @@ safe_pv() {
     fi
 }
 
+short_me="$(basename $0)"
 background=1
 proceed=
 send_email=1
@@ -211,11 +212,11 @@ while getopts FhiINsY opt; do
             proceed=1
             ;;
         *)
-            echo "Use '$0 -h' for help" >&2
+            echo "Use '$short_me -h' for help" >&2
             exit 1
             ;;
         :)
-            echo "Use '$0 -h' for help" >&2
+            echo "Use '$short_me -h' for help" >&2
             exit 1
           ;;
     esac
@@ -360,8 +361,8 @@ if [[ -z "$background" ]]; then
 else
     echo "Refreshing Spare system disk '/usr2' partition in background ..."
 fi
-date="$(date)"
-echo "Started at $date"
+echo "Started at $(date)"
+echo "[$short_me version 3.0]"
 
 if [[ -n "$initialize" ]]; then
 
