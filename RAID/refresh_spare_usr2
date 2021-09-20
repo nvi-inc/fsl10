@@ -341,7 +341,7 @@ EOF
         echo "Log file is $log"
         echo ""
         options="${options}F"
-        "$0" "-$options" "$special" "$log" 2>&1 |tee "$log"
+        stdbuf -o0 "$0" "-$options" "$special" "$log" 2>&1 |stdbuf -o0 tee "$log"
     fi
     exit
 fi
