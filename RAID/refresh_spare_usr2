@@ -127,8 +127,8 @@ script being aborted while using the '-I' option.
 CRITICAL PHASE
 
 In many cases, if the script is unexpectedly aborted when using the '-I'
-option, if it is possible to recover simply by rerunning the script.  An
-important exception this is if the abort occurs in the 'critical phase'.
+option, it is possible to recover simply by rerunning the script.  An important
+exception to this is if the abort occurs in the 'critical phase'.
 
 The critical phase of operation occurs between the printing of
 
