@@ -324,7 +324,7 @@ EOF
         echo "Log file is $log"
         echo ""
         options="${options}F"
-        stdbuf -o0 "$0" "-$options" "$special" "$log" 2>&1 |stdbuf -o0 tee "$log"
+        "$0" "-$options" "$special" "$log" 2>&1 | tee "$log"
     fi
     exit
 fi
@@ -335,7 +335,7 @@ else
     echo "Refreshing Spare system disk '/usr2' partition in background ..."
 fi
 echo "Started at $(date)"
-echo "[$short_me version 3.0]"
+echo "[$short_me 3.0]"
 
 if [[ -n "$initialize" ]]; then
 
@@ -373,23 +373,22 @@ EOF
     mke2fs -F -t $type -U $UUID $device
     mount /usr2
     echo "... completed \"mount /usr2\".  The critical phase has finished."
-    if [[ -z "$background" ]]; then
-        echo "" >/dev/tty
-    fi
 fi
 
 if [[ -z "$background" ]]; then
-    if [[ -z "$initialize" ]]; then
-        echo "" >/dev/tty
-    fi
+# keep foreground messages in order, this delay may not always be long enough
+    sleep 0.1
+
     if [[ -n "$pv" ]]; then
         cat >/dev/tty << EOF
+
     You may see a login message from your Operational system.  If you are
     prompted for the 'root' or other password on that system, you should
     provide it.  Then a progress report will be displayed.
 EOF
     else
         cat >/dev/tty << EOF
+
     You may see a login message from your Operational system  If you are
     prompted for the 'root' or other password on that system, you should
     provide it.  Then there will be a long pause without any output unless
