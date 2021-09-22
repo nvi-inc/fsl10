@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.4.5 - September 2021
+Version 1.4.7 - September 2021
 
 :sectnums:
 :experimental:
@@ -662,9 +662,9 @@ systems. Once the RAIDs on both systems are _recovering_ you can
 log-out of both systems and then login into the _spare_ system again
 to start _refresh_spare_usr2_.
 
-The recovery of the RAIDs will increase the amount of time that the
-_refresh_spare_usr2_ takes to complete. It has been observed in some
-cases to approximately double the time required.
+While a _refresh_spare_usr2_  with two nearly synchronized _/usr2_
+partitions is fairly fast, the recovery of the RAIDs may increase the
+amount of time required by about a factor of three.
 
 Once _refresh_spare_usr2_ completes, it is safe to reboot, even if a
 recovery is still ongoing. The only requirement is to reboot the

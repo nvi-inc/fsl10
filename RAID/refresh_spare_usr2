@@ -64,7 +64,7 @@ If the script is aborted while it is running, it is usually possible to recover
 by simply rerunning it.  An important exception to this when using the '-I'
 option is described, with recovery steps, in the CRITICAL PHASE section below.
 
-The script may take up to three times longer to complete if both the
+The script may take about three times longer to complete if both the
 Operational and Spare systems are refreshing their secondary disks than when
 the systems are quiescent.
 
@@ -306,7 +306,7 @@ exit 1
     'refresh_spare_usr2' is running, but see the 'USING THE SYSTEMS WHILE THE
     SCRIPT IS RUNNING' section of the '-h' help output for more details.
 
-    After the refresh has finished wait, until 'mdstat' does not show an active
+    After the refresh has finished, wait until 'mdstat' does not show an active
     recovery and then reboot.
 
 EOF
@@ -323,8 +323,7 @@ EOF
         echo ""
         echo "Log file is $log"
         echo ""
-        options="${options}F"
-        "$0" "-$options" "$special" "$log" 2>&1 | tee "$log"
+        "$0" "-${options}F" "$special" "$log" 2>&1 | tee "$log"
     fi
     exit
 fi
@@ -379,23 +378,11 @@ if [[ -z "$background" ]]; then
 # keep foreground messages in order, this delay may not always be long enough
     sleep 0.1
 
-    if [[ -n "$pv" ]]; then
-        cat >/dev/tty << EOF
+    cat >/dev/tty << EOF
 
     You may see a login message from your Operational system.  If you are
     prompted for the 'root' or other password on that system, you should
-    provide it.  Then a progress report will be displayed.
-EOF
-    else
-        cat >/dev/tty << EOF
-
-    You may see a login message from your Operational system  If you are
-    prompted for the 'root' or other password on that system, you should
-    provide it.  Then there will be a long pause without any output unless
-    there are errors.
-EOF
-    fi
-    cat >/dev/tty << EOF
+    provide it.  Then progress information from 'rsync' will be displayed.
 
     It is best to NOT login into either the spare or operational system while
     'refresh_spare_usr2' is running, but see the 'USING THE SYSTEMS WHILE THE
