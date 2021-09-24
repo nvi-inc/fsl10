@@ -89,17 +89,17 @@ but the final overall time is still listed.
 
 USING THE SYSTEMS WHILE THE SCRIPT IS RUNNING
 
-It is best to NOT login to an account on the spare system with a home directory
+It is best to NOT login to an account on the Spare system with a home directory
 on the '/usr2' partition (logging in as 'root' on a text console is okay) or
 otherwise access that partition during the refresh.  Accounts with home
-directories on the spare system '/usr2' partition may not be fully configured
+directories on the Spare system '/usr2' partition may not be fully configured
 until after the refresh completes.
 
-It is possible to use the operational system during the refresh if necessary,
+It is possible to use the Operational system during the refresh if necessary,
 but this should be avoided if possible and activity on the '/usr2' partition
 should be as limited as possible.  You should not expect any changes on the
-operational system '/usr2' that occur after the refresh starts to be propagated
-to the spare system.  If any files are deleted before they can be transferred,
+Operational system '/usr2' that occur after the refresh starts to be propagated
+to the Spare system.  If any files are deleted before they can be transferred,
 there will be a warning 'file has vanished: "..."' for each such file, where
 '...' is the file name, and there will be a summary warning that starts with
 'rsync warning: some files vanished before they could be transferred', but
@@ -110,7 +110,7 @@ USING THE INITIALIZATION OPTION
 
 When using the '-I' option, it is recommended that you login on a text console
 as 'root'.  Alternatively, you could login as a non-'root' user either on a
-console or by 'ssh' from another system (preferably not the operational
+console or by 'ssh' from another system (preferably not the Operational
 system).  For either approach as a non-'root' user, you must make sure your
 working directory is not on '/usr2', for example by using 'cd /tmp', before
 running the script.  It is best to get off '/usr2' before promoting to 'root'.
@@ -302,7 +302,7 @@ exit 1
     Going to background, you should log out now or you may be logged out
     automatically.
 
-    It is best to NOT login into either the spare or operational system while
+    It is best to NOT login to either the Spare or Operational system while
     'refresh_spare_usr2' is running, but see the 'USING THE SYSTEMS WHILE THE
     SCRIPT IS RUNNING' section of the '-h' help output for more details.
 
@@ -384,7 +384,7 @@ if [[ -z "$background" ]]; then
     prompted for the 'root' or other password on that system, you should
     provide it.  Then progress information from 'rsync' will be displayed.
 
-    It is best to NOT login into either the spare or operational system while
+    It is best to NOT login to either the Spare or Operational system while
     'refresh_spare_usr2' is running, but see the 'USING THE SYSTEMS WHILE THE
     SCRIPT IS RUNNING' section of the '-h' help output for more details.
 
