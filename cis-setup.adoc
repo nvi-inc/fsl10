@@ -826,7 +826,7 @@ above to copy it to the _spare_ account:
 
 +
 
-NOTE: It is recommended to not set a passphrase.
+TIP: It is recommended to not set a passphrase.
 
 .. Enable running the script with _sudo_. Use _visudo_ to add:
 
@@ -864,7 +864,22 @@ _~spare/.ssh/authorized_keys_ line with:
 
 `command="sudo --preserve-env rrsync -ro /usr2" ssh-rsa`
 
-.. Enable _spare_ to run _rrsync_ with _sudo_. Use _visudo_ to add:
++
+
++
+
++
+
+TIP: If your _spare_ system is registered with DNS, you can provide
+some additional security by adding ``from="__node__" `` {nbsp}(note
+the trailing space) at the start of the line, where `__node__` is the
+FQDN or IP address of the _spare_ system.  It may be necessary to
+provide the FQDN, IP address, and/or alias of the _spare_ system in a
+comma separated list in place of  `__node__` to get reliable
+operation.
+
+.. Enable the _spare_ account to run _rrsync_ with _sudo_ without a
+password and passing environment variables. Use _visudo_ to add:
 
 +
 
@@ -872,9 +887,9 @@ _~spare/.ssh/authorized_keys_ line with:
 spare          ALL=(ALL) NOPASSWD:SETENV: /usr/bin/rrsync
 ....
 
-.. Lock out spare account from normal login (but it must have a
+.. Lock-out the _spare_ account from normal login (but it must have a
 shell). This will disable password login, but not _ssh_ login with
-keys, for this user. Execute:
+keys, for this account. Execute:
 
 
 +
@@ -883,8 +898,8 @@ keys, for this user. Execute:
 usermod -L spare
 ----
 
-.. Disable password aging and inactivity time-out for this account,
-Execute:
+.. Disable password aging and inactivity time-out for the _spare_
+account. Execute:
 
 +
 
