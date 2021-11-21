@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.5.1 - December 2021
+Version 1.6.0 - December 2021
 
 :sectnums:
 :experimental:
@@ -636,6 +636,88 @@ terminated early with kbd:[Ctrl-C], without affecting the recovery.
 If you abort the progress indicator, you can check the progress with _mdstat_. The
 system can be used normally while it recovering, but it may be a
 little slow.
+
+=== raid-events
+
+The _mdmonitor_ service can be configured to use the _raid-events_
+script to send email reports on RAID rebuilds and checks. This is most
+useful for getting reports for the start and end of a RAID build
+triggered by _refresh_secondary_. The script will also report on the
+start and end of any other RAID rebuilds, including those triggered by
+the _recover_raid_ script. Checks are triggered periodically to verify
+the integrity of the RAIDs.
+
+The emails are sent to _root_, then typically redirected to _oper_,`
+and then forwarded to off-system accounts that may have their email
+read more frequently. There are four different possible subject lines
+used in the emails:
+
+* `Rebuild Running on _device_`
+
++
+
+NOTE: Sometimes for a rebuild started by _refresh_secondary_, this
+message may be sent about 20 minutes after the rebuild has started.
+The cause of this is not entirely understood, but the message is
+eventually sent.
+
+* `Rebuild Ended _state_ on _device_`
+
+* `Check Running on _device_`
+
+* `Check Ended _state_ on _device_`
+
+where:
+
+* `_device_` is the RAID device, e.g., _/dev/md/0_
+
+* `_state_` is `OKAY` if the final state was not degraded; `DEGRADED`,
+if it was degraded.
+
+The body of each email is the output of the _mdstat_ script at the
+time the message was sent.
+
+==== Checking
+
+The _checking_ process is triggered by _/etc/cron.d/mdadm_ on
+the first Sunday of each month. It uses the
+_/usr/share/mdadm/checkarray_ script and takes a similar amount of time
+as a rebuild of the RAID triggered by _refresh_secondary_.
+
+==== Installation
+
+To install the script, use the following commands as _root_:
+
+```
+cd /usr/local/sbin
+cp ~/fsl10/RAID/raid-events .
+chmod u+x raid-events
+cat <<EOF >>/etc/mdadm/mdadm.conf
+
+PROGRAM /usr/local/sbin/raid-events
+EOF
+```
+
+And then reboot.
+
+==== Disabling checking
+
+If the checking process causes performance problems at inconvenient
+times, there are at least three options for dealing with it:
+
+* Disable the `AUTOCHECK` option in _/etc/default/mdadm_
+
++
+
+This is suitable if the RAID is rebuilt monthly using
+_refresh_secondary_. In this case, the check is superfluous.
+
+* Change the time at which it runs as configured in
+_/etc/cron.d/mdadm_
+
+* Cancel a running check, with:
+
+  /usr/share/mdadm/checkarray --cancel --all
 
 === refresh_spare_usr2
 
