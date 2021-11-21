@@ -1,0 +1,93 @@
+#!/bin/bash
+#
+# Copyright (c) 2021 NVI, Inc.
+#
+# This file is part of FSL10 Linux distribution.
+# (see http://github.com/nvi-inc/fsl10).
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+
+# For systems with GPT LVM RAID arrays, copies the partition table onto
+# the second disk (if missing), rebuilds the boot sector and adds the RAID
+# partition back into the array as a spare to be rebuilt.
+
+get_mdstat() {
+   local -n arr=$1
+   mapfile arr < <(cat /proc/mdstat;echo;lsblk --nodeps -o NAME,HCTL,MODEL,SIZE,SERIAL /dev/sd*[!0-9])
+}
+
+send_mail () {
+subject=$1
+shift
+echo "$@" | /usr/bin/mail -s "$subject" root &
+}
+
+event=$1
+device=$2
+component=$3
+
+#debug
+#get_mdstat lines
+#send_mail "raid-events: $event on $device component: $component" "${lines[@]}"
+
+if [[ "$event" != RebuildStarted && "$event" != RebuildFinished ]]; then
+    exit
+fi
+
+rebuild_file=/tmp/.rebuild_active
+check_file=/tmp/.check_active
+
+for run in {1..3}; do
+    if [[ "$run" != 1 ]]; then
+        sleep 1
+    fi
+    rebuild=
+    check=
+    degraded=OKAY
+    get_mdstat lines
+
+# debug
+#    send_mail "Try $run" "${lines[@]}"
+
+    for line in "${lines[@]}" ; do
+        if [[ "$line" == *recovery* ]]; then
+             rebuild=1
+        fi
+        if [[ "$line" == *check* ]]; then
+             check=1
+        fi
+        if [[ "$line" == *\[*_*\]* ]]; then
+             degraded="DEGRADED"
+        fi
+    done
+
+    if [[ -n "$rebuild" && ! -f "$rebuild_file" ]]; then
+        send_mail "Rebuild Running on $device" "${lines[@]}"
+        touch "$rebuild_file"
+        exit
+    elif [[ -z "$rebuild" && -f "$rebuild_file" ]]; then
+        send_mail "Rebuild Ended $degraded on $device" "${lines[@]}"
+        rm -f "$rebuild_file"
+        exit
+    elif [[ -n "$check" && ! -f "$check_file" ]]; then
+        send_mail "Check Running on $device" "${lines[@]}"
+        touch "$check_file"
+        exit
+    elif [[ -z "$check" && -f "$check_file" ]]; then
+        send_mail "Check Ended $degraded on $device" "${lines[@]}"
+        rm -f "$check_file"
+        exit
+    fi
+done
