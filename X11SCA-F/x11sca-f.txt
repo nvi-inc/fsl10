@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020-2021 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -30,3 +30,8 @@ Special instructions for X11SCA-F motherboard
 .. Move the network cable to the first (left) interface.
 .. reboot
 . Continue with the Third Stage Installation
+
+The driver will need to be re-installed after a kernel ABI update. After
+rebooting to install the kernel update, repeat the steps above beginning with
+'cd /us/local/src' and ending with 'reboot' (inclusive of both), except omit
+the 'tar ...' and moving the network cable steps.
