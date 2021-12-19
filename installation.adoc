@@ -20,7 +20,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.5.0 - October 2021
+Version 1.5.1 - November 2021
 
 :sectnums:
 :experimental:
@@ -751,34 +751,30 @@ See also the <<Setup additional disk>> sub-section in the <<Post Install>> secti
    git checkout -q _tag_
 ....
 
-where _tag_ is the latest available release, be it the 10.0.0-beta3
-pre-release (as of the time of writing), 10.0.0, or later.
+where _tag_ is the latest available release, be it 10.0.0 or
+later.
 
 [IMPORTANT]
 ====
 
-Although 10.0.0 is the next release planned at the time this was
-written, and should suffice for an initial installation, it may well
-not be the most up-to-date release when you are installing. To find
-more recent releases, go to:
+Although 10.0.0 is the current release at the time this was written,
+and should suffice for an initial installation, it may well not be the
+most up-to-date release when you are installing. To find more recent
+releases, go to:
 
 https://github.com/nvi-inc/fs/releases
 
 You should probably use the most recent release ending in *.0* (a
 so-called _feature_ release) with no trailing *-_string_*, e.g.,
-    *10.0.0*. However, if there is a more recent _patch_ release (not
-            ending *.0*) for the most recent feature release, you
-    should use the most recent patch release.  For example, if
-    *10.1.0* is the most recent feature release and there are
-    corresponding patch releases,  *10.1.1* and *10.1.2*, the last
-    one, ending *.2*, is probably the best choice.
+*10.0.0*. However, if there is a more recent _patch_ release (not
+ending *.0*) for the most recent feature release, you should use the
+most recent patch release.  For example, if *10.1.0* is the most
+recent feature release and there are corresponding patch releases,
+*10.1.1* and *10.1.2*, the last one, ending *.2*, is probably the best
+choice.
 
 NOTE: Releases _numbered_ before *10.0.0* are listed mostly for historical
-reference. They are not intended for production.
-
-NOTE: Until there is an official release of *10.0.0*, only
-pre-releases with a trailing *-string* will be available. In this
-case, you should typically use the most recent.
+reference. They are not intended for operational use.
 
 ====
 
