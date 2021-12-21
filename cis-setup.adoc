@@ -20,7 +20,7 @@
 
 = CIS hardening for FSL10
 Dave Horsley and Ed Himwich
-Version 1.5.0 - October 2021
+Version 1.5.1 - December 2021
 
 :experimental:
 :toc:
@@ -28,7 +28,7 @@ Version 1.5.0 - October 2021
 == Introduction
 
 These notes detail adding extra security features to Field System
-Linux 10 as advised by Center for Internet Security (CIS). With the
+Linux _10_ as advised by Center for Internet Security (CIS). With the
 exception of the partition configuration, all actions are to be
 performed post-installation (see the <<installation.adoc#,FSL10
       Installation>> document). All tests that failed, topics that need
@@ -36,8 +36,8 @@ to be discussed, and issues with the benchmark remediations are
 provided in separate sections. A final section covers additional
 steps that are needed for FS operations.
 
-This document  is based on the results for the CIS Debian Linux 9
-Benchmark v1.0.0 - Level 2 - Server.
+This document  is based on the results for the "`CIS Debian Linux 9
+Benchmark v1.0.0 - Level 2 - Server`".
 
 == Partition Configuration
 
@@ -46,12 +46,12 @@ optional during the partition section.
 
 == Post-installation changes
 
-All commands need to be run as `root`
+All commands need to be run as _root_.
 
 === Scripted changes
 
-As many changes as possible are implemented by the `remediate` script.
-The script is intended to be run after the "Third Stage Installation"
+As many changes as possible are implemented by the _remediate_ script.
+The script is intended to be run after the "`Third Stage Installation`"
 steps in the FSL10 instructions, before any further changes have been
 made to the system (however initializing and adding other disks to the
 RAID can intervene).
@@ -63,11 +63,11 @@ script ../remediate.txt
 exit
 ....
 
-WARNING: This script should not be run more than once on a system.
+IMPORTANT: This script should not be run more than once on a system.
 
-TIP: The use of the *script* command causes the output to be recorded
+TIP: The use of the _script_ command causes the output to be recorded
 in the specified file. This can be very helpful for understanding what
-went wrong if the script fails. The script itself uses the *-x* option
+went wrong if the script fails. The script itself uses the `-x` option
 to echo the commands as they are executed to make it easy to match the
 output with the commands being executed.
 
@@ -106,7 +106,7 @@ Add:
 sshd:ALL
 ....
 
-It is recommended that you further restrict `sshd` to specific hosts and/or
+It is recommended that you further restrict _sshd_ to specific hosts and/or
 sub-domains.
 
 ==== Password policies
@@ -120,9 +120,9 @@ You may wish to set password reuse remember to 24.
 You may wish to configure a remote log host and/or set log retention
 period to at least one year.
 
-To set a remote log host, edit the `/etc/rsyslog.conf` and
-`/etc/rsyslog.d/*.conf` files and add the following line (where
-`loghost.example.com` is the name of your central log host).
+To set a remote log host, edit the _/etc/rsyslog.conf_ and
+_/etc/rsyslog.d/*.conf_ files and add the following line (where
+_loghost.example.com_ is the name of your central log host).
 
 ....
 *.* @@loghost.example.com
@@ -135,7 +135,7 @@ kill -HUP rsyslogd
 ....
 
 Set the retention period of system logs by editing
-`/etc/logrotate.d/rsyslog`. This should be configured to store logs
+_/etc/logrotate.d/rsyslog_. This should be configured to store logs
 for at least a minimum of a year (366 for daily 53 for weekly)..
 
 ==== Bootloader password
@@ -149,8 +149,8 @@ Reenter password: <password>
 Your PBKDF2 is <encrypted-password>
 ....
 
-Add the following into `/etc/grub.d/00_header` or a custom
-`/etc/grub.d` configuration file:
+Add the following into _/etc/grub.d/00_header_ or a custom
+_/etc/grub.d_ configuration file:
 
 ....
 cat <<EOF
@@ -160,7 +160,7 @@ EOF
 ....
 
 If there is a requirement to be able to boot/reboot without entering
-the password, edit `/etc/grub.d/10_linux` and add `--unrestricted` to the
+the password, edit _/etc/grub.d/10_linux_ and add `--unrestricted` to the
 line `CLASS=`
 
 IMPORTANT: It is strongly recommended that booting without a password
@@ -176,7 +176,7 @@ CLASS="--class gnu-linux --class gnu --class os --unrestricted"
 ....
 
 Run the following commands to update the grub2 configuration and reset
-the `grub.cfg` permissions:
+the _grub.cfg_ permissions:
 
 ....
 update-grub
@@ -207,9 +207,9 @@ Exim4 is required as MTA; it never accepts incoming remote connections
 
 === 3.5 Firewall Configuration
 
-The firewall is configured with `ufw` instead of `iptables` and
-`ip6tables`. This causes four to six issues depending on the details
-of the installation, but `ufw` provides the same security as the
+The firewall is configured with _ufw_ instead of _iptables_ and
+_ip6tables_. This causes four to six issues depending on the details
+of the installation, but _ufw_ provides the same security as the
 recommended remediations. The configuration is set to by default deny
 for incoming connections, enable incoming SSH connections, and sets
 logging for all connections. Setup:
@@ -227,24 +227,24 @@ A remote log server must be configured by system administrators later.
 	
 === 4.2.4 Ensure permissions on all logfiles are configured
 
-All files except `/var/log/wtmp` have the requested permissions. That
+All files except _/var/log/wtmp_ have the requested permissions. That
 file changes on a reboot to `rw-rw-r--`, owned by `root.wtmp`. No
 sensitive information is stored in the file and making it readable for
-others allows commands like `last` and `who` to work.
+others allows commands like _last_ and _who_ to work.
 
 === 5.2.6 Ensure SSH X11 forwarding is disabled
 
-We require `ssh` X11 forwarding for use with FS for remote operations
+We require _ssh_ X11 forwarding for use with FS for remote operations
 and testing.
 
 === 5.4.2 Ensure system accounts are non-login
 
-System accounts (i.e., accounts with user ID less than 1000) `oper`
-and `prog` are needed for compatibility with the wider VLBI community
+System accounts (i.e., accounts with `UID` less than `1000`) _oper_
+and _prog_ are needed for compatibility with the wider VLBI community
 and are only used as service accounts from AUID accounts. They require
-a valid shell, but direct local login and `ssh` login (including with
-    keys) are disabled for these two accounts. Note that *oper* and
-*prog* have no password expiration (they has no passwords) or
+a valid shell, but direct local login and _ssh_ login (including with
+    keys) are disabled for these two accounts. Note that _oper_ and
+_prog_ have no password expiration (they has no passwords) or
 inactivity time-out, like other system accounts.
 
 == CIS issues that need to be addressed
@@ -259,9 +259,9 @@ it uses `ignore` by default.
 
 === 2.3.4 Ensure telnet client is not installed
 
-Would prefer to keep the `telnet` client, it is useful for debugging
+Would prefer to keep the _telnet_ client, it is useful for debugging
 ASCII device protocol devices, which we have.  The security weakness
-is `telnetd`, which is not installed, nor does the benchmark test
+is _telnetd_, which is not installed, nor does the benchmark test
 for it.
 
 === 4.1.1.2 Ensure system is disabled when audit logs are full
@@ -299,7 +299,7 @@ This section details problems with the recommended remediations.
 === 2.1.2 Ensure openbsd-inetd is not installed
 
 Remediation solves problem, but does not make the test pass. To do the
-latter required 'purge'.
+latter required `purge`.
 
 === 2.2.1.2 Ensure ntp is configured
 
@@ -307,13 +307,13 @@ Remediation makes it less secure. A default policy of `ignore` is better.
 
 === 2.3.4 Ensure telnet client is not installed
 
-The remediation does not make the test pass, that required 'purge'.
+The remediation does not make the test pass, that required `purge`.
 
 === 3.2.4 Ensure suspicious packets are logged
 
-The remediation lines added in `/etc/sysctl.d/*` are not respected at
+The remediation lines added in _/etc/sysctl.d/*_ are not respected at
 boot (unlike all others). To overcome this, the following lines are
-used in a new systemd service 'CISfix' at boot.
+used in a new systemd service `CISfix` at boot.
 
 ....
 sysctl -w net.ipv4.conf.all.log_martians=1
@@ -324,17 +324,17 @@ sysctl -w net.ipv4.route.flush=1
 === 4.1 Configure System Accounting (auditd)
 
 Many of the remedations are described in terms of the contents of
-`/etc/audit/audit.rules`. However, the contents of that file are
-auto-generated at boot from the files in `/etc/audit/rules.d`, which
+_/etc/audit/audit.rules_. However, the contents of that file are
+auto-generated at boot from the files in _/etc/audit/rules.d_, which
 is where these remediations must go.
 
 === 4.1.6 Ensure events that modify the system's network environment are collected
 
-64-bit remediation had b64 and b32 rules concatenated on one line.
+64-bit remediation had `b64` and `b32` rules concatenated on one line.
 
 === 4.1.17 Ensure kernel module loading and unloading is collected
 
-64-bit remediation was missing b32 rule.
+64-bit remediation was missing `b32` rule.
 
 == Additional set-up
 
@@ -344,23 +344,23 @@ After the CIS hardening is completed, some additional set-up is needed.
 
 There are three issues that need to be corrected after the CIS hardening.
 
-. The AIDE package used in CIS hardening adds a line to */etc/crontab*
-to run *aide.wrapper*. Unfortunately at this time, the line inserted is
-incorrectly formatted, missing the "user" field, for Debian systems.
-This causes the *cron* daemon to ignore the file, thereby breaking
-basic *cron* functionality. This can be fixed by adding *root* as the
-user in a new field after the fifth field on the *aide.wrapper* line
+. The AIDE package used in CIS hardening adds a line to _/etc/crontab_
+to run _aide.wrapper_. Unfortunately at this time, the line inserted is
+incorrectly formatted, missing the "`user`" field, for Debian systems.
+This causes the _cron_ daemon to ignore the file, thereby breaking
+basic _cron_ functionality. This can be fixed by adding _root_ as the
+user in a new field after the fifth field on the _aide.wrapper_ line
 and then running:
 +
 ....
 systemctl restart cron
 ....
 
-. The CIS hardening configuration of PAM causes uses of *sudo* that
+. The CIS hardening configuration of PAM causes uses of _sudo_ that
 require a password to increment the failure count when a correct
 password is accepted, leading to eventual lock-out of the user using
-*sudo* when the *deny* lock-out failure count is reached.  To make sure the
-*tally2* failure count is reset after a successful *sudo* that
+_sudo_ when the `deny` lock-out failure count is reached.  To make sure the
+`tally2` failure count is reset after a successful _sudo_ that
 required a password, add to:
 
 +
@@ -370,13 +370,13 @@ required a password, add to:
 account required pam_tally2.so
 ```
 +
-NOTE: To reset a locked-out user after CIS hardening, use */sbin/pam_tally2 -u <user> --reset*
-where *<user>* is the user account. Leave off the *--reset* to see what the current tally is.
+NOTE: To reset a locked-out user after CIS hardening, use `*/sbin/pam_tally2 -u _user_ --reset*`
+where `*_user_*` is the user account. Leave off the `--reset` to see what the current tally is.
 
-. Using the *noexec* option for */tmp* causes a problem for the
-package management system. The *dpkg-preconfigure* program places and
-executes scripts on */tmp* as part of package installation. The
-*noexec* option prevents the execution of the scripts. To work around
+. Using the `noexec` option for _/tmp_ causes a problem for the
+package management system. The _dpkg-preconfigure_ program places and
+executes scripts on _/tmp_ as part of package installation. The
+`noexec` option prevents the execution of the scripts. To work around
 this issue, you can exeucte:
 
     cd /root/fsl10/
@@ -384,18 +384,18 @@ this issue, you can exeucte:
 
 +
 
-The *root_tmp* script will do three things: 
+The _root_tmp_ script will do three things:
 
-.. Create a one time service at boot to clean the */root/tmp* directory
-.. Set *dpkg-preconfigure* to use */root/tmp* for temporary files
-.. Create an initial */root/tmp* directory
+.. Create a one time service at boot to clean the _/root/tmp_ directory
+.. Set _dpkg-preconfigure_ to use _/root/tmp_ for temporary files
+.. Create an initial _/root/tmp_ directory
 
 +
 
-There may be other issues with using the *noexec* option for */tmp*,
+There may be other issues with using the `noexec` option for _/tmp_,
 but we don't have any specifics at this time.
 
-. Sometimes the firewall (UFW) does not work properly after rebooting.
+. Sometimes the firewall (_ufw_) does not work properly after rebooting.
 This has been noticed for remote access to _gromet_ for met. data on
 port 50001. There are no other known issues. An apparent fix for this
 is to disable and re-enable the firewall. If you have this problem and
@@ -407,38 +407,38 @@ to perform this action:
 +
 
 The new service will run at the next reboot. It is configured to run
-_after_ UFW has been started.
+_after_ _ufw_ has been started.
 
 === Enabling user promotion to oper/prog and root
 
-The model of FSL assumes *oper* and *prog* accounts will be used for
+The model of FSL assumes _oper_ and _prog_ accounts will be used for
 operations and programming respectively. However, some organizations may
 have security and auditing restrictions that mean operators must
 log-in using their own account (possibly named with their Agency User ID,
     AUID).  As the Field System currently operates, users will then
-need to switch to the *oper* or *prog* account after login. Likewise,
-     if a user is allowed to elevate to *root*, they will need to do
+need to switch to the _oper_ or _prog_ account after login. Likewise,
+     if a user is allowed to elevate to _root_, they will need to do
      so after log-in to their own account. This sub-section covers how to
      enable this capability. The next sub-section <<Adding AUID accounts>> covers how to add an
      AUID account. The method described here, and in the next sub-section,
-     uses *dhorsley* as an example user.
+     uses _dhorsley_ as an example user.
 
-For *oper* and *prog*, we suggest creating two groups that can *sudo*
+For _oper_ and _prog_, we suggest creating two groups that can _sudo_
 to the accounts.
 
-run *visudo* then add at end:
+run _visudo_ then add at end:
 
     %operators      ALL=(oper) NOPASSWD: ALL
     %programmers    ALL=(prog) NOPASSWD: ALL
     %programmers    ALL=(oper) NOPASSWD: ALL
 
-To allow *operators* to use *refresh_secondary*, *shutdown*, and *reboot*, add (respectively):
+To allow _operators_ to use _refresh_secondary_, _shutdown_, and _reboot_, add (respectively):
 
    %operators      ALL=(ALL) /usr/local/sbin/refresh_secondary
    %operators      ALL=(ALL) /sbin/shutdown
    %operators      ALL=(ALL) /sbin/reboot
 
-To use these commands the *operators* will need to enter (respectively) from their AUID accounts:
+To use these commands the _operators_ will need to enter (respectively) from their AUID accounts:
 
    sudo refresh_secondary
    sudo shutdown
@@ -446,7 +446,7 @@ To use these commands the *operators* will need to enter (respectively) from the
 
 A password will be required. Trailing options can be used with the commands, as appropriate.
 
-If the  user can elevate to *root*, also add:
+If the  user can elevate to _root_, also add:
 
     dhorsley       ALL=(root) ALL
 
@@ -455,7 +455,7 @@ Create the groups if they don't exist:
     addgroup operators
     addgroup programmers
 
-If they don't already, make sure *oper* and *prog* have usable shells:
+If they don't already, make sure _oper_ and _prog_ have usable shells:
 
     chsh -s /bin/bash oper
     chsh -s /bin/bash prog
@@ -465,32 +465,32 @@ If the accounts haven't been disabled for login already, do so:
     usermod -L oper
     usermod -L prog
 
-To prevent connecting with *ssh* using a key, create (or add *oper*
-and *prog* to an existing) *DenyUsers* line in */etc/ssh/sshd_config*:
+To prevent connecting with _ssh_ using a key, create (or add _oper_
+and _prog_ to an existing) `DenyUsers` line in _/etc/ssh/sshd_config_:
 
-NOTE: If you used the CIS *remediate* script, you should comment out
-the line: *DenyGroup rtx* as well.
+NOTE: If you used the CIS _remediate_ script, you should comment out
+the line: `DenyGroup rtx` as well.
 
 ....
 DenyUsers oper prog
 ....
 
-And restart *sshd* with:
+And restart _sshd_ with:
 
 ....
 systemctl restart sshd
 ....
 
-Authorized users can then switch to *oper* with (similarly for
-*prog* and *root*):
+Authorized users can then switch to _oper_ with (similarly for
+_prog_ and _root_):
 
     sudo -i -u oper
 
-No password will be required (except for *root*).
+No password will be required (except for _root_).
 
 To ensure X authorization works do the following (this example is for
-user *oper* and  works analogously for *prog* and *root*, but see the
-note at the end of step (1) about *root*'s Xresources:
+user _oper_ and  works analogously for _prog_ and _root_, but see the
+note at the end of step (1) about _root_'s Xresources:
 
 1. Add this to the following file:
 +
@@ -516,13 +516,13 @@ else
 fi
 ```
 +
-This will also set the Xresources to those of *oper*. (For *root*
+This will also set the Xresources to those of _oper_. (For _root_
     only the first clause would be used since Xresources would not be
     set.)
 
 2. Create the following file
 +
-./usr/local/bin/oper_account`
+./usr/local/bin/oper_account
 [source,bash]
 ```
 #!/bin/bash
@@ -541,7 +541,7 @@ fi
 +
     chmod a+rx /usr/local/bin/oper_account
 
-The three numbered steps above can be executed for *oper*, *prog*, and *root*
+The three numbered steps above can be executed for _oper_, _prog_, and _root_
 with:
 
 ....
@@ -551,9 +551,9 @@ with:
 === Adding AUID accounts
 
 This sub-section describes how to add AUID accounts to be used with the
-ability to promote to *oper*, *prog*, and *root* as described in the
+ability to promote to _oper_, _prog_, and _root_ as described in the
 previous sub-section. As in the previous sub-section, the following method
-uses *dhorsley* as an example user.
+uses _dhorsley_ as an example user.
 
 . Add any needed user accounts as appropriate:
 
@@ -561,31 +561,31 @@ uses *dhorsley* as an example user.
 
 +
 IMPORTANT: If you are configuring a spare computer, you will need to
-make sure the *UID* and *GID* for each user with a home directory on
-*/usr2* is the same on both computers for the system-to-system backup
-of */usr2* to work properly.
+make sure the `UID` and `GID` for each user with a home directory on
+_/usr2_ is the same on both computers for the system-to-system backup
+of _/usr2_ to work properly.
 +
 
 [NOTE]
 ====
 
 For normal operations, AUID users' home directories should be on
-*/usr2*. However, for some maintenance accounts, it may make sense to
-have the home directory some where else, typically on */home*. In that
+_/usr2_. However, for some maintenance accounts, it may make sense to
+have the home directory some where else, typically on _/home_. In that
 case, use this command instead:
 
     adduser dhorsley
 
 The final step of this section will need to be adjusted accordingly.
 
-The *UID* and *GID* of the account should still be kept in agreement
+The `UID` and `GID` of the account should still be kept in agreement
 between the two computers.
 
 ====
 
 . Add each user to these groups as appropriate, e.g.:
 +
-NOTE: This step assumes that the *operators* and *programmers* groups have been created as described in the previous sub-section <<Enabling user promotion to oper/prog and root>>.
+NOTE: This step assumes that the _operators_ and _programmers_ groups have been created as described in the previous sub-section <<Enabling user promotion to oper/prog and root>>.
 +
     adduser dhorsley operators
 +
@@ -599,8 +599,8 @@ and/or:
 
 . If the account will be used by an operator and/or programmer, the X11
 environment needs to be set-up. The following command will move an
-existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and create a new
-*/usr2/dhorsley* with a useful skeleton for use with the FS (you will
+existing _/usr2/dhorsley_ to _/usr2/dhorsley.FSCOPY_ and create a new
+_/usr2/dhorsley_ with a useful skeleton for use with the FS (you will
     be prompted for the account name):
 
     /usr2/fs/misc/auid_update
@@ -609,8 +609,8 @@ existing */usr2/dhorsley* to */usr2/dhorsley.FSCOPY* and create a new
 [NOTE]
 ====
 
-If the user's home directory is not on */usr2*, but is for example on
-*/home*, the following commands should be used instead:
+If the user's home directory is not on _/usr2_, but is for example on
+_/home_, the following commands should be used instead:
 
     cd /home
     mv dhorsley dhorsley.FSCOPY
@@ -632,8 +632,8 @@ situation more difficult and increase the amount of data that will be
 lost.
 
 If you find the number of login failures before lock-out too small,
-you can increase it by increasing the value of the *deny* parameter
-(*5* in the example below, other typical parameters are omitted and
+you can increase it by increasing the value of the `deny` parameter
+(`5` in the example below, other typical parameters are omitted and
 should not be changed) in:
 
 ./etc/pam.d/common-auth
@@ -648,17 +648,17 @@ long and complicated passwords and a lock-out of several minutes.
 === Setting hostname alias
 
 These steps set a more user friendly alias for the computers of the
-form `fs1-_xx_` and `fs2-_xx_` where `_xx_` is the station's two letter
+form _fs1-<xx>_ and _fs2-<xx>_ where _<xx>_ is the station's two letter
 code.  This provides a compact alias for local usage, even for sites
 with more than one system, and makes the system identifiable for
 remote users in a systematic way. These steps should be executed for
-both the *operational* and *spare* computers.
+both the _operational_ and _spare_ computers.
 
-. Edit `/etc/hosts` and add the new aliases to the appropriate lines.
+. Edit _/etc/hosts_ and add the new aliases to the appropriate lines.
 +
 If you have two computers, add the aliases for both to the file on each computer.
 
-. Create a file `/etc/hostname_alias` that contains the new alias.
+. Create a file _/etc/hostname_alias_ that contains the new alias.
 .. Execute
 +
     cd /etc
@@ -668,40 +668,40 @@ If you have two computers, add the aliases for both to the file on each computer
 . Change the system's mailname
 +
 
-NOTE: To allow mail to *mailman* mail lists to work, you may need to
-make a use a fake FQDN name, perhaps by appending *.net* to your
-alias, for use in `/etc/mailname` and
-`/etc/exim4/update-exim4.conf.conf`. The two files should be
+NOTE: To allow mail to _mailman_ mail lists to work, you may need to
+make a use a fake FQDN name, perhaps by appending _.net_ to your
+alias, for use in _/etc/mailname_ and
+_/etc/exim4/update-exim4.conf.conf_. The two files should be
 consistent.
 
 +
-.. Edit the file `/etc/mailname` and change its contents to the new
+.. Edit the file _/etc/mailname_ and change its contents to the new
 name, without a domain name unless that is required by remote mail
 hosts or mail lists. If so,
 <<installation.adoc#_generate_fqdn_in_helo_for_outgoing_mail,Generate FQDN in HELO for outgoing mail>>
 in the FSL10 Installation document may also be helpful.
 
-.. Edit `/etc/exim4/update-exim4.conf.conf`, change the value of `hostnames=` to the new alias
+.. Edit _/etc/exim4/update-exim4.conf.conf_, change the value of `hostnames=` to the new alias
 .. Execute
 +
      update-exim4.conf
      systemctl restart exim4
 
-. For the *spare* computer only:
+. For the _spare_ computer only:
 
-.. Update `/usr/local/sbin/refresh_spare_usr2` to use the new alias of the *operational* computer in the `ssh` line.
+.. Update _/usr/local/sbin/refresh_spare_usr2_ to use the new alias of the _operational_ computer in the _ssh_ line.
 
-.. You will need to update the new alias for the *operational*
-computer to be recognized as a known host to the *root* account on the
-*spare* computer. You can do that by using `ssh` to
+.. You will need to update the new alias for the _operational_
+computer to be recognized as a known host to the _root_ account on the
+_spare_ computer. You can do that by using _ssh_ to
 `spare@operational` where `operational` is new alias for the
-*operational* computer. The command will give you guidance for which
-lines need to be deleted in `/root/.ssh/known_hosts`. After deleting
-those lines, reconnect using the same `ssh` command and answer `yes`
-to confirm connecting. Finally, logout of the `spare` account on
-*operational* computer.
+_operational_ computer. The command will give you guidance for which
+lines need to be deleted in _/root/.ssh/known_hosts_. After deleting
+those lines, reconnect using the same _ssh_ command and answer `*yes*`
+to confirm connecting. Finally, logout of the _spare_ account on
+_operational_ computer.
 
-. Use the new alias in the user prompts and `xterm` titles for *oper*, *prog*, and all non-system-administrator AUID accounts. In the
+. Use the new alias in the user prompts and _xterm_ titles for _oper_, _prog_, and all non-system-administrator AUID accounts. In the
 `.bashrc` file for each user to be changed:
 
 .. Before the `if` block that sets `PS1` add:
@@ -715,7 +715,7 @@ to confirm connecting. Finally, logout of the `spare` account on
 
 .. In the two statements setting `PS1` in the `if` block, change the use of `\h` to `$hostalias`.
 
-.. In the statement setting `PS1` in the `case` block that sets the `xterm` window title, change the use of `\h` to `$hostalias`.
+.. In the statement setting `PS1` in the `case` block that sets the _xterm_ window title, change the use of `\h` to `$hostalias`.
 
 === Installing refresh_spare_usr2 with CIS hardening
 
@@ -780,7 +780,7 @@ echo "This script must be customized before use.  See script for details."
 exit 1
 ....
 
-... Change the `operational` in the line:
+... Change the _operational_ in the line:
 
 +
 
