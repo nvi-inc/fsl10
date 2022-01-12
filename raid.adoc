@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.6.0 - December 2021
+Version 1.6.0 - January 2022
 
 :sectnums:
 :experimental:
@@ -677,14 +677,14 @@ if it was degraded.
 The body of each email is the output of the _mdstat_ script at the
 time the message was sent.
 
-==== Checking
+==== Checks
 
 The _checking_ process is triggered by _/etc/cron.d/mdadm_ on
 the first Sunday of each month. It uses the
 _/usr/share/mdadm/checkarray_ script and takes a similar amount of time
 as a rebuild of the RAID triggered by _refresh_secondary_.
 
-==== Installation
+==== Installing raid-events
 
 To install the script, use the following commands as _root_:
 
