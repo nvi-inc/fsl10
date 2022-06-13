@@ -20,7 +20,7 @@
 
 = RAID Notes for FSL 10
 J.F.H. Quick, W.E. Himwich, and D.E. Horsley
-Version 1.6.0 - January 2022
+Version 1.6.1 - June 2022
 
 :sectnums:
 :experimental:
@@ -122,7 +122,6 @@ with the _old_ _shelf_ disk.
 . Move the disk from the _secondary_ slot to the _primary_ slot, keyed-on
 . Move the _old_ _shelf_ disk to the _secondary_ slot, keyed-off
 . Boot (_primary_ keyed-on, _secondary_ keyed-off)
-. Login in as root
 . Run _refresh_secondary_
 . Key-on the _secondary_ slot when prompted
 . If the script rejects the disk (and stops with an error), seek expert advice. Be sure to note any messages so they can be reported.
@@ -161,6 +160,7 @@ are still mounted read/write. Hence this script should only be used on a unloade
 or single-user system.  The advantage of using this script is that returning the
 system to normal operation after a successful update requires only the use of
 _recover_raid_ - no reboot is required at all.
+
 WARNING: Do _NOT_ use the _drop_primary_ script for kernel updates or any other
 such testing that could affect _grub_ and/or require you to reboot in order
 to evaluate the success thereof.
@@ -202,15 +202,15 @@ The system can be used for operations while the refresh is in progress.
 
 The section describes how to recover from a _good_ shelf disk. This
 might be needed, e.g., if it is discovered that a problem has
-developed on the RAID pair since the last disk rotation, possibly due
-to a bad update of some type or some other error.
+developed on the RAID pair since the last disk rotation. This might be
+due to a bad update of some type or some other problem.
 
 TIP: Before using this procedure, it should be considered whether the
 damage is extensive enough to require starting over from the shelf
 disk or whether it can be reasonably repaired in place.
 
-IMPORTANT: This will only produce good result if the shelf disk is in
-_good_ copy.
+IMPORTANT: This will only produce a good result if the shelf disk is
+a _good_ copy.
 
 WARNING: Do _not_ use this procedure if a problem with computer caused
 the damage to the RAID.
@@ -224,7 +224,6 @@ the _primary_ controller).
 . Insert the _good_ shelf disk in the _primary_ slot, keyed-on.
 . Insert the disk that is next in cyclic order (from the ones set aside)  in the _secondary_ slot, keyed-off.
 . Reboot (_primary_ keyed-on, _secondary_ keyed-off)
-. Login in as root
 . Run _blank_secondary_
 . Key-on the _secondary_ slot when prompted
 . Answer `*y*` to blank
@@ -238,11 +237,20 @@ be used for operations, if need be. In that case, the rest of this procedure can
 . Move the disk from the _secondary_ slot to the _primary_ slot, keyed-on
 . Insert the remaining disk, that was set aside, in the _secondary_ slot, keyed-off.
 . Reboot (_primary_ keyed-on, _secondary_ keyed-off)
-. Login in as root
 . Run _blank_secondary_
 . Key-on the _secondary_ slot when prompted
 . Answer `*y*` to blank
-. Once the refresh is complete, you have recovered to the state of the previous _good_ _shelf_ disk.
+
+. Run _refresh_secondary_
+
++
+
+Once the refresh has entered the recovery phase (the progress display
+is being shown onscreen), the system can be used for operations, if
+need be.
+
+. When the refresh is complete, you have recovered to the state of the
+previous _good_ _shelf_ disk.
 
 == Initialize a new disk
 
@@ -252,13 +260,13 @@ initialize new ones to replace them.
 IMPORTANT: The new disks should be at least
 as large as the smallest of the remaining disks.
 
-The sub-sections below cover various scenarios for intializing one new
+The sub-sections below cover various scenarios for initializing one new
 disk to complete a set of three, i.e., one of three disks in a set has
-failed.  It is assumed that you want to maintain the cyclic numbering
-of the disks for rotations (but that is not required).  It should be
+failed. It is assumed that you want to maintain the cyclic numbering
+of the disks for rotations (but that is not required). It should be
 straightforward to adapt them to other cases.
 
-If you need to initilaize more than one disk, please follow the
+If you need to initialize more than one disk, please follow the
 instructions in the <<installation.adoc#_setup_additional_disk,Setup
 additional disk>> section of the FSL10 Installation document.
 
@@ -269,16 +277,14 @@ This case corresponds to not having a good shelf disk.
 . Wait until the RAID is not recovering, check with _mdstat_
 . Shutdown the system, e.g., `shutdown -h now`
 
-If the disks are in cyclical order (i.e, primary, secondary are numbered
-    in order: 1, 2, or 2, 3, or 3, 1), you should:
+If the disks are in cyclical order (i.e., primary, secondary are
+numbered in order: 1, 2, or 2, 3, or 3, 1), you should:
 
 . Take the disk from _primary_ slot, put it on the _shelf_
 . Move the disk from the _secondary_ slot to the _primary_ slot, keyed-on
 
-If the disks are
-not in cyclical order (i.e, primary,
-      secondary are numbered in order: 1, 3, or 2, 1, or 3, 2), you
-    should:
+If the disks are not in cyclical order (i.e., primary, secondary are
+numbered in order: 1, 3, or 2, 1, or 3, 2), you should:
     
 . Take the disk from _secondary_ slot, put it on the _shelf_
     
@@ -286,7 +292,6 @@ In either case, finish with:
 
 . Put the new disk in the _secondary_ slot, key-off.
 . Boot (_primary_ keyed-on, _secondary_ keyed-off)
-. Login in as _root_
 . Run _blank_secondary_
 . Key-on the _secondary_ slot when prompted
 . Answer `*y*` to blank
@@ -304,7 +309,6 @@ In this case, there is a good shelf disk. The strategy used avoids overwriting i
 . Move the working disk to the _primary_ slot, if it isn't already there, keyed-on.
 . Put the new disk in the _secondary_ slot, keyed-off.
 . Boot (_primary_ keyed-on, _secondary_ keyed-off)
-. Login in as _root_
 . Run _blank_secondary_
 . Key-on the _secondary_ slot when prompted
 . Answer `*y*` to blank
@@ -332,7 +336,6 @@ If the working disk is not in the _primary_ slot:
 Then in any event:
 
 . Put the new disk in the _secondary_ slot, keyed-off.
-. Login in as _root_
 . Run _blank_secondary_
 . Key-on the _secondary_ slot when prompted
 . Answer `*y*` to blank
@@ -340,9 +343,9 @@ Then in any event:
 . Once the refresh is complete, the disk can be used normally
 . Label the new disk with its system name, number, and serial number.
 
-If the disks are not in not in cyclical order (i.e, primary, secondary
-are numbered in order, 1, 3, or 2, 1, or 3, 2), on the next disk
-rotation you should move the _secondary_ the shelf instead of the
+If the disks are not in not in cyclical order (i.e., primary,
+secondary are numbered in order: 1, 3, or 2, 1, or 3, 2), on the next
+disk rotation you should move the _secondary_ the shelf instead of the
 _primary_.
 
 == Script descriptions
@@ -380,16 +383,8 @@ Any _primary_ disk (_sda_) will be rejected that:
 . Is not part of the RAID (_md0_)
 . Has a boot scheme other than the BIOS or UEFI set up as described in the FSL10 Installation Document.
 
-If the _primary_ disk is removable, the user will be provided with some
-information about the disk and given an opportunity to continue with
-kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
-identified as the _primary_, one would not want to continue. However
-for some machines the SATA disk that is the _primary_ may be marked
-removable if it is hot swappable, but would still be appropriate to
-use. 
-
-For safety reasons, to ensure that only an old _shelf_ disk is overwritten,
-any _secondary_ disk (_sdb_) will be rejected that:
+To ensure that only an old _shelf_ disk for this system is
+overwritten, any _secondary_ disk (_sdb_) will be rejected that:
 
 . Was loaded (slot keyed-on) before starting the script
 +
@@ -448,13 +443,14 @@ been on the _shelf_ unused since it was last rotated, it is safe to
 refresh and should be accepted by all the checks. In other words,
         normal disk rotation should work with no problems.
 
-If the _secondary_ disk is removable, the user will be provided with some
-information about the disk and given an opportunity to continue with
-kbd:[Enter] or abort with kbd:[Ctrl+C].  Typically, if a USB disk is
-identified as the _secondary_, one would not want to continue. However
-for some machines the SATA disk that is the _secondary_ may be marked
-removable if it is hot swappable, but would still be appropriate to
-use. 
+If the _primary_ and/or _secondary_ disks are removable, the user will
+be provided with some information about the disks and given an
+opportunity to continue with kbd:[Enter] or abort with kbd:[Ctrl+C].
+Typically, if a USB disk is identified as the _primary_ or
+_secondary_, one would not want to continue. However for some
+machines, the SATA disks that are the _primary_ and/or _secondary_ may
+be marked removable if they are hot swappable, but would still be
+appropriate to use.
 
 This script requires the _secondary_ disk (_sdb_) to not be loaded, i.e.,
 the slot turned off, when the script is started. However, it has an
@@ -500,6 +496,7 @@ Unless you have just loaded it through _refresh_secondary_'s auspices or used
 the `-A` option to "`Allow`" it (see below).
 
 . Is still part of the RAID _md0_
+
 +
 Which should only happen if run incorrectly with `-A` (or other
 interfering commands have been executed).
@@ -509,9 +506,11 @@ interfering commands have been executed).
 Again catching misuse of the `-A` option.
 
 . Has a partition that is in RAID _md0_
+
 +
-This is essentially redundant with the item two above, but is included
-out of an abundance of caution.
+
+This is essentially redundant with the "`Is still part of the RAID
+_md0_`" check above, but is included out of an abundance of caution.
 
 . Has a partition that is included in any RAID.
 
@@ -545,9 +544,9 @@ action thereby causing _pvremove_ to complain about the VG still being active.)
 
 This script is only for use with expert advice.
 
-This script can be used to drop a _primary_ disk (_sda_) out of a RAID pair
-(by marking as failed) so that it can act as a safety backup during major
-upgrades or other significant changes.
+This script can be used to drop a _primary_ disk (_sda_) out of a RAID
+pair (by marking it as failed) so that it can act as a safety backup
+during major upgrades or other significant changes.
 
 Initially, the script performs some sanity checks to confirm that the
 RAID _/dev/md0_:
@@ -579,8 +578,10 @@ the array for several possible reasons, including:
 
 . A real disk fault of some sort, including one caused by turning it off
   whilst it is still in use.
-. Use of the _mdadm_ command with `-f` option to mark it as faulty.
+. Using the _mdadm_ command with `-f` option to mark it as faulty.
 . Turning it off whilst the system is shutdown and booting without it.
+
+. Using the _drop_primary_ script.
 
 This script is designed to be used only with a
 set of disks that were most recently used _together_ in an active
