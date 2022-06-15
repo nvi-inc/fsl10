@@ -22,7 +22,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.6.0 - January 2022
+Version 1.6.1 - June 2022
 
 :sectnums:
 :experimental:
@@ -1664,6 +1664,219 @@ instructions, please see the
 <<raid.adoc#_refresh_spare_usr2,refresh_spare_usr2>> sub-section in
 the <<raid.adoc#_script_descriptions,Script descriptions>> section of
 the <<raid.adoc#,RAID Notes for FSL 10>> document.
+
+=== Increase the size of an LVM volume
+
+It is possible to increase the size of an LVM volume if there is
+additional room available in its volume group. These instructions
+assume you will be resizing a logical volume for a typical
+configuration. For example, for the logical volume mounted at _/usr2_,
+on RAID device _/dev/md0_, which is using _/dev/sda2_ and _/dev/sdb2_.
+Additionally, example pathnames are given in the instructions below
+for adjusting the size of the logical volume for _/usr2_. All these
+names may be different if you want to resize a different volume and/or
+your disk configuration is different.
+
+. Preparation
+
+.. Check that there is enough free space available.
+
++
+
+Examine the output of:
+
+ vgs
+
++
+
+You can increase the size of a logical volume if the volume group
+(under the `VGS` column heading) has enough free space (`VFree`
+heading) for the increase. Typically, the volume group would be `vg0`.
+
+.. Determine the `_Path_` of the logical volume you want to extend.
+
+... Get a listing to relate the internal device-mapper pathnames
+(under the `Filesystem` column heading)  and where the logical volumes
+are mounted (`Mounted on` heading). For example,
+_/dev/mapper/vg0-usr2_ would typically be mounted at  _/usr2_.
+
+ df -h
+
+... Get a listing to relate the internal device-mapper pathname (under
+the `DMPath` column heading) to the logical volume `_Path_`. For
+example, for _/dev/mapper/vg0-usr2_, the `_Path_` would typically be
+_/dev/vg0/usr2_.
+
+  lvdisplay -C -o lv_dm_path,lv_path
+
++
+
+... For the mount point of the logical volume you want to extend,
+determine the `_Path_` using the internal device-mapper pathname from
+the above two sub-steps. For example, the logical volume for _/usr2_
+would typically correspond to _/dev/mapper/vg0-usr2_, which would
+correspond to `Path` _/dev/vg0/usr2_.
+
+. Pre-check (optional)
+
++
+
+This sub-step is not required but can be used, along with the
+"`Post-check`" sub-step below, to check that the volume changed by the
+expect amount and that no files were lost or changed size or
+modification times.
+
+.. Get the size (under the `1G-block` column heading) of the logical
+volume (`Mounted on` heading) for the volume of interest:
+
+ df -BG
+
++
+
+Record the size to compare to the results in the "`Post-check`"
+sub-step below.
+
+.. Make a listing of the files on the `_mount_point_` (include the
+leading `/`) to be changed. For example, the `_mount_point_` might be
+_/usr2_.
+
++
+
++
+[subs="+quotes"]
+....
+ls -ltR _mount_point_ >/tmp/before.txt
+....
+
+. Make the change, using the `_Path_` you determined in the
+"`Preparation`" sub-step above.
+
+.. Make a backup of your system.
+
++
+
+NOTE: This sub-step, and recovery in case of a problem, is much easier
+if you using the FSL10 RAID system. If not, it is strongly recommended
+that you make your own backup of your entire system. The remainder of
+this sub-step assumes you are using a RAID, following the approach of
+the <<raid.adoc#_recoverable_testing,Recoverable testing>> procedure
+in <<raid.adoc#,Raid Notes for FSL10>> document.  +
+
++
+
+If you are using a RAID, you can drop the primary disk out of the RAID
+to save as a backup:
+
+ drop_primary
+
+.. Extend `_Path_`
+
++
+
+For the logical volume (mount point) you want to extend, you can
+either:
+
+... Incrementally increase the size. For example, to increase `_Path_`
+by 4 GB:
+
++
+[subs="+quotes"]
+....
+lvextend -L+4G _Path_
+....
+
+... Set the size to a new larger total size, say 4GB:
+
++
+
++
+
+[subs="+quotes"]
+....
+lvextend -L4G _Path_
+....
+
+.. Resize `_Path_`
+
++
+
++
+
+[subs="+quotes"]
+....
+resize2fs _Path_
+....
+
+. Post-check (optional)
+
++
+
+This sub-step is not required but can be used, if the "`Pre-check`"
+sub-step above was used, to check that the new size is correct and no
+files were lost or changed size or modification times.
+
+.. Check that the size of the logical volume (under the `Mounted on`
+column heading) has the expected new size in the output of:
+
+ df -BG
+
++
+
+Compare the result to that in the "`Pre-check`" sub-step above.
+
+.. Make a listing of the files on the `_mount_point_` (include the
+leading `/`) that was changed.  For example, the `_mount_point_` might
+be _/usr2_.
+
++
+[subs="+quotes"]
+....
+ls -ltR _mount_point_ >/tmp/after.txt
+....
+
+.. Compare the before and after listings of the files
+
+  diff /tmp/before.txt /tmp/after.txt
+
++
+
+There should be no differences in the listings except any changes that
+can explained by other expected activity that occurred since the
+"`Pre-check`" sub-step above. If there was no other activity on the
+logical volume, there should be no differences.
+
+. Cleanup
+
++
+
+NOTE: If you are not using the FSL10 RAID system, you will need to use
+your own methods to restore the system if there was a problem. The
+remainder of this step describes how to proceed if you using a RAID.
+
++
+
+If you are using a RAID there are two options:
+
+.. If you are satisfied with the change, you can recover the RAID
+with:
+
+  recover_raid
+
++
+
+This should only take a few minutes.
+
++
+
++
+
+NOTE: The change in the volume size will not propagate to the _shelf_
+disk until the next disk rotation.
+
+.. If you are not satisfied with the change, you can try again if you
+first restore the RAID, using the "`failed`" branch of the
+<<raid.adoc#_recoverable_testing,Recoverable testing>> procedure in
+<<raid.adoc#,Raid Notes for FSL10>> document.
 
 [appendix]
 
