@@ -22,7 +22,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.6.1 - May 2023
+Version 1.6.2 - August 2023
 
 :sectnums:
 :experimental:
@@ -812,13 +812,17 @@ then
 
 to confirm that everything compiled correctly (no news is good news).
 
-=== Wait for the RAID1 disk mirroring to set up
+=== Reboot
 
-If you installed the RAID (and RAID tools) check its progress with:
+If you installed the RAID with two disks (and RAID tools) check its
+progress with:
+
 
    mdstat
 
 until the array no-longer shows a recovery in progress.
+
+IMPORTANT: Do not reboot until the recovery is complete.
 
 The final steps are to remove any DVD from the machine and to restart the machine
 using _reboot_ as _root_ or kbd:[Ctrl+Alt+Del] whilst watching that everything
@@ -828,7 +832,6 @@ Your new FS machine should now be ready to be customised to your requirements
 by tailoring the control files in _/usr2/control_ and adding suitable station
 specific software to _/usr2/st_.  See the files in the _/usr2/fs/misc_ directory
 for more information.
-
 
 == Post Install
 
