@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="J.F.H. Quick, W.E. Himwich, and D.E. Horsley">
+<title>RAID Notes for FSL 10</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="article">
+<div id="header">
+<h1>RAID Notes for FSL 10</h1>
+<div class="details">
+<span id="author" class="author">J.F.H. Quick, W.E. Himwich, and D.E. Horsley</span><br>
+<span id="revdate">Version 1.6.1 - June 2022</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#_guidelines_for_raid_operations">2. Guidelines for RAID operations</a>
+<ul class="sectlevel2">
+<li><a href="#_mandatory_practices">2.1. Mandatory practices</a></li>
+<li><a href="#_recommended_practices">2.2. Recommended practices</a></li>
+</ul>
+</li>
+<li><a href="#_disk_rotation">3. Disk Rotation</a></li>
+<li><a href="#_recoverable_testing">4. Recoverable testing</a></li>
+<li><a href="#_recover_from_a_shelf_disk">5. Recover from a shelf disk</a></li>
+<li><a href="#_initialize_a_new_disk">6. Initialize a new disk</a>
+<ul class="sectlevel2">
+<li><a href="#_currently_two_disks_are_running_in_the_raid">6.1. Currently two disks are running in the RAID</a></li>
+<li><a href="#_currently_one_disk_is_running_in_the_raid_but_two_are_installed">6.2. Currently one disk is running in the RAID, but two are installed</a></li>
+<li><a href="#_currently_one_disk_is_installed_and_running">6.3. Currently one disk is installed and running</a></li>
+</ul>
+</li>
+<li><a href="#_script_descriptions">7. Script descriptions</a>
+<ul class="sectlevel2">
+<li><a href="#_mdstat">7.1. mdstat</a></li>
+<li><a href="#_refresh_secondary">7.2. refresh_secondary</a></li>
+<li><a href="#_blank_secondary">7.3. blank_secondary</a></li>
+<li><a href="#_drop_primary">7.4. drop_primary</a></li>
+<li><a href="#_recover_raid">7.5. recover_raid</a></li>
+<li><a href="#_raid_events">7.6. raid-events</a></li>
+<li><a href="#_refresh_spare_usr2">7.7. refresh_spare_usr2</a></li>
+</ul>
+</li>
+<li><a href="#_multiple_computer_set_up">8. Multiple computer set-up</a></li>
+<li><a href="#_recovery_scenarios">9. Recovery scenarios</a>
+<ul class="sectlevel2">
+<li><a href="#_operational_computer_failure">9.1. Operational computer failure</a></li>
+<li><a href="#_one_disk_in_the_operational_computer_raid_fails">9.2. One disk in the operational computer RAID fails</a></li>
+<li><a href="#_operational_computer_raid_corrupted">9.3. Operational computer RAID corrupted</a></li>
+<li><a href="#_operational_computer_raid_corrupted_and_operational_computer_failure">9.4. Operational computer RAID corrupted and operational computer failure</a></li>
+<li><a href="#_loss_of_all_operational_computer_disks">9.5. Loss of all operational computer disks</a></li>
+<li><a href="#_loss_of_operational_computer_and_all_its_disks">9.6. Loss of operational computer and all its disks</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>These notes are intended to cover, albeit tersely, the major issues
+for RAID operations with FSL10 (see the <a href="installation.html">FSL10
+      Installation</a> document). The disk lay-out has changed
+significantly since FSL9, which required updating the scripts that are
+used. In addition, the scripts have been extensively revised to
+provide more protection from possible errors in how they are used.</p>
+</div>
+<div class="paragraph">
+<p>All operations and scripts in this document require <em>root</em> privileges
+unless otherwise indicated.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_guidelines_for_raid_operations">2. Guidelines for RAID operations</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The FSL10 RAID configuration normally uses two disks configured
+according to the FSL10 installation instructions (see the <a href="installation.html">FSL10
+      Installation</a> document). Below are mandatory
+and recommended guidelines.</p>
+</div>
+<div class="sect2">
+<h3 id="_mandatory_practices">2.1. Mandatory practices</h3>
+<div class="paragraph">
+<p>These practices are fundamental to the operation of the RAID.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Never mix disks from different computers in one computer.</p>
+</li>
+<li>
+<p>Never split up a RAID pair unless already synced, check with <em>mdstat</em></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>A RAID pair (kept together and in order) can be removed or moved
+between computers if need be. A disk rotation (or initializing a new
+    disk)  is probably the only reason to split a pair.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+When booting a disk from a RAID by itself, you may see
+~20 of the <code>volume group
+not found</code> error messages, then the machine will boot. These error
+messages  only appear like this the first time a disk
+from the RAID is booted without its partner.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_recommended_practices">2.2. Recommended practices</h3>
+<div class="paragraph">
+<p>These recommendations are intended to provide consistent procedures and make it easier to understand any issues, if they occur.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Always use the lowest numbered interface as the <em>primary</em> and the next lowest numbered as <em>secondary</em></p>
+</li>
+<li>
+<p>Make the upper (or left) slot the <em>primary</em>, the lower (or right) slot the <em>secondary</em>. If necessary, change the internal cabling to make it so.</p>
+</li>
+<li>
+<p>Label the slots as <em>primary</em> and <em>secondary</em> as appropriate.</p>
+</li>
+<li>
+<p>Always boot for a refresh/blank with the <em>primary</em> slot turned on and the <em>secondary</em> slot turned off: so it is clear which is the active disk</p>
+</li>
+<li>
+<p>Label the disks (so visible when in use) with the system name and number them 1, 2, and 3, &#8230;&#8203;</p>
+</li>
+<li>
+<p>Label the disks (so visible when in use) with their serial numbers, either from <em>mdstat</em> when only one disk inserted or by examining the disk</p>
+</li>
+<li>
+<p>For reference, place the disk serial numbers in a file with their corresponding numbers, e.g.:</p>
+<div class="listingblock">
+<div class="title">/root/DISKS.txt</div>
+<div class="content">
+<pre class="highlight"><code>1=ZC1B1YCC
+2=ZC1A6WZ1
+3=ZC1AHENM</code></pre>
+</div>
+</div>
+</li>
+<li>
+<p>When rotating disks, keep the disks in cyclical order (<em>primary</em>, <em>secondary</em>, <em>shelf</em>): 1, 2, 3; then 2, 3, 1;, then 3, 1, 2, then 1, 2, 3; and so on</p>
+</li>
+<li>
+<p>Rotate disks for a given computer at least once a month, and before any updates</p>
+</li>
+<li>
+<p>If you have a spare computer (and/or additional systems), keep the disks in the same sequence on all the computers</p>
+</li>
+<li>
+<p>Do not turn a disk off while the system is running. The only time a key switch state should be changed while the system is running is to add a disk for a blank or refresh operation.</p>
+</li>
+<li>
+<p>Set your  BIOS to allow hot swapping of disks for both the <em>primary</em>
+and <em>secondary</em> controllers. This is necessary to use the RAID procedures
+described in this document.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_disk_rotation">3. Disk Rotation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section describes the disk rotation procedure. It is used to make
+periodic updates of the shelf disk.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Your BIOS must be set to allow hot swapping of disks,
+particularly for the <em>secondary</em> controller (it should also be set for
+the <em>primary</em> controller).
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If you do not have access to the <em>root</em> account, you may
+have <em>sudo</em> access to the privileged commands. If so, you will need
+to run the <code>shutdown -h now</code> and <em>refresh_secondary</em> commands with
+<em>sudo</em>.  This is true for other privileged commands used elsewhere in
+this document.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Wait until the RAID is not recovering, check with <em>mdstat</em></p>
+</li>
+<li>
+<p>Shutdown the system, e.g., <code>shutdown -h now</code></p>
+</li>
+<li>
+<p>Take the disk from <em>primary</em> slot, put it on the <em>shelf</em></p>
+<div class="paragraph">
+<p>We recommend that you label the disk immediately, including the date
+(and possibly the time). In addition to getting the disk labeled
+before it is put away, it will reduce the chances that it is confused
+with the <em>old</em> <em>shelf</em> disk.</p>
+</div>
+</li>
+<li>
+<p>Move the disk from the <em>secondary</em> slot to the <em>primary</em> slot, keyed-on</p>
+</li>
+<li>
+<p>Move the <em>old</em> <em>shelf</em> disk to the <em>secondary</em> slot, keyed-off</p>
+</li>
+<li>
+<p>Boot (<em>primary</em> keyed-on, <em>secondary</em> keyed-off)</p>
+</li>
+<li>
+<p>Run <em>refresh_secondary</em></p>
+</li>
+<li>
+<p>Key-on the <em>secondary</em> slot when prompted</p>
+</li>
+<li>
+<p>If the script rejects the disk (and stops with an error), seek expert advice. Be sure to note any messages so they can be reported.</p>
+</li>
+<li>
+<p>If the disk is accepted, let the refresh run to completion (the progress report can be aborted as indicated). The system can be used in the meantime, but may be a little slow.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_recoverable_testing">4. Recoverable testing</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section describes a method for testing updates in a way that provides a
+relatively easy recovery option if a problem occurs. Should that recovery fail
+for some reason, it is still possible to recover with the shelf disk as
+described in the <a href="#_recover_from_a_shelf_disk">Recover from a shelf disk</a> section below.</p>
+</div>
+<div class="paragraph">
+<p>Seek expert advice for this, but the basic plan is given below:</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Your BIOS must be set to allow hot swapping of disks
+for both the <em>primary</em> and <em>secondary</em> controllers.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If a rotation hasn&#8217;t just been completed, perform one (as an extra backup)</p>
+</li>
+<li>
+<p>Before proceeding verify that there is no recovery in progress, check with <em>mdstat</em></p>
+</li>
+<li>
+<p>Shutdown the system, e.g., <code>shutdown -h now</code></p>
+</li>
+<li>
+<p>Key-off the <em>primary</em> slot</p>
+</li>
+<li>
+<p>Reboot (<em>primary</em> keyed-off, <em>secondary</em> keyed-on)</p>
+</li>
+<li>
+<p>Install and test the update</p>
+<div class="paragraph">
+<p>The update and testing will occur on the secondary disk only.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If an update is relatively minor or the envisaged testing is intended to be
+of short duration and success is likely, expert users may wish to make use of the
+<em>drop_primary</em> script to split the RAID pairing in place of the reboot cycle method
+described above. Note that some (hopefully minor) data loss is possible on the
+primary (backup) disk as it is removed from the RAID whilst all the filesystems
+are still mounted read/write. Hence this script should only be used on a unloaded
+or single-user system.  The advantage of using this script is that returning the
+system to normal operation after a successful update requires only the use of
+<em>recover_raid</em> - no reboot is required at all.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Do <em>NOT</em> use the <em>drop_primary</em> script for kernel updates or any other
+such testing that could affect <em>grub</em> and/or require you to reboot in order
+to evaluate the success thereof.
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If the update is deemed <em>successful</em>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="7">
+<li>
+<p>Key-on the <em>primary</em> slot</p>
+</li>
+<li>
+<p>Run <em>recover_raid</em> to add the <em>primary</em> slot disk back into the RAID.</p>
+<div class="paragraph">
+<p>The <em>recover_raid</em> script will fail if the disk hasn&#8217;t spun up and been recognized by the kernel. It is perfectly
+fine to try several times until it succeeds.</p>
+</div>
+</li>
+<li>
+<p>Once the recovery completes (this may only take a few minutes), reboot the system.</p>
+<div class="paragraph">
+<p>This step is necessary to return the disk in the primary slot to be <em>sda</em>.</p>
+</div>
+</li>
+<li>
+<p>Once the system has booted, the system has been successfully updated.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Alternatively, if the update is deemed to have <em>failed</em>, the system can be
+ recovered as follows:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="7">
+<li>
+<p>Shutdown the system, e.g., <code>shutdown -h now</code></p>
+</li>
+<li>
+<p>Key-off the <em>secondary</em> slot</p>
+</li>
+<li>
+<p>Key-on the <em>primary</em> slot</p>
+</li>
+<li>
+<p>Reboot (<em>primary</em> keyed-on, <em>secondary</em> keyed-off)</p>
+</li>
+<li>
+<p>Run <em>blank_secondary</em></p>
+</li>
+<li>
+<p>Key-on the <em>secondary</em> slot when prompted</p>
+</li>
+<li>
+<p>Answer <code><strong>y</strong></code> to blank</p>
+</li>
+<li>
+<p>Run <em>refresh_secondary</em></p>
+</li>
+<li>
+<p>Once the refresh is complete (this may take several hours), you have recovered to the original state.</p>
+<div class="paragraph">
+<p>The system can be used for operations while the refresh is in progress.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_recover_from_a_shelf_disk">5. Recover from a shelf disk</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The section describes how to recover from a <em>good</em> shelf disk. This
+might be needed, e.g., if it is discovered that a problem has
+developed on the RAID pair since the last disk rotation. This might be
+due to a bad update of some type or some other problem.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Before using this procedure, it should be considered whether the
+damage is extensive enough to require starting over from the shelf
+disk or whether it can be reasonably repaired in place.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+This will only produce a good result if the shelf disk is
+a <em>good</em> copy.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Do <em>not</em> use this procedure if a problem with computer caused
+the damage to the RAID.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Your BIOS must be set to allow hot swapping of disks,
+particularly for the <em>secondary</em> controller (it should also be set for
+the <em>primary</em> controller).
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Shutdown the system, e.g., <code>shutdown -h now</code></p>
+</li>
+<li>
+<p>Take the disks from both the <em>primary</em> and <em>secondary</em> slots, set them aside.</p>
+</li>
+<li>
+<p>Insert the <em>good</em> shelf disk in the <em>primary</em> slot, keyed-on.</p>
+</li>
+<li>
+<p>Insert the disk that is next in cyclic order (from the ones set aside)  in the <em>secondary</em> slot, keyed-off.</p>
+</li>
+<li>
+<p>Reboot (<em>primary</em> keyed-on, <em>secondary</em> keyed-off)</p>
+</li>
+<li>
+<p>Run <em>blank_secondary</em></p>
+</li>
+<li>
+<p>Key-on the <em>secondary</em> slot when prompted</p>
+</li>
+<li>
+<p>Answer <code><strong>y</strong></code> to blank</p>
+</li>
+<li>
+<p>Run <em>refresh_secondary</em></p>
+<div class="paragraph">
+<p>Once the refresh has entered the recovery phase (the progress display is being shown onscreen), the system can
+be used for operations, if need be. In that case, the rest of this procedure can be completed when time allows.</p>
+</div>
+</li>
+<li>
+<p>Wait until the RAID is not recovering, check with <em>mdstat</em></p>
+</li>
+<li>
+<p>Shutdown the system, e.g., <code>shutdown -h now</code></p>
+</li>
+<li>
+<p>Take the disk from <em>primary</em> slot, put it on the <em>shelf</em></p>
+</li>
+<li>
+<p>Move the disk from the <em>secondary</em> slot to the <em>primary</em> slot, keyed-on</p>
+</li>
+<li>
+<p>Insert the remaining disk, that was set aside, in the <em>secondary</em> slot, keyed-off.</p>
+</li>
+<li>
+<p>Reboot (<em>primary</em> keyed-on, <em>secondary</em> keyed-off)</p>
+</li>
+<li>
+<p>Run <em>blank_secondary</em></p>
+</li>
+<li>
+<p>Key-on the <em>secondary</em> slot when prompted</p>
+</li>
+<li>
+<p>Answer <code><strong>y</strong></code> to blank</p>
+</li>
+<li>
+<p>Run <em>refresh_secondary</em></p>
+<div class="paragraph">
+<p>Once the refresh has entered the recovery phase (the progress display
+is being shown onscreen), the system can be used for operations, if
+need be.</p>
+</div>
+</li>
+<li>
+<p>When the refresh is complete, you have recovered to the state of the
+previous <em>good</em> <em>shelf</em> disk.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_initialize_a_new_disk">6. Initialize a new disk</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>If one or more of the disks in the set for the RAID fails, you can
+initialize new ones to replace them.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+The new disks should be at least
+as large as the smallest of the remaining disks.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The sub-sections below cover various scenarios for initializing one new
+disk to complete a set of three, i.e., one of three disks in a set has
+failed. It is assumed that you want to maintain the cyclic numbering
+of the disks for rotations (but that is not required). It should be
+straightforward to adapt them to other cases.</p>
+</div>
+<div class="paragraph">
+<p>If you need to initialize more than one disk, please follow the
+instructions in the <a href="installation.html#_setup_additional_disk">Setup
+additional disk</a> section of the FSL10 Installation document.</p>
+</div>
+<div class="sect2">
+<h3 id="_currently_two_disks_are_running_in_the_raid">6.1. Currently two disks are running in the RAID</h3>
+<div class="paragraph">
+<p>This case corresponds to not having a good shelf disk.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Wait until the RAID is not recovering, check with <em>mdstat</em></p>
+</li>
+<li>
+<p>Shutdown the system, e.g., <code>shutdown -h now</code></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If the disks are in cyclical order (i.e., primary, secondary are
+numbered in order: 1, 2, or 2, 3, or 3, 1), you should:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Take the disk from <em>primary</em> slot, put it on the <em>shelf</em></p>
+</li>
+<li>
+<p>Move the disk from the <em>secondary</em> slot to the <em>primary</em> slot, keyed-on</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If the disks are not in cyclical order (i.e., primary, secondary are
+numbered in order: 1, 3, or 2, 1, or 3, 2), you should:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Take the disk from <em>secondary</em> slot, put it on the <em>shelf</em></p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>In either case, finish with:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Put the new disk in the <em>secondary</em> slot, key-off.</p>
+</li>
+<li>
+<p>Boot (<em>primary</em> keyed-on, <em>secondary</em> keyed-off)</p>
+</li>
+<li>
+<p>Run <em>blank_secondary</em></p>
+</li>
+<li>
+<p>Key-on the <em>secondary</em> slot when prompted</p>
+</li>
+<li>
+<p>Answer <code><strong>y</strong></code> to blank</p>
+</li>
+<li>
+<p>Run <em>refresh_secondary</em></p>
+</li>
+<li>
+<p>Once the refresh is complete, the disk can be used normally</p>
+</li>
+<li>
+<p>Label the new disk with its system name, number, and serial number.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_currently_one_disk_is_running_in_the_raid_but_two_are_installed">6.2. Currently one disk is running in the RAID, but two are installed</h3>
+<div class="paragraph">
+<p>In this case, there is a good shelf disk. The strategy used avoids overwriting it until there are three functional disks again.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Use <em>mdstat</em> to determine which disk is running, compare the serial number to those shown on the labels or inspect the disks to determine their serial numbers.</p>
+</li>
+<li>
+<p>Shutdown the system, e.g., <code>shutdown -h now</code></p>
+</li>
+<li>
+<p>Remove the non-working disk.</p>
+</li>
+<li>
+<p>Move the working disk to the <em>primary</em> slot, if it isn&#8217;t already there, keyed-on.</p>
+</li>
+<li>
+<p>Put the new disk in the <em>secondary</em> slot, keyed-off.</p>
+</li>
+<li>
+<p>Boot (<em>primary</em> keyed-on, <em>secondary</em> keyed-off)</p>
+</li>
+<li>
+<p>Run <em>blank_secondary</em></p>
+</li>
+<li>
+<p>Key-on the <em>secondary</em> slot when prompted</p>
+</li>
+<li>
+<p>Answer <code><strong>y</strong></code> to blank</p>
+</li>
+<li>
+<p>Run <em>refresh_secondary</em></p>
+</li>
+<li>
+<p>Once the refresh is complete, the disk can be used normally</p>
+</li>
+<li>
+<p>Label the new disk with its system name, number, and serial number.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If the disks are not in cyclical order (i.e., primary, secondary are
+numbered in order: 1, 3, or 2, 1, or 3, 2), on the next disk rotation
+you should move the <em>secondary</em> disk to the shelf instead of moving
+the <em>primary</em>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_currently_one_disk_is_installed_and_running">6.3. Currently one disk is installed and running</h3>
+<div class="paragraph">
+<p>In this case, the shelf disk is assumed to be healthy, but older.
+ Again, the strategy is to avoid overwriting it until there is a full
+ complement of disks available.</p>
+</div>
+<div class="paragraph">
+<p>If the working disk is not in the <em>primary</em> slot:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Shutdown the system, e.g., <code>shutdown -h now</code></p>
+</li>
+<li>
+<p>Move the working disk to the <em>primary</em> slot, keyed-on.</p>
+</li>
+<li>
+<p>Boot (<em>primary</em> keyed-on, <em>secondary</em> empty)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Then in any event:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Put the new disk in the <em>secondary</em> slot, keyed-off.</p>
+</li>
+<li>
+<p>Run <em>blank_secondary</em></p>
+</li>
+<li>
+<p>Key-on the <em>secondary</em> slot when prompted</p>
+</li>
+<li>
+<p>Answer <code><strong>y</strong></code> to blank</p>
+</li>
+<li>
+<p>Run <em>refresh_secondary</em></p>
+</li>
+<li>
+<p>Once the refresh is complete, the disk can be used normally</p>
+</li>
+<li>
+<p>Label the new disk with its system name, number, and serial number.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If the disks are not in not in cyclical order (i.e., primary,
+secondary are numbered in order: 1, 3, or 2, 1, or 3, 2), on the next
+disk rotation you should move the <em>secondary</em> the shelf instead of the
+<em>primary</em>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_script_descriptions">7. Script descriptions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section describes the various scripts that are used for RAID maintenance.</p>
+</div>
+<div class="sect2">
+<h3 id="_mdstat">7.1. mdstat</h3>
+<div class="paragraph">
+<p>This script can be used by any user (not just <em>root</em>) to check the
+status of the RAID. It is most useful for checking whether a recovery
+is in process or has ended, but is also useful for showing the current
+state of the RAID, including any anomalies.</p>
+</div>
+<div class="paragraph">
+<p>The script also lists various useful details for all block devices (such
+as disks) that are currently connected, including their model and serial
+numbers where applicable.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_refresh_secondary">7.2. refresh_secondary</h3>
+<div class="paragraph">
+<p>This can be used to refresh a <em>shelf</em> disk for the RAID as a new
+<em>secondary</em> disk (<em>sdb</em>) as part of a standard three (or more) disk
+rotation.</p>
+</div>
+<div class="paragraph">
+<p>Initially, the script performs some sanity checks to confirm that the
+RAID <em>/dev/md0</em>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Exists.</p>
+</li>
+<li>
+<p>Is not a clean state, i.e., it needs recovery.</p>
+</li>
+<li>
+<p>Is not already recovering, i.e., is in a recoverable state.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Additional checks are performed to confirm that the content the script
+intends to copy is where it expects it to be and has the right form.
+Any <em>primary</em> disk (<em>sda</em>) will be rejected that:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Is not part of the RAID (<em>md0</em>)</p>
+</li>
+<li>
+<p>Has a boot scheme other than the BIOS or UEFI set up as described in the FSL10 Installation Document.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>To ensure that only an old <em>shelf</em> disk for this system is
+overwritten, any <em>secondary</em> disk (<em>sdb</em>) will be rejected that:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Was loaded (slot keyed-on) before starting the script</p>
+<div class="paragraph">
+<p>Unless overridden by <code>-A</code> or previously loaded by this or the <em>blank_secondary</em> script.</p>
+</div>
+</li>
+<li>
+<p>Is already part of RAID <em>md0</em></p>
+<div class="paragraph">
+<p>Which should only happen if run incorrectly with <code>-A</code> (or other
+interfering commands have been executed) or the disk has
+fallen out of the RAID due to failure.</p>
+</div>
+</li>
+<li>
+<p>Has a RAID from a different computer, i.e., foreign</p>
+<div class="paragraph">
+<p>Technically this could also be another RAID from the same computer, but not of a
+properly set up FSL10 computer, which should have only the one RAID</p>
+</div>
+</li>
+<li>
+<p>Has any part already mounted</p>
+<div class="paragraph">
+<p>Again catching misuse of the <code>-A</code> option.</p>
+</div>
+</li>
+<li>
+<p>Has a different boot scheme than the <em>primary</em></p>
+<div class="paragraph">
+<p>And hence is probably from a different computer.</p>
+</div>
+</li>
+<li>
+<p>Has a different RAID UUID</p>
+<div class="paragraph">
+<p>This would be a disk from a different computer. Though whether this
+check can actually trigger after the test for a foreign RAID above
+remains to be seen.</p>
+</div>
+</li>
+<li>
+<p>Was last booted at a future <code>TIME</code> (possibly due to a mis-set clock or clocks)</p>
+</li>
+<li>
+<p>Has a higher <code>EVENT</code> count, i.e., is newer (but see the <strong>WARNING</strong> item below)</p>
+</li>
+<li>
+<p>Has been used (booted) separately by itself</p>
+</li>
+<li>
+<p>Has a different partition layout from the <em>primary</em></p>
+</li>
+<li>
+<p>Is smaller than the size of the RAID on the primary disk.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If any of the checks reject the disk, we recommend you seek expert
+advice; please record the error so it can be reported.</p>
+</div>
+<div class="paragraph">
+<p>The checks are included to make the refresh process as safe as
+possible, particular at a station with more than one FSL<em>x</em> computer.
+We believe all the most common errors are trapped, but the script
+should still be used with care.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+The check on the <code>EVENT</code> counter is intended to prevent accidentally using
+the <em>shelf</em> disk to overwrite a newer disk from the RAID.  This check can be
+over-run if the <em>primary</em> has run for a considerable period of time
+before the refresh is attempted.  This should not be an issue if the
+refresh is attempted promptly after the <em>shelf</em> disk is booted for the
+first time by itself and the RAID was run on the other disks for more than a trivial
+amount of time beforehand.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If the disk being refreshed is from the same computer and has just
+been on the <em>shelf</em> unused since it was last rotated, it is safe to
+refresh and should be accepted by all the checks. In other words,
+        normal disk rotation should work with no problems.</p>
+</div>
+<div class="paragraph">
+<p>If the <em>primary</em> and/or <em>secondary</em> disks are removable, the user will
+be provided with some information about the disks and given an
+opportunity to continue with <kbd>Enter</kbd> or abort with <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span>.
+Typically, if a USB disk is identified as the <em>primary</em> or
+<em>secondary</em>, one would not want to continue. However for some
+machines, the SATA disks that are the <em>primary</em> and/or <em>secondary</em> may
+be marked removable if they are hot swappable, but would still be
+appropriate to use.</p>
+</div>
+<div class="paragraph">
+<p>This script requires the <em>secondary</em> disk (<em>sdb</em>) to not be loaded, i.e.,
+the slot turned off, when the script is started. However, it has an
+option, <code>-A</code> (use only with expert advice), to &#8220;Allow&#8221; an already
+loaded disk to be used. It is intended to make remote operation
+possible and must be used with extra care.</p>
+</div>
+<div class="paragraph">
+<p>If the disk is turned on (when prompted) during the script, it
+will automatically be &#8220;Allowed&#8221; by both this script and
+<em>blank_secondary</em>, which also supports this feature.  This allows
+(expert use only), after a failed <em>refresh_secondary</em>, running
+<em>blank_secondary</em> then rerunning <em>refresh_secondary</em>, all without having to
+shutdown, turn the disk off, reboot, start the script, and turn the disk on for each.</p>
+</div>
+<div class="paragraph">
+<p>The refresh will take several hours. The script provides a progress
+indicator that can safely be aborted (using <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> as described
+    by the on-screen instructions) if that is preferred.  An active
+screen saver may make it difficult to see the progress after awhile,
+       but pressing <kbd>shift</kbd> or some other key should make it
+       visible again.  If you abort the progress indicator, you can
+       check the progress later with <em>mdstat</em>. The system can be used
+       normally while it refreshing, but it may be a little slow.</p>
+</div>
+<div class="paragraph">
+<p>Once the progress indicator is updating, it is safe to reboot the
+computer if it is needed.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_blank_secondary">7.3. blank_secondary</h3>
+<div class="paragraph">
+<p>This script should only be used with expert advice.</p>
+</div>
+<div class="paragraph">
+<p>It can be used to make <em>any</em> <em>secondary</em> disk (<em>sdb</em>) refreshable, if
+it is big enough. It must be used with care and only on a <em>secondary</em>
+disk that you know is safe to erase. Generally speaking you don&#8217;t want
+to use it with a disk from a different FSL<em>x</em> computer, except for very
+unusual circumstances, see <a href="#_recovery_scenarios">Recovery scenarios</a> section for some example
+cases. It will ask you to confirm before blanking.</p>
+</div>
+<div class="paragraph">
+<p>It will reject any <em>secondary</em> disk (<em>sdb</em>) that:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Was loaded (slot keyed-on) before starting the script</p>
+<div class="paragraph">
+<p>Unless you have just loaded it through <em>refresh_secondary</em>'s auspices or used
+the <code>-A</code> option to &#8220;Allow&#8221; it (see below).</p>
+</div>
+</li>
+<li>
+<p>Is still part of the RAID <em>md0</em></p>
+<div class="paragraph">
+<p>Which should only happen if run incorrectly with <code>-A</code> (or other
+interfering commands have been executed).</p>
+</div>
+</li>
+<li>
+<p>Has any partition already mounted</p>
+<div class="paragraph">
+<p>Again catching misuse of the <code>-A</code> option.</p>
+</div>
+</li>
+<li>
+<p>Has a partition that is in RAID <em>md0</em></p>
+<div class="paragraph">
+<p>This is essentially redundant with the &#8220;Is still part of the RAID
+<em>md0</em>&#8221; check above, but is included out of an abundance of caution.</p>
+</div>
+</li>
+<li>
+<p>Has a partition that is included in any RAID.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If the <em>primary</em> disk is removable, the user will be provided with some
+information about the disk and given an opportunity to continue with
+<kbd>Enter</kbd> or abort with <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span>.  Typically, if a USB disk is
+identified as the <em>primary</em>, one would not want to continue. However
+for some machines the SATA disk that is the <em>primary</em> may be marked
+removable if it is hot swappable, but would still be appropriate to
+use.</p>
+</div>
+<div class="paragraph">
+<p>This script requires the <em>secondary</em> disk (<em>sdb</em>) to not be loaded, i.e.,
+the slot turned off, when the script is started. However, it has an
+option, <code>-A</code> (use only with expert advice), to &#8220;Allow&#8221; an already
+loaded disk to be used. It is intended to make remote operation
+possible and must be used with extra care.</p>
+</div>
+<div class="paragraph">
+<p>If the disk is turned on (when prompted) during the script, it will
+automatically be &#8220;Allowed&#8221; by both this script and
+<em>refresh_secondary</em>, which also supports this feature.  This allows
+you to then run <em>refresh_secondary</em> immediately without having to
+shutdown, turn the disk off, reboot, start the script, and turn the disk on.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+On the 32-bit <em>i386</em> platform, due to a broken <em>vgremove</em> binary, this
+script can give WARNINGs when erasing disks that were used for LVM.  These
+warnings can safely be ignored - the disk will be successfully blanked (despite
+<em>vgremove</em> having segmentation-faulted instead of performing the requisite
+action thereby causing <em>pvremove</em> to complain about the VG still being active.)
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_drop_primary">7.4. drop_primary</h3>
+<div class="paragraph">
+<p>This script is only for use with expert advice.</p>
+</div>
+<div class="paragraph">
+<p>This script can be used to drop a <em>primary</em> disk (<em>sda</em>) out of a RAID
+pair (by marking it as failed) so that it can act as a safety backup
+during major upgrades or other significant changes.</p>
+</div>
+<div class="paragraph">
+<p>Initially, the script performs some sanity checks to confirm that the
+RAID <em>/dev/md0</em>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Exists.</p>
+</li>
+<li>
+<p>Is in a clean state, i.e., both disks are present and no recovery is
+currently in progress.</p>
+</li>
+<li>
+<p>Contains the <em>primary</em> disk (<em>sda</em>) as a member.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>If the <em>primary</em> disk is removable, the user will be provided with some
+information about the disk and given an opportunity to continue with
+<kbd>Enter</kbd> or abort with <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span>.  Typically, if a USB disk is
+identified as the <em>primary</em>, one would not want to continue. However
+for some machines the SATA disk that is the <em>primary</em> may be marked
+removable if it is hot swappable, but would still be appropriate to
+use.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This script is non-destructive in nature and its effect can
+easily be reversed by running the <em>recover_raid</em> script mentioned
+below.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_recover_raid">7.5. recover_raid</h3>
+<div class="paragraph">
+<p>This script is only for use with expert advice.</p>
+</div>
+<div class="paragraph">
+<p>This script can be used to recover a disk (<em>sda</em> or <em>sdb</em>) that has
+fallen out of the RAID array, becoming <em>inactive</em>.  A disk can <em>fall</em> out of
+the array for several possible reasons, including:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>A real disk fault of some sort, including one caused by turning it off
+whilst it is still in use.</p>
+</li>
+<li>
+<p>Using the <em>mdadm</em> command with <code>-f</code> option to mark it as faulty.</p>
+</li>
+<li>
+<p>Turning it off whilst the system is shutdown and booting without it.</p>
+</li>
+<li>
+<p>Using the <em>drop_primary</em> script.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This script is designed to be used only with a
+set of disks that were most recently used <em>together</em> in an active
+RAID.  It is recommended only to use this script if the key switches
+for the disks have not been manipulated since the <em>inactive</em> disk fell
+out of the RAID; in this case it should always be safe.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The <em>inactive</em> disk is either <em>failed</em> or <em>missing</em>. It is
+<em>failed</em> if it was either marked <em>failed</em> by hand or dropped out of the RAID due to disk errors.
+It is <em>missing</em> if either the system was rebooted with the disk
+<em>failed</em> or physically missing or it was manually marked <em>removed</em>.  You
+can check which state an <em>inactive</em> disk is in  with
+<code><strong>mdadm&#160;--detail&#160;/dev/md0</strong></code>&#8201;&#8212;&#8201;which lists <em>failed</em> as
+<em>faulty</em> but a missing disk will not appear at all.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The <em>active</em> disk is the one the system is still running on.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+It is okay to use this script even if the <em>inactive</em> disk fell out
+the RAID a (long) long time ago (in a galaxy far, far away) and/or
+there have been extensive changes to the <em>active</em> disk.
+It is also okay to use if the system
+was rebooted (even multiple times) or the <em>active</em> disk was used
+(booted) separately by itself since the <em>inactive</em> disk fell out of the
+RAID.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+This script must <em>NOT</em> be used if the <em>inactive</em> disk has
+been changed in any way e.g., by being used (booted) separately (which is
+    caught by the script) or refreshed against some other disk, or if
+the <em>active</em> disk has been used to refresh any other disk in the
+interim.  In particular, the script must <em>NOT</em> be used to refresh a
+<em>shelf</em> disk&#8201;&#8212;&#8201;only use <em>refresh_secondary</em> for that purpose.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>It normally works on <em>md0</em>, but a different <em>md</em> device can be specified as the first argument.</p>
+</div>
+<div class="paragraph">
+<p>It will refuse to recover the RAID if the RAID:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Does not need recovery</p>
+</li>
+<li>
+<p>Is not in a recoverable state, e.g., is already recovering</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>or if any <em>missing</em> disk:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic" start="3">
+<li>
+<p>Has a later modification <code>TIME</code> than the <em>active</em> disk</p>
+</li>
+<li>
+<p>Has a higher <code>EVENT</code> count, i.e., is newer,  than the <em>active</em> disk</p>
+</li>
+<li>
+<p>Has been used (booted) separately (as mentioned above in the <strong>WARNING</strong> item)</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>or if no matching <em>missing</em> disk can be found.</p>
+</div>
+<div class="paragraph">
+<p>The recovery may be fairly quick, as short as a few minutes, if the
+<em>inactive</em> disk is relatively fresh.
+There is an ongoing progress display that can be
+terminated early with <kbd>Ctrl-C</kbd>, without affecting the recovery.
+If you abort the progress indicator, you can check the progress with <em>mdstat</em>. The
+system can be used normally while it recovering, but it may be a
+little slow.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_raid_events">7.6. raid-events</h3>
+<div class="paragraph">
+<p>The <em>mdmonitor</em> service can be configured to use the <em>raid-events</em>
+script to send email reports on RAID rebuilds and checks. This is most
+useful for getting reports for the start and end of a RAID build
+triggered by <em>refresh_secondary</em>. The script will also report on the
+start and end of any other RAID rebuilds, including those triggered by
+the <em>recover_raid</em> script. Checks are triggered periodically to verify
+the integrity of the RAIDs.</p>
+</div>
+<div class="paragraph">
+<p>The emails are sent to <em>root</em>, then typically redirected to <em>oper</em>,`
+and then forwarded to off-system accounts that may have their email
+read more frequently. There are four different possible subject lines
+used in the emails:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>Rebuild Running on <em>device</em></code></p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Sometimes for a rebuild started by <em>refresh_secondary</em>, this
+message may be sent about 20 minutes after the rebuild has started.
+The cause of this is not entirely understood, but the message is
+eventually sent.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p><code>Rebuild Ended <em>state</em> on <em>device</em></code></p>
+</li>
+<li>
+<p><code>Check Running on <em>device</em></code></p>
+</li>
+<li>
+<p><code>Check Ended <em>state</em> on <em>device</em></code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>where:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code><em>device</em></code> is the RAID device, e.g., <em>/dev/md/0</em></p>
+</li>
+<li>
+<p><code><em>state</em></code> is <code>OKAY</code> if the final state was not degraded; <code>DEGRADED</code>,
+if it was degraded.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The body of each email is the output of the <em>mdstat</em> script at the
+time the message was sent.</p>
+</div>
+<div class="sect3">
+<h4 id="_checks">7.6.1. Checks</h4>
+<div class="paragraph">
+<p>The <em>checking</em> process is triggered by <em>/etc/cron.d/mdadm</em> on
+the first Sunday of each month. It uses the
+<em>/usr/share/mdadm/checkarray</em> script and takes a similar amount of time
+as a rebuild of the RAID triggered by <em>refresh_secondary</em>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_installing_raid_events">7.6.2. Installing raid-events</h4>
+<div class="paragraph">
+<p>To install the script, use the following commands as <em>root</em>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>cd /usr/local/sbin
+cp ~/fsl10/RAID/raid-events .
+chmod u+x raid-events
+cat &lt;&lt;EOF &gt;&gt;/etc/mdadm/mdadm.conf
+
+PROGRAM /usr/local/sbin/raid-events
+EOF</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And then reboot.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_disabling_checking">7.6.3. Disabling checking</h4>
+<div class="paragraph">
+<p>If the checking process causes performance problems at inconvenient
+times, there are at least three options for dealing with it:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Disable the <code>AUTOCHECK</code> option in <em>/etc/default/mdadm</em></p>
+<div class="paragraph">
+<p>This is suitable if the RAID is rebuilt monthly using
+<em>refresh_secondary</em>. In this case, the check is superfluous.</p>
+</div>
+</li>
+<li>
+<p>Change the time at which it runs as configured in
+<em>/etc/cron.d/mdadm</em></p>
+</li>
+<li>
+<p>Cancel a running check, with:</p>
+<div class="literalblock">
+<div class="content">
+<pre>/usr/share/mdadm/checkarray --cancel --all</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_refresh_spare_usr2">7.7. refresh_spare_usr2</h3>
+<div class="paragraph">
+<p>This script is not part of RAID operations per se, but is included in
+this document for completeness. In a two system configuration
+(<em>operational</em> and <em>spare</em>), it is used to make a copy of the
+<em>operational</em> system&#8217;s <em>/usr2</em> partition on the <em>spare</em> system.
+Normally this partition holds all the operational FS programs and
+data.</p>
+</div>
+<div class="paragraph">
+<p>A full description of the features of the script are available from
+the <code><strong>refresh_spare_usr2&#160;-h</strong></code> output.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+This script should be installed on the <em>spare</em> system <em>only</em>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>A recommended monthly backup strategy is to do a disk rotation on both
+systems. Once the RAIDs on both systems are <em>recovering</em> you can
+log-out of both systems and then login into the <em>spare</em> system again
+to start <em>refresh_spare_usr2</em>.</p>
+</div>
+<div class="paragraph">
+<p>While a <em>refresh_spare_usr2</em>  with two nearly synchronized <em>/usr2</em>
+partitions is fairly fast, the recovery of the RAIDs may increase the
+amount of time required by about a factor of three.</p>
+</div>
+<div class="paragraph">
+<p>Once <em>refresh_spare_usr2</em> completes, it is safe to reboot, even if a
+recovery is still ongoing. The only requirement is to reboot the
+<em>spare</em> system before the FS is run on it again.</p>
+</div>
+<div class="paragraph">
+<p>A feature of this approach is that it will make the <em>spare</em> system
+shelf disk a deeper back-up than the <em>spare</em> system RAID disks.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_installing_refresh_spare_usr2">7.7.1. Installing refresh_spare_usr2</h4>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+For this script to work most usefully, the <em>operational</em> and
+<em>spare</em> systems should have the same set-up including particularly the
+same user accounts with same UIDs and GIDs in parallel for all
+accounts, particularly for those that have home directories on
+<em>/usr2</em>, as well as other OS set-up information the FS may depend on
+such as <em>/etc/hosts</em> and <em>/etc/ntp.conf</em>.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If you are unwilling or unable to use the <em>forced command</em>
+approach below for the <em>root</em> account, you may find the approach of
+using <em>sudo</em> in a regular account a usable alternative. For details on
+that approach, please see the
+<a href="cis-setup.html#_installing_refresh_spare_usr2_with_cis_hardening">Installing
+refresh_spare_usr2 with CIS hardening</a> subsection of the
+<a href="cis-setup.html">CIS Hardening for FSL10</a> document.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>All the steps below must be performed as <em>root</em> on the specified
+system. You should read all of each step or sub-step before following
+it.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>On the <em>spare</em> system:</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Install <em>refresh_spare_usr2</em>. Execute:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr/local/sbin
+cp -a /root/fsl10/RAID/refresh_spare_usr2 refresh_spare_usr2
+chown root.root refresh_spare_usr2
+chmod a+r,u+wx,go-wx refresh_spare_usr2</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Customize <em>refresh_spare_usr2</em>, following the directions in the
+comments in the script:</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>Comment-out the lines (add leading <code>#</code>s):</p>
+<div class="literalblock">
+<div class="content">
+<pre>echo "This script must be customized before use.  See script for details."
+exit 1</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Change the <code>operational</code> in the line:</p>
+<div class="literalblock">
+<div class="content">
+<pre>remote_node=operational</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to the alias (preferred), FQDN, or IP address of your <em>operational</em>
+system.</p>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Create and copy a key for <em>root</em>. Execute:</p>
+<div class="listingblock">
+<div class="content">
+<pre>ssh-keygen
+ssh-copy-id root@<em>operational</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code><em>operational</em></code> is the alias, name, or IP of your <em>operational</em>
+system.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If <em>root</em> already has a key, you only need the second command
+above to copy it to the <em>spare</em> system.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+It is recommended to not set a passphrase.
+</td>
+</tr>
+</table>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>On the <em>operational</em> system:</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Install the <em>rrsync</em> script. Execute:</p>
+<div class="literalblock">
+<div class="content">
+<pre>gunzip -c /usr/share/doc/rsync/scripts/rrsync.gz &gt;/usr/local/bin/rrsync
+ln -s /usr/local/bin/rrsync /usr/bin/rrsync
+chmod u+x,go-x /usr/local/bin/rrsync</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Set the <em>root</em> account to only allow a <em>forced command</em> with <em>ssh</em>:</p>
+<div class="olist lowerroman">
+<ol class="lowerroman" type="i">
+<li>
+<p>Replace the <code>ssh-rsa</code> at the start of the line (probably the only
+one) in <em>~root/.ssh/authorized_keys</em> for the <em>root</em> account on the
+<em>spare</em> system with:</p>
+<div class="paragraph">
+<p><code>command="rrsync -ro /usr2" ssh-rsa</code></p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If your <em>spare</em> system is registered with DNS, you can provide
+some additional security by adding <code>from="<em>node</em>" </code> &#160;(note
+the trailing space) at the start of the line, where <code><em>node</em></code> is the
+FQDN or IP address of the <em>spare</em> system.  It may be necessary to
+provide the FQDN, IP address, and/or alias of the <em>spare</em> system in a
+comma separated list in place of  <code><em>node</em></code> to get reliable
+operation.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Set <em>sshd</em> to only allowed forced commands for <em>root</em> by
+un-commenting the <code>PermitRootLogin</code> line and changing the second field
+from <code>prohibit-password</code> to <code>forced-commands-only</code>.</p>
+</li>
+<li>
+<p>Restart `<em>sshd</em>. Execute:</p>
+<div class="literalblock">
+<div class="content">
+<pre>systemctl restart sshd</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_using_refresh_spare_usr2">7.7.2. Using refresh_spare_usr2</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>As part of a monthly backup, you would usually start a disk rotation
+on both the <em>operational</em> and <em>spare</em> systems first. Once both systems
+are recovering, you should log out of both systems.</p>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+Before proceeding, make sure that no one is logged into
+either system and that no processes are running on <em>/usr2</em> on either
+system, particularly the FS.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Login on the <em>spare</em> system. The best choice for this is as <em>root</em>
+on a local virtual console text terminal.</p>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Logging in as a non-<em>root</em> user is acceptable. Any means can be
+used: a text console, <em>ssh</em> from another system (preferably not the
+<em>operational</em> system), or the graphics X display. In these cases, you
+must promote to <em>root</em> using <em>su</em> (or execute the script with <em>sudo</em>
+for CIS hardened systems).
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Execute the script:</p>
+<div class="literalblock">
+<div class="content">
+<pre>refresh_spare_usr2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Answer the question <code><strong>y</strong></code> if it is safe to proceed.</p>
+</div>
+</li>
+<li>
+<p>Log out of the system.</p>
+</li>
+<li>
+<p>Wait until the script has finished before logging in again and
+resuming other activities on the systems.</p>
+<div class="paragraph">
+<p>An email will be sent to <em>root</em> when the script finishes. If your
+email to <em>root</em> is being forwarded to a mailbox off the system, you
+can use receipt of that message (and that it shows no errors) as the
+indication that it finished successfully.</p>
+</div>
+<div class="paragraph">
+<p>Alternatively, you can examine the logs (before starting the script)
+in <em>/root/refresh_spare_usr2_logs</em> to see how long previous script
+uses took. When at least that much time has elapsed, you can login
+and can check the log for the current script use to verify that it has
+finished.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Generally speaking, it is best to <em>not</em> login to either the <em>spare</em> or
+<em>operational</em> system while the script is running. Under normal
+circumstances the script should run quickly enough that this does not
+cause a significant burden. If it is necessary to login to either
+system, the following paragraphs in this <strong>CAUTION</strong> cover the relevant
+considerations.</p>
+</div>
+<div class="paragraph">
+<p>If you do login to the <em>spare</em> system, it is best to <em>not</em> use an
+account with a home directory on the <em>/usr2</em> partition (logging in as
+<em>root</em> on a text console is okay) or otherwise access that partition
+while the script is running. In any event, activity on <em>/usr2</em> should
+be minimized.</p>
+</div>
+<div class="paragraph">
+<p>It is possible to use the <em>operational</em> system while the script is
+running if necessary, but this should be avoided if possible and
+activity on the <em>/usr2</em> partition should be minimized. You should not
+expect any changes on the <em>operational</em> system <em>/usr2</em> that occur
+after the script starts to be propagated to the <em>spare</em> system. If any
+files are deleted before they can be transferred, there will be a
+warning <code>file has vanished: "<em>file</em>"</code>, for each such <code><em>file</em></code>, and
+there will be a summary warning that starts with <code>rsync warning: some
+files vanished before they could be transferred</code>, but without
+additional warnings or errors, the transfer should otherwise be
+successful.</p>
+</div>
+<div class="paragraph">
+<p>In case you have logged into either system while the script is
+running, you can touch-up the copy on the <em>spare</em> system, by rerunning
+the script after logging out.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>If the script finished with no problems, you can reboot the <em>spare</em>
+system as soon as is convenient. You may reboot even if the RAID is
+recovering, but you can wait until the recovery is complete. The only
+requirement is to reboot before the FS is run again on the <em>spare</em>
+system.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_multiple_computer_set_up">8. Multiple computer set-up</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You may have more than one FSL10 computer at a site, either an
+<em>operational</em> and <em>spare</em> for one system and/or additional computers for a
+additional systems. In this case, we recommend that you do a full setup of
+each computer from scratch from FSL10 installation notes. The main, but not only,
+reason for this is to make sure each RAID has a unique UUID, so the
+<em>refresh_secondary</em> script will be able to help you avoid accidentally
+mixing disks while doing a refresh. While in principle is it possible
+to do one set-up and clone the configuration to more disks and then
+customize for each computer, we are not providing detailed
+instructions on how to do that at this time.</p>
+</div>
+<div class="paragraph">
+<p>It is recommended that the network configuration on each machine be
+made independent of the MAC address of the hardware. This will make it
+possible to move a RAID pair to a different computer and have it work
+on the network. Please note that the IP address and hostname is tied to
+the disks and not the computers. For information on how to configure this,
+    please see the (optional) <a href="installation.html#_network_configuration_changes">Network configuration changes</a> section
+    of the FSL10 installation document.</p>
+</div>
+<div class="paragraph">
+<p>The configuration of the system outside of the <em>/usr2</em> partition
+between <em>operational</em> and <em>spare</em> computers should be maintained in
+parallel so that the same capabilities are available on both. In
+particular, any packages installed on one should also be installed
+on the other.  In addition, it is important that the user and group
+IDs of all users on the operational and spare computers be same. It
+should not be necessary to maintain parallelism with OS updates, but that
+is recommended as well. It is recommended to maintain maintenance parallelism
+with other independent <em>operational</em>/<em>spare</em> systems at a site as well (this may
+    enable additional recovery options in extreme cases).</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_recovery_scenarios">9. Recovery scenarios</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The setup provided by FSL10 provides several layers of recovery in
+case of problems with the computers or the disks. Each system has a
+<em>shelf</em> disk, which can serve as a back-up. Additionally if there is a
+<em>spare</em> computer for each <em>operational</em> computer, there are additional
+recovery options. If there are other FSL10 computers at the site, it
+may be possible in extreme cases to press those computers and/or disks into
+service, particularly if they have been maintained in parallel.</p>
+</div>
+<div class="paragraph">
+<p>A few example recovery scenarios are described below in rough order of
+likelihood of being needed. None of them are very likely to be needed,
+particularly those beyond the first two.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+In any scenario, if disks and/or a computer have failed,
+  they should be repaired or replaced as soon as feasible.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_operational_computer_failure">9.1. Operational computer failure</h3>
+<div class="paragraph">
+<p>This might be caused by a power supply or other hardware failure.
+If the contents of the <em>operational</em> RAID are not damaged, the RAID pair
+can be moved to the <em>spare</em> computer until the <em>operational</em> computer is
+repaired. Once the RAID has been moved, whether the contents have
+been damaged can be assessed. It will be necessary to move
+connections for any serial/GPIB devices to the spare computer as well.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If the disks do not connect to network after first
+booting in a different computer:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Shut the system down.</p>
+</li>
+<li>
+<p>Remove the power cord.</p>
+</li>
+<li>
+<p>Press and hold the power button for 15 or more seconds.</p>
+<div class="paragraph">
+<p>The goal is drain any residual energy in the computer in order to completely
+reset the NIC.</p>
+</div>
+</li>
+<li>
+<p>Reboot and try again.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This has been seen to solve the problem, perhaps because it forces the
+NIC to re-register with ARP. Waiting longer may also solve the problem.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_one_disk_in_the_operational_computer_raid_fails">9.2. One disk in the operational computer RAID fails</h3>
+<div class="paragraph">
+<p>This should not interrupt operations. The computer should continue to
+run seamlessly on the remaining disk.  If the system is rebooted in
+this state, it should use the working disk. At the first opportunity,
+     usually after operations, the <em>recover_raid</em> script can be tried
+     to restore the disk to the RAID. If that doesn&#8217;t work, the disk
+     may have failed and may need to replaced (it may worthwhile to
+         try blanking and refreshing it first). If the disk has
+     failed, it should be removed and a disk rotation should be
+     performed (with the still good disk in the <em>primary</em> slot) to
+     refresh the <em>shelf</em> disk and make a working RAID.  The failed
+     disk should be repaired or replaced with a new disk that is at
+     least as large. The <em>blank_secondary</em> script should be used to
+     erase the new disk before it is introduced into the rotation
+     sequence. See the <a href="#_initialize_a_new_disk">Initialize a new disk</a> section above for
+     full details on initializing a new disk.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_operational_computer_raid_corrupted">9.3. Operational computer RAID corrupted</h3>
+<div class="paragraph">
+<p>As well as a large scale corruption, this can include recovery from
+accidental loss of important non-volatile files. This would generally
+not include <em>.skd</em>, <em>.snp</em>, and <em>.prc</em> files; those can be more easily
+restored by generating them again. It also can be used to recover
+from a bad OS patch (which is extremely unlikely). That is easier to
+manage if the patches were applied just after a disk rotation (see
+also the <a href="#_recoverable_testing">Recoverable testing</a> section).</p>
+</div>
+<div class="paragraph">
+<p>In this case, the <em>shelf</em> disk can be used to restore the system to
+the state at the time of the most recent rotation.  To do this, follow
+the procedure in <a href="#_recover_from_a_shelf_disk">Recover from a shelf disk</a> section above.  The
+system can be used for operations once the RAID is recovering for the
+first refresh in the procedure.  All needed volatile operational files that were
+created/modified after the last disk rotation will need to be
+recreated.  Then as time allows, the other disk can recovered by
+finishing the procedure in <a href="#_recover_from_a_shelf_disk">Recover from a shelf disk</a> section.</p>
+</div>
+<div class="paragraph">
+<p>If the first disk that is tried for blanking and recovery doesn&#8217;t work, the
+other one can be tried. If neither works, it should be possible to run on just
+what was the <em>shelf</em> disk until a fuller recovery is possible, probably with
+replacements for the malfunctioning disks.</p>
+</div>
+<div class="paragraph">
+<p>This approach could also be used for a similar problem with the
+<em>spare</em> computer and using its <em>shelf</em> disk for recovery.</p>
+</div>
+<div class="paragraph">
+<p>This approach of this section should not be used if a problem with the <em>operational</em>
+computer caused the damage to its RAID. In that case, follow
+the <a href="#_operational_computer_raid_corrupted_and_operational_computer_failure">Operational computer RAID corrupted and operational computer failure</a> sub-section below.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_operational_computer_raid_corrupted_and_operational_computer_failure">9.4. Operational computer RAID corrupted and operational computer failure</h3>
+<div class="paragraph">
+<p>This might happen if the operational computer is exposed to fire
+and/or water.  In this case, there are two options. One is switching to
+using the <em>spare</em> computer as in the <a href="#_loss_of_operational_computer_and_all_its_disks">Loss of operational computer and all its disks</a> sub-section below.
+The other is to use the <em>operational</em> computer&#8217;s
+<em>shelf</em> disk in the <em>spare</em> computer, either by itself or by making a
+ersatz RAID by blanking the <em>spare</em> computer&#8217;s <em>shelf</em> disk and
+refreshing it from the <em>operational</em> computer&#8217;s <em>shelf</em> disk.</p>
+</div>
+<div class="paragraph">
+<p>In the latter scenario, be sure to preserve the original working RAID
+from the <em>spare</em> computer. All needed volatile operational files that
+were created/modified after the last <em>operational</em> computer  disk
+rotation will need to be recreated.  It will be necessary to move
+connections for any serial/GPIB devices to the spare computer as well.
+However, it will not be necessary to enable any daemon&#8217;s like
+<em>metserver</em> and <em>metclient</em> as it would be in the former scenario; this
+may be a significant time saver.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_loss_of_all_operational_computer_disks">9.5. Loss of all operational computer disks</h3>
+<div class="paragraph">
+<p>If the RAID and <em>shelf</em> disk on the <em>operational</em> computer are beyond
+recovery, the RAID pair from the <em>spare</em> computer can be moved to the
+<em>operational</em> computer. All needed volatile operational files that
+were created/modified after the last <em>refresh_spare_usr2</em> will need to be
+recreated. If daemons like <em>metserver</em> and <em>metclient</em> are needed,
+  they will need to be enabled.</p>
+</div>
+<div class="paragraph">
+<p>This approach should not be used if a problem with the <em>operational</em>
+computer caused the damage to its RAID. In that case, follow the
+<a href="#_operational_computer_raid_corrupted_and_operational_computer_failure">Operational computer RAID corrupted and operational computer failure</a> sub-section above.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_loss_of_operational_computer_and_all_its_disks">9.6. Loss of operational computer and all its disks</h3>
+<div class="paragraph">
+<p>In this case, operations should be moved to the <em>spare</em> computer until
+the <em>operational</em> computer is repaired or replaced.  It will be
+necessary to move connections for any serial/GPIB devices to the
+<em>spare</em> computer as well. If daemons like <em>metserver</em> and
+<em>metclient</em> are needed, they will need to be enabled. All needed
+volatile operational files that were created/modified after the last
+<em>refresh_spare_usr2</em> will need to be recreated.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2023-05-16 14:26:40 -0400
+</div>
+</div>
+</body>
+</html>
