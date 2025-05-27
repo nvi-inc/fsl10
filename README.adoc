@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020 NVI, Inc.
+// Copyright (c) 2020, 2025 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -19,6 +19,12 @@
 //
 
 = Field System Linux Distribution
+
+IMPORTANT: New installations should use the latest available
+distribution. FSL10 has been superseded by FSL11,
+https://github.com/nvi-inc/fsl11. FSL11 may have also been superseded
+by the time you read this. Please check FSL11 or you can look for
+later distributions: FSL12, etc.
 
 This archive contains instructions and utilities for setting up a standard Field System Linux system.
 While you can will be able to install the Field System on other Linux distributions, the system

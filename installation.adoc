@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2020-2021 NVI, Inc.
+// Copyright (c) 2020-2021, 2025 NVI, Inc.
 //
 // This file is part of the FSL10 Linux distribution.
 // (see http://github.com/nvi-inc/fsl10).
@@ -22,7 +22,7 @@
 
 = FS Linux 10 Installation Guide
 J.F.H. Quick, D.E. Horsley, and W.E. Himwich
-Version 1.6.2 - August 2023
+Version 1.6.3 - May 2025
 
 :sectnums:
 :experimental:
@@ -31,6 +31,12 @@ Version 1.6.2 - August 2023
 :toc:
 <<<
 == Introduction
+
+IMPORTANT: New installations should use the latest available
+distribution. FSL10 has been superseded by FSL11,
+https://github.com/nvi-inc/fsl11. FSL11 may have also been superseded
+by the time you read this. Please check FSL11 or you can look for
+later distributions: FSL12, etc.
 
 These instructions provide a complete method for system installation
 and some tuning. They are not the only method for accomplishing these
@@ -174,6 +180,12 @@ motherboard's _setup_ utility `boot` menu and restore booting from the
 hard disks.
 
 == First Stage Installation
+
+IMPORTANT: New installations should use the latest available
+distribution. FSL10 has been superseded by FSL11,
+https://github.com/nvi-inc/fsl11. FSL11 may have also been superseded
+by the time you read this. Please check FSL11 or you can look for
+later distributions: FSL12, etc.
 
 WARNING: This guide assumes that you have two disks installed in the machine
 in order to set them up as a RAID pair. For the RAID to work seamlessly with a
@@ -576,6 +588,11 @@ create the new file _/etc/apt/apt.conf.d/00proxies_ using _vi_ containing:
 to use a proxy _proxy.some.where_ at port `8080` for example.
 
 === Edit /etc/apt/sources.list
+
+NOTE: Since _Stretch_ is no longer under security support, you will
+also need to modify _sources.list_ as described in the
+<<End of security updates>> in the <<Managing Security Updates>>
+appendix.
 
 Using your favourite text editor, eg _vi_, and comment out all `cdrom` entries
 (unless you don't have a decent Internet connection and need to use DVDs,
