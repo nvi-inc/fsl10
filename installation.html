@@ -1,0 +1,4016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="author" content="J.F.H. Quick, D.E. Horsley, and W.E. Himwich">
+<title>FS Linux 10 Installation Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="book">
+<div id="header">
+<h1>FS Linux 10 Installation Guide</h1>
+<div class="details">
+<span id="author" class="author">J.F.H. Quick, D.E. Horsley, and W.E. Himwich</span><br>
+<span id="revdate">Version 1.6.3 - May 2025</span>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_introduction">1. Introduction</a></li>
+<li><a href="#_choosing_architecture_and_creating_installation_media">2. Choosing architecture and creating installation media</a></li>
+<li><a href="#_motherboard_setup">3. Motherboard setup</a></li>
+<li><a href="#_first_stage_installation">4. First Stage Installation</a>
+<ul class="sectlevel2">
+<li><a href="#_boot_from_the_installation_medium">4.1. Boot from the installation medium</a></li>
+<li><a href="#_set_boot_options_and_boot_installer">4.2. Set boot options and boot installer</a></li>
+<li><a href="#_select_a_keyboard_layout">4.3. Select a keyboard layout</a></li>
+<li><a href="#_if_you_are_presented_with_a_dialog_asking_for_non_free_firmware_files">4.4. If you are presented with a dialog asking for non-free firmware files</a></li>
+<li><a href="#_if_you_are_presented_with_a_dialog_asking_which_interface_to_use">4.5. If you are presented with a dialog asking which interface to use</a></li>
+<li><a href="#_set_a_hostname">4.6. Set a hostname</a></li>
+<li><a href="#_enter_a_suitable_root_password">4.7. Enter a suitable root password</a></li>
+<li><a href="#_setup_first_account">4.8. Setup first account</a></li>
+<li><a href="#_get_network_time">4.9. Get network time</a></li>
+<li><a href="#_setup_partitions">4.10. Setup partitions</a></li>
+<li><a href="#_configure_the_package_manager">4.11. Configure the package manager</a></li>
+<li><a href="#_do_not_participate_in_popularity_contest">4.12. Do not participate in popularity-contest</a></li>
+<li><a href="#_choose_your_packages">4.13. Choose your packages</a></li>
+<li><a href="#_install_the_grub_bootloader_bios_boot_only">4.14. Install the GRUB bootloader (BIOS boot only)</a></li>
+<li><a href="#_remove_installation_media">4.15. Remove installation media</a></li>
+</ul>
+</li>
+<li><a href="#_second_stage_installation">5. Second Stage Installation</a>
+<ul class="sectlevel2">
+<li><a href="#_login_as_root">5.1. Login as root</a></li>
+<li><a href="#_remove_the_dummy_desktop_user_optional">5.2. Remove the dummy Desktop User (optional)</a></li>
+<li><a href="#_install_grub_to_the_secondary_disk_if_available">5.3. Install GRUB to the secondary disk (if available)</a></li>
+<li><a href="#_setup_http_proxy_for_apt_optional">5.4. Setup HTTP Proxy for APT (Optional)</a></li>
+<li><a href="#_edit_etcaptsources_list">5.5. Edit /etc/apt/sources.list</a></li>
+<li><a href="#_update_apts_list_of_packages">5.6. Update APT&#8217;s list of packages</a></li>
+<li><a href="#_download_the_fs_linux_10_package_selections">5.7. Download the FS Linux 10 package selections</a></li>
+<li><a href="#_clean_up_the_apt_download_directory">5.8. Clean up the APT download directory</a></li>
+</ul>
+</li>
+<li><a href="#_third_stage_installation">6. Third Stage Installation</a>
+<ul class="sectlevel2">
+<li><a href="#_fsadapt">6.1. fsadapt</a></li>
+<li><a href="#_set_passwords">6.2. Set Passwords</a></li>
+<li><a href="#_install_tools_for_raid_optional">6.3. Install tools for RAID (Optional)</a></li>
+<li><a href="#_download_the_field_system">6.4. Download the Field System</a></li>
+<li><a href="#_run_fs_install_script">6.5. Run FS install script</a></li>
+<li><a href="#_make_the_fs">6.6. Make the FS</a></li>
+<li><a href="#_reboot">6.7. Reboot</a></li>
+</ul>
+</li>
+<li><a href="#_post_install">7. Post Install</a>
+<ul class="sectlevel2">
+<li><a href="#_setup_additional_disk">7.1. Setup additional disk</a></li>
+<li><a href="#_consider_additional_customizations">7.2. Consider additional customizations</a></li>
+</ul>
+</li>
+<li><a href="#_additional_setup_items">Appendix A: Additional Setup Items</a>
+<ul class="sectlevel2">
+<li><a href="#_additional_security_and_cis_benchmarks">A.1. Additional security and CIS Benchmarks</a></li>
+<li><a href="#_customize_roots_bashrc_file">A.2. Customize root&#8217;s .bashrc file</a></li>
+<li><a href="#_network_configuration_changes">A.3. Network configuration changes</a></li>
+<li><a href="#_disable_desktop_user">A.4. Disable Desktop User</a></li>
+<li><a href="#_remove_modemmanager_package">A.5. Remove ModemManager package</a></li>
+<li><a href="#_remove_anacron_package">A.6. Remove Anacron package</a></li>
+<li><a href="#_more_firewall_rules">A.7. More firewall rules</a></li>
+<li><a href="#_configure_e_mail">A.8. Configure e-mail</a></li>
+<li><a href="#_generate_fqdn_in_helo_for_outgoing_mail">A.9. Generate FQDN in HELO for outgoing mail</a></li>
+<li><a href="#_set_x_display_resolution_at_boot">A.10. Set X display resolution at boot</a></li>
+<li><a href="#_fix_for_slow_rebootshutdown_with_wayland_disabled">A.11. Fix for slow reboot/shutdown with Wayland disabled</a></li>
+<li><a href="#_use_keepalive_to_prevent_vlan_firewall_inactivity_time_out">A.12. Use KeepAlive to prevent VLAN firewall inactivity time-out</a></li>
+<li><a href="#_remove_login_banners_for_commands_run_by_ssh_on_remote_systems">A.13. Remove login banners for commands run by ssh on remote systems</a></li>
+<li><a href="#_printer_setup">A.14. Printer setup</a></li>
+<li><a href="#_ntp_configuration">A.15. NTP configuration</a></li>
+<li><a href="#_add_raid_events_scripts">A.16. Add raid-events scripts</a></li>
+<li><a href="#_add_refresh_spare_usr2">A.17. Add refresh_spare_usr2</a></li>
+</ul>
+</li>
+<li><a href="#_managing_security_updates">Appendix B: Managing Security Updates</a>
+<ul class="sectlevel2">
+<li><a href="#_installing_updates_upgrading">B.1. Installing updates (Upgrading)</a></li>
+<li><a href="#_kernel_updates">B.2. Kernel updates</a></li>
+<li><a href="#_recovery_from_a_failed_update">B.3. Recovery from a failed update</a></li>
+<li><a href="#_manually_checking_for_updates">B.4. Manually checking for updates</a></li>
+<li><a href="#_end_of_security_updates">B.5. End of security updates</a></li>
+</ul>
+</li>
+<li><a href="#_rescue_mode">Appendix C: Rescue mode</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div style="page-break-after: always;"></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_introduction">1. Introduction</h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+New installations should use the latest available
+distribution. FSL10 has been superseded by FSL11,
+<a href="https://github.com/nvi-inc/fsl11" class="bare">https://github.com/nvi-inc/fsl11</a>. FSL11 may have also been superseded
+by the time you read this. Please check FSL11 or you can look for
+later distributions: FSL12, etc.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>These instructions provide a complete method for system installation
+and some tuning. They are not the only method for accomplishing these
+goals, but have been well tested. Experts can of course use their own
+means, but the farther they deviate from this model, the less support
+we will be able to provide.</p>
+</div>
+<div class="paragraph">
+<p>The standard configuration uses a RAID1 system with removable disks.
+Normally, two disks would be in use at a given time. A third disk is
+used as a back-up and rotated into use periodically. More disks can be
+used for further redundancy. You can of course provide your own
+back-up method and can install the system to a single disk if you do
+not want to use the software RAID.</p>
+</div>
+<div class="paragraph">
+<p>If you are using the RAID configuration, you may wish to review the
+<a href="raid.html#_recommended_practices">Recommended practices</a> sub-section
+of the <a href="raid.html">RAID notes for FSL10</a> document before installing.
+However, all of the practices listed there can implemented after the
+installation steps below are complete.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Removable disks should be used with a carrier/receiver system
+that can tolerate a large number of insertions; &#8220;bare&#8221; disks should
+not be inserted repetitively. Two receivers would normally be mounted
+in the computer chassis. Each disk would be in its own carrier. We can
+provide a recommendation for a carrier/receiver system if you need
+one.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Please note that for each step in this guide, we recommend you
+carefully read all the included caveats and notes as the material is
+not always logically sequential, i.e., instructions may proceed
+explanations that impact what you actually type.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. FSL distributions</caption>
+<colgroup>
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+<col style="width: 20%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">FS Linux</th>
+<th class="tableblock halign-left valign-top">Release Name</th>
+<th class="tableblock halign-left valign-top">Debian Version</th>
+<th class="tableblock halign-left valign-top">Linux kernel</th>
+<th class="tableblock halign-left valign-top">Year</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>1</em></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">(Slackware)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>1.2.&lt;x&gt;</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1994</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>bo</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>1.3.1</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.0.29</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1997</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>3</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>hamm</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.0.34</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1998</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>slink</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.1</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.0.36</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1999</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>4</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>potato</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.2</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.2.18</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2000</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>5</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>woody</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>3.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.2.20</em>/<em>2.4.18</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2002</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>6</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>sarge</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>3.1</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.4.27</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2005</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>7</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>etch</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>4.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.6.18</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2007</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>8</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>lenny</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>5.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.6.26</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2009</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>squeeze</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>6.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>2.6.32</em></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>9</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>wheezy</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>7.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>3.2.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2014</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>jessie</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>8.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>3.16.0</em></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>10</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>stretch</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>9.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>4.9.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2020</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>buster</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>10.0</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>4.19.0</em></p></td>
+<td class="tableblock halign-left valign-top"></td>
+</tr>
+</tbody>
+</table>
+<div class="paragraph">
+<p>The FSL10 documents follow the FS font conventions, which can be found
+at: <a href="https://nvi-inc.github.io/fs/misc/font_conventions.html" class="bare">https://nvi-inc.github.io/fs/misc/font_conventions.html</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_choosing_architecture_and_creating_installation_media">2. Choosing architecture and creating installation media</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>As of Field System version <em>10.0</em>, both <em>i386</em> and <em>amd64</em> architectures
+are supported natively. The <em>amd64</em> architecture is preferred and
+should be used if possible (it should be unless the processor is very
+    old, from about 2010 or older).  However, some work may be
+required to port your station code from a 32-bit to a 64-bit OS. Some
+automatic tools have been developed for this, and can be provided upon
+request. Usually the <em>i386</em> architecture will work on any processor,
+but requires use of the <code>Legacy</code> (or <code>BIOS</code>) boot mode in most cases.
+The <em>amd64</em> installation media will fail to boot on a system that is
+32-bit only.</p>
+</div>
+<div class="paragraph">
+<p>To install Debian <em>9</em>, you can either use a DVD or USB drive. The latter is
+faster, and also easier if you wish to use UEFI. Directions for creating your
+installation media can be found online.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Don&#8217;t be confused by the <em>amd64</em> name, this architecture supports both
+AMD and Intel manufactured x86-64 processors. This includes CPU lines such as
+Ryzen, Epyc, Core, and Xeon. The naming scheme dates back to when Intel had a
+competing and incompatible 64-bit architecture <em>ia64</em>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>You can install from a DVD drive, USB device, or over the network. Any revision of
+<em>9.&lt;x&gt;</em> installer from <em>9.7</em> onwards should work fine, but older revisions will want to download
+many security patches from the network which may already be included in the
+latest revision. Revisions before <em>9.7</em> had a serious security flaw in the package
+installer. Note also that installing from DVDs as described here is
+recommended mainly for sites with little to poor Internet connectivity (even
+then, use of a single DVD may suffice) and the equivalent use of a Debian
+GNU/Linux <em>9.&lt;x&gt;</em> &#8220;Stretch&#8221; - Official <em>i386</em>/<em>amd64</em> <em>netinst</em> CD would suffice for
+installation at most sites with good connectivity. Official images for the installer
+can be found at: <a href="https://cdimage.debian.org/cdimage/archive/" class="bare">https://cdimage.debian.org/cdimage/archive/</a> or alternatively,
+should your hardware require non-free firmware, unofficial images for the
+installer that also include all available non-free firmware can be found at:
+<a href="https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/archive/" class="bare">https://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/archive/</a></p>
+</div>
+<div class="paragraph">
+<p>The details of creating your installation media can be found in the Debian
+installation guide available from:
+<a href="https://www.debian.org/releases/stretch/installmanual" class="bare">https://www.debian.org/releases/stretch/installmanual</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_motherboard_setup">3. Motherboard setup</h2>
+<div class="sectionbody">
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Some hardware may require special procedures. For cases we know about,
+instructions are provided in top-level sub-directories of the
+repository, which is visible at <a href="https://github.com/nvi-inc/fsl10" class="bare">https://github.com/nvi-inc/fsl10</a>. In
+addition to special instructions, there may be needed software/drivers
+in the sub-directories. The following table lists the cases that are
+currently covered. Some of these solutions may be useful for other
+hardware with the same issues. If you have the listed hardware or
+issue, we recommend reading the instructions before beginning the
+installation.</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Special installation instructions available</caption>
+<colgroup>
+<col style="width: 14.2857%;">
+<col style="width: 42.8571%;">
+<col style="width: 42.8572%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Directory</th>
+<th class="tableblock halign-left valign-top">Hardware</th>
+<th class="tableblock halign-left valign-top">Issue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/nvi-inc/fsl10/tree/master/X11SCA-F">X11SCA-F</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Supermicro X11SCA-F motherboard</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Newer driver required for Intel 1000e NIC</p></td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Modern motherboards offer two forms of booting: native UEFI or BIOS
+emulation (&#8220;Legacy&#8221;). UEFI is the preferred approach.  Either mode of
+boot is supported by this installation guide, and you will be given
+alternatives when the instructions differ.</p>
+</div>
+<div class="paragraph">
+<p>Decide which boot mode you want to use and select it through the motherboard
+<em>setup</em> menu (typically by pressing <kbd>DEL</kbd> during POST).</p>
+</div>
+<div class="paragraph">
+<p>Also make sure that the motherboard time is set to the current Universal time, i.e.,
+UTC, and the motherboard can boot from the installation media.</p>
+</div>
+<div class="paragraph">
+<p>While you are in the motherboard menu, make sure that hot-swapping is
+enabled for both the primary and secondary controllers. This is
+necessary for disk rotation and recoverable testing.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+For UEFI, some motherboards may switch to booting to the UEFI
+shell if they fail to find a hard disk that will boot. This might
+happen, for example, if you attempt to boot from a blank disk. If you
+become stuck booting to the UEFI shell, you may need to enter the
+motherboard&#8217;s <em>setup</em> utility <code>boot</code> menu and restore booting from the
+hard disks.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_first_stage_installation">4. First Stage Installation</h2>
+<div class="sectionbody">
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+New installations should use the latest available
+distribution. FSL10 has been superseded by FSL11,
+<a href="https://github.com/nvi-inc/fsl11" class="bare">https://github.com/nvi-inc/fsl11</a>. FSL11 may have also been superseded
+by the time you read this. Please check FSL11 or you can look for
+later distributions: FSL12, etc.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+This guide assumes that you have two disks installed in the machine
+in order to set them up as a RAID pair. For the RAID to work seamlessly with a
+third disk later, you must make sure that the smallest disk of the three
+disks available is used as the first of this initial RAID pair. Use of a
+single disk (for a test install etc.) is also annotated below.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Installing to a single disk initially is recommended and has some
+advantages. It is faster and you can control when the syncing for the
+second disk occurs, such as when you leave for the evening.  The
+set-up of additional disks is covered in the <a href="#_post_install">Post Install</a> section
+(which references the <a href="raid.html">RAID notes for FSL10</a> document).
+As mentioned in the warning above, you should start with the smallest disk.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_boot_from_the_installation_medium">4.1. Boot from the installation medium</h3>
+<div class="paragraph">
+<p>Connect an active network cable to your lowest numbered interface
+(only). Usually it is on the left if there are two.</p>
+</div>
+<div class="paragraph">
+<p>Insert/plug-in your installation media and reboot.</p>
+</div>
+<div class="paragraph">
+<p>To boot of the installation media you may need to bring up your motherboards
+<code>boot</code> menu, which is typically accessed by pressing <kbd>F11</kbd> or <kbd>F12</kbd>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_set_boot_options_and_boot_installer">4.2. Set boot options and boot installer</h3>
+<div class="paragraph">
+<p>At the <code>Installer boot menu</code>:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><em>Highlight</em> <code>Install</code> (or <code>Graphical install</code>&#8201;&#8212;&#8201;only the installer
+interface differs&#8201;&#8212;&#8201;but this may not work on some video hardware)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>UEFI: press <kbd>e</kbd>, then <kbd>&downarrow;</kbd> three times (<code>vmlinuz</code>), then <kbd>End</kbd></p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If <kbd>e</kbd> doesn&#8217;t work, UEFI is not available.  It may be possible to enable it in the BIOS.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>BIOS: press <kbd>Tab</kbd></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>To the end of the displayed command, add the additional options:</p>
+<div class="literalblock">
+<div class="content">
+<pre>locale=en_US.UTF8 netcfg/disable_dhcp=true time/zone=UTC</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Whilst typing a <code>/</code> (slash) it may automatically be changed (escaped) to
+      <code>\/</code> (i.e. preceded by a backslash). This is normal behaviour and harmless.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Press:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>UEFI: <kbd>F10</kbd></p>
+</li>
+<li>
+<p>BIOS: <kbd>Enter</kbd></p>
+</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You may omit the <code>netcfg/disable_dhcp=true</code> if you want to use DHCP to
+configure the network settings of this machine, though this is not advised.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You can additionally use <code>partman-partitioning/default_label=gpt</code> if you wish
+to force the use of a GPT partition table on a disk that is smaller than 2 GB,
+but beware - some older BIOS versions cannot handle GPT formatted disks.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you do not set a locale or set <code>locale=C</code>, you will be
+prompted to select your language and your country. However some
+applications may have problems if a UTF8 locale is not used.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The installer will now boot.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_select_a_keyboard_layout">4.3. Select a keyboard layout</h3>
+<div class="paragraph">
+<p>Find your keyboard on the keymap list and press  <kbd>Enter</kbd>. (The most common one is <code>American English</code>)</p>
+</div>
+<div class="paragraph">
+<p>The installation media is now scanned and additional installer components loaded.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_if_you_are_presented_with_a_dialog_asking_for_non_free_firmware_files">4.4. If you are presented with a dialog asking for non-free firmware files</h3>
+<div class="paragraph">
+<p>You may need to locate the files requested (especially if they relate to
+your network or disk-drive interfaces)  and place them on a USB stick which
+should be inserted at this stage.  If you do have the required files select
+<code>Yes</code>, otherwise press <kbd>Tab</kbd> to select <code>No</code> then press
+<kbd>Enter</kbd> to continue.  It may well be simpler just to use the unofficial
+installer images mentioned above that include all available non-free firmware.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_if_you_are_presented_with_a_dialog_asking_which_interface_to_use">4.5. If you are presented with a dialog asking which interface to use</h3>
+<div class="paragraph">
+<p>Typically only shown if two or more network interfaces are
+found, which might include a virtual firewire interface in some cases.
+Select the interface you require (usually <code>eno1</code>) and press  <kbd>Enter</kbd>.</p>
+</div>
+<div class="paragraph">
+<p>Unless you are using DHCP (which is not advisable) you will be
+prompted to:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Type in the required static IP address in the form <code><em>xxx.xxx.xxx.xxx</em></code>
+(where each <code><em>xxx</em></code> is any integer from 0 - 255 inclusive) and press
+<kbd>Enter</kbd>.</p>
+</li>
+<li>
+<p>Type in the required netmask in the form <code>255.<em>yyy.yyy.yyy</em></code> (where each
+<code><em>yyy</em></code> is typically 0, 64, 128, 192 or 255) and press <kbd>Enter</kbd>.</p>
+</li>
+<li>
+<p>Type in the required gateway IP address in the form
+<code><em>xxx.xxx.xxx.xxx</em></code> (where each <code><em>xxx</em></code> is any integer from 0 - 255 inclusive)
+and press <kbd>Enter</kbd>.</p>
+</li>
+<li>
+<p>Type in the required nameserver IP addresses, space separated, in
+the form <code><em>xxx.xxx.xxx.xxx</em></code> (where each <code><em>xxx</em></code> is any integer from 0 - 255
+inclusive) and press <kbd>Enter</kbd>.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Alternatively, if you are only using the installer to initialize new disks,
+you may want to use <code>Go Back</code> and directly select <code>Detect disks</code> from the
+main menu to skip forward to <a href="#_setup_partitions">Setup partitions</a> below.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_set_a_hostname">4.6. Set a hostname</h3>
+<div class="paragraph">
+<p>Backspace over the default hostname <em>debian</em> and type in the name
+you require (if not already retrieved via DNS), then press  <kbd>Enter</kbd>.
+Enter the required Internet Domain name (if not found) and press  <kbd>Enter</kbd>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_enter_a_suitable_root_password">4.7. Enter a suitable root password</h3>
+<div class="paragraph">
+<p>Twice as prompted.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setup_first_account">4.8. Setup first account</h3>
+<div class="paragraph">
+<p>Enter <code><strong>Desktop User</strong></code> for the name of the new user
+then press  <kbd>Enter</kbd>  to accept <em>desktop</em> as the username and enter a (real)
+password twice as prompted.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_get_network_time">4.9. Get network time</h3>
+<div class="paragraph">
+<p>The installer now tries to set the time using NTP
+If this is not possible at your site due to your firewall etc., you may need
+to press <kbd>Enter</kbd> to cancel this process.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setup_partitions">4.10. Setup partitions</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you are using UEFI and the disk was previously used for BIOS, you may need
+to confirm forcing UEFI installation.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>When prompted, select <code>Manual</code></p>
+</div>
+<div class="sect3">
+<h4 id="_setup_the_first_disk">4.10.1. Setup the first disk</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If needed create a new partition table by:</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Select first disk, something like <code>SCSI1 (0,0,0) (sda) - 4 TB ATA SATA HARDDISK</code>, and
+press <kbd>Enter</kbd></p>
+</li>
+<li>
+<p>Installer may warn: <code>You have selected an entire device to partition…</code>. Select <code>Yes</code></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>Select the <code>FREE SPACE</code> under the first device</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If some other file system, like <code>xfs</code>, or other old setup is
+displayed, you will need to delete it first.  You may be able to do
+this by deleting individual partitions until you have a single <code>FREE
+SPACE</code> area.  For more complicated layouts, it may be more expedient,
+    and it may be necessary, to use <code>Guided partitioning</code> to delete
+    the existing configuration (and temporarily create new
+            partitions). In this case, select <code>Guided partitioning</code>,
+    then select <code>Guided - use entire disk</code>.  Then select your disk,
+    such as listed above, do not select a RAID or your installation
+    media device.  Then select <code>All files in one partition
+    (recommended for new users)</code>.  You may be prompted to confirm
+    deleting RAID and/or LVM, which you must do to continue.  Then you
+    should be able to continue with step 1 above, by selecting your disk.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Select <code>Create a new partition</code></p>
+</li>
+<li>
+<p>Then for</p>
+<div class="ulist">
+<ul>
+<li>
+<p>UEFI:  Enter <code><strong>1GB</strong></code> in the size, then select <code>Beginning</code> of the disk.</p>
+</li>
+<li>
+<p>BIOS: Enter <code><strong>1MB</strong></code> in the size, choose <code>Primary</code> (rather than <code>Logical</code>) if asked for the partition type, then select <code>Beginning</code> of the disk.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Then for</p>
+<div class="ulist">
+<ul>
+<li>
+<p>UEFI: Select <code>Use as</code> then select <code>EFI System Partition (ESP)</code></p>
+</li>
+<li>
+<p>BIOS: Select <code>Use as</code> then select <code>Reserved BIOS boot area</code>, or alternatively <code>Do not use the partition</code> if the former option is not available.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Now press <code>Done setting up the partition</code>.</p>
+</li>
+<li>
+<p>Next select the <code>FREE SPACE</code> and <code>Create a new partition</code> again.</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You may see a small <code>1MB FREE SPACE</code> at the start of the disk. This is
+fine, just be sure to choose the large <code>FREE SPACE</code> at the end of the disk.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>This time choose the whole amount of free space (the default) and choose <code>Primary</code> for the partition type if asked.</p>
+</li>
+<li>
+<p>Select <code>Use as: physical volume for RAID</code>, then <code>Done setting up the partition</code></p>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you physically only have one disk bay and wish to construct a FSL10 <code>test-bed</code>,
+it is possible to avoid using the software RAID layer entirely.  Simply select <code>Use as: physical volume for LVM</code>
+for this partition instead and skip ahead to <a href="#_setup_logical_volume_manager_lvm">Setup Logical Volume Manager (LVM)</a> below.
+However, please note that a single disk setup is not recommended for any <em>operational</em> system.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_setup_the_second_disk">4.10.2. Setup the second disk</h4>
+<div class="paragraph">
+<p>Repeat the process for the second disk, if present.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_setup_raid">4.10.3. Setup RAID</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Select <code>Configure software RAID</code>, select <code>Yes</code> to write the changes
+to the disks.</p>
+</li>
+<li>
+<p>Select <code>Create MD device</code>, choose <code>RAID1</code> and enter <code><strong>2</strong></code> as number
+of devices and <code><strong>0</strong></code> as number of spares.</p>
+</li>
+<li>
+<p>Select the RAID partitions we just created by pressing <kbd>Space</kbd>&#8201;&#8212;&#8201;these should be <em>sda2</em> and <em>sdb2</em>, if you have just one disk, just
+pick <em>sda2</em>&#8201;&#8212;&#8201;then press <kbd>Enter</kbd> to continue</p>
+</li>
+<li>
+<p>Select <code>Finish</code>.</p>
+</li>
+<li>
+<p>Back in partitioning, Select the space <em>under</em> <code>RAID1 device #0</code> and press <kbd>Enter</kbd></p>
+</li>
+<li>
+<p>Select <code>use as</code> then select <code>Physical volume for LVM</code> then <code>Done setting up the partition</code></p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_setup_logical_volume_manager_lvm">4.10.4. Setup Logical Volume Manager (LVM)</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Now choose <code>Configure the Logical Volume Manager</code> and select <code>yes</code> if prompted to write the changes to disk</p>
+</li>
+<li>
+<p>Choose <code>Create volume group</code></p>
+</li>
+<li>
+<p>Enter a name appropriate for the machine and group, e.g., <code><strong>vg0</strong></code>, and press <kbd>Enter</kbd></p>
+</li>
+<li>
+<p>Select the raid device <em>md0</em> (or <em>sda2</em> if not using RAID)  by pressing <kbd>Space</kbd>, then press <kbd>Enter</kbd>
+to continue</p>
+</li>
+<li>
+<p>For each item in the following table run <code>Create logical volume</code>, select the
+your volume group and assign the corresponding label. Those marked with <code>*</code> are
+optional unless you are applying CIS hardening.</p>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 3. Logical volumes</caption>
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"></th>
+<th class="tableblock halign-left valign-top">Mount point</th>
+<th class="tableblock halign-left valign-top">LV name</th>
+<th class="tableblock halign-left valign-top">Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/var/log/audit</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>audit</code> *</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/boot</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>boot</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">3</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/home</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>home</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/var/log</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>log</code> *</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">4 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>root</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">50 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">6</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>swap</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>swap</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">7</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/tmp</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>tmp</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/var</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>var</code> *</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">9</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/var/tmp</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>vartmp</code> *</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">8 G</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">10</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><em>/usr2</em></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>usr2</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">remaining disk space <em>less ~50 GB</em></p></td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p>In the LVM configuration window, select <code>Finish</code></p>
+</li>
+<li>
+<p>Then for each logical volume in the table except <code>swap</code>, do the following:</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Select the partition (e.g., <code>#1</code>) for each <code>LV name</code> (and press <kbd>Enter</kbd>)</p>
+</li>
+<li>
+<p>Select <code>Use as</code> and press <kbd>Enter</kbd> then select <code>Ext4 journaling file system</code></p>
+</li>
+<li>
+<p>Select <code>Mount point</code>, press <kbd>Enter</kbd>, then select the appropriate mount point from the list or use <code>Enter manually</code> if not there.</p>
+</li>
+<li>
+<p>Select <code>Done setting up this partition</code></p>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>For the <code>swap</code> logical volume, select <code>Use as</code> then select <code>swap area</code>, followed by <code>Done setting up this partition</code></p>
+</li>
+<li>
+<p>Back in the partition screen, select <code>Finish partitioning and write changes to
+the disks</code> and select <code>Yes</code> to write the changes. For big disks, it may take
+a little time to create the <code>ext4</code> file systems.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The Debian base system is now installed from the installation media, which
+usually only takes a few minutes.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configure_the_package_manager">4.11. Configure the package manager</h3>
+<div class="paragraph">
+<p>If you start from a <em>netinst</em> CD image, the installer now
+assumes you will install only from the network, and jumps straight to
+the <code>Choose your country&#8230;&#8203;</code> part of the dialogue as detailed below.</p>
+</div>
+<div class="paragraph">
+<p>Select the fastest Debian mirror from those available.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+The new <code>deb.debian.org</code> mirror is a good choice for most
+sites as it uses DNS to find a local mirror.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Enter any necessary <code>HTTP</code> proxy information (usually left blank.)</p>
+</div>
+<div class="paragraph">
+<p>If you are using DVD installer you will be prompted to scan additional DVDs.
+Scanning the additional DVDs (and obtaining copies of them in the
+first place) is entirely optional, and is only useful if you don&#8217;t have a
+reliable network connection to a suitable Debian mirror and hence would
+prefer not to download packages you could get from the DVD.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you do want to use a mirror in future, it is better not to scan any
+DVDs at this stage and to scan them later during Stage 2 using <em>apt-cdrom</em>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For each additional DVD you wish to scan, insert it in the drive, select
+<code>Yes</code> and press  <kbd>Enter</kbd>  to perform the scan (which takes a while.)</p>
+</div>
+<div class="paragraph">
+<p>(If you are using DVDs, and are prompted to insert another DVD, you
+will need to use <code><strong>eject /dev/cdrom</strong></code> from another virtual console to do this)</p>
+</div>
+<div class="paragraph">
+<p>Select <code>No</code> and press  <kbd>Enter</kbd>  to continue once you are done.
+If prompted, insert the &#8220;Debian GNU/Linux <em>9.&lt;x&gt;</em> Stretch - Official <em>i386</em>/<em>amd64</em>
+Binary-1 DVD&#8221; back into the DVD-ROM drive and press  <kbd>Enter</kbd>.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+If you do scan additional DVDs, the following useful dialogue
+which allows you to select a suitable network mirror from a country-based
+list may be suppressed.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Select <code>Yes</code> and press  <kbd>Enter</kbd>  to use a network mirror (unless you
+have inadequate Internet access - but then you must scan all DVDs.)
+Choose your country from the list if available and press  <kbd>Enter</kbd>.
+(If your country is not available choose the country nearest to you in a
+network connectivity sense.)</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_do_not_participate_in_popularity_contest">4.12. Do not participate in popularity-contest</h3>
+<div class="paragraph">
+<p>When prompted to join the popularity-contest, select <code>No</code> and press <kbd>Enter</kbd></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_choose_your_packages">4.13. Choose your packages</h3>
+<div class="paragraph">
+<p>When prompted to choose packages, select <code>SSH server</code> by highlighting it with
+the arrow keys and pressing <kbd>Space</kbd> on it (unless you don&#8217;t want it).</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+If you have a small disks and are worried about space, then you can
+also press <kbd>Space</kbd> on <code>Desktop Environment</code> to unselect it (which may
+then change the dialogue presented below).
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Finally press, <kbd>Enter</kbd> to install the standard system.</p>
+</div>
+<div class="paragraph">
+<p>The Debian standard system is now installed from the installation media plus any
+updates from the network mirror and/or <em>security.debian.org</em> site if they can be
+reached.</p>
+</div>
+<div class="paragraph">
+<p>This can take a while, up to one and a half hours or more.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_install_the_grub_bootloader_bios_boot_only">4.14. Install the GRUB bootloader (BIOS boot only)</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+With UEFI boot, you will not be presented with this option; GRUB will automatically be
+installed to the first ESP partition.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>At <code>Install GRUB to Master Boot Record</code> select <code>yes</code> then select <em>/dev/sda</em></p>
+</div>
+<div class="paragraph">
+<p>When prompted, press <kbd>Enter</kbd> to install to the master boot record of the
+primary disk.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_remove_installation_media">4.15. Remove installation media</h3>
+<div class="paragraph">
+<p>Remove the DVD from the DVD-ROM drive (it should be auto-ejected), or unplug the
+USB drive and press  <kbd>Enter</kbd>  to reboot into the newly installed system.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+It would generally be wise to disable booting from DVD-ROM and floppy i.e.,
+anything other than the hard drive, in the BIOS just in case someone
+leaves something nasty in the machine&#8217;s removable drives by mistake.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_second_stage_installation">5. Second Stage Installation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>You can now boot to your new OS.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If the login screen is painfully slow and your CPU does not
+include a GPU, you can probably fix the slowness by disabling
+<code>Wayland</code> in <em>gdm3</em>. However, the result may be that rebooting or
+shutting down will typically have an enforced 90-120 second delay (see
+    the <a href="#_fix_for_slow_rebootshutdown_with_wayland_disabled">Fix for slow reboot/shutdown with Wayland disabled</a> section for a <em>possible</em>
+    fix). You may find the slow login screen preferable. To disable
+<code>Wayland</code>, edit <em>/etc/gdm3/daemon.conf</em> and uncomment the line
+<code>WaylandEnable=false</code>.  Then <em>gdm3</em> will need to be restarted either
+by rebooting or entering <code><strong>systemctl restart gdm3</strong></code>.  You can restart an
+individual virtual console <em>getty</em> with <code><strong>systemctl restart getty@tty<em>N</em></strong></code>
+where <code><strong><em>N</em></strong></code> is the number of the virtual console.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_login_as_root">5.1. Login as root</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Previous versions of Debian ran X11 on virtual console 7. As of
+Debian 9, the graphical environment login is on virtual console 1.
+Each login there for a different user creates a session on the next
+unused virtual console.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Switch to Virtual Console 2, by pressing <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>F2</kbd></span>.</p>
+</div>
+<div class="paragraph">
+<p>Enter <em>root</em> and press <kbd>Enter</kbd>, then enter the <em>root</em> password you set
+earlier.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_remove_the_dummy_desktop_user_optional">5.2. Remove the dummy Desktop User (optional)</h3>
+<div class="paragraph">
+<p>Unless you want another account that that is set up to use the default
+desktop environment, delete <em>desktop</em> with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>deluser --remove-home desktop</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you do keep this account, you will not be able to run the FS from
+it unless you add this account into the additional hardware access groups
+such as is done for <em>oper</em> and <em>prog</em> by <em>fsadapt</em>.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_install_grub_to_the_secondary_disk_if_available">5.3. Install GRUB to the secondary disk (if available)</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>If you installed with UEFI boot, run the command</p>
+<div class="literalblock">
+<div class="content">
+<pre>cp /dev/sda1 /dev/sdb1</pre>
+</div>
+</div>
+</li>
+<li>
+<p>If you installed with BIOS boot, install GRUB to the Master Boot Record by
+running: <code><strong>dpkg-reconfigure -plow grub-pc</strong></code> and after pressing
+<kbd>Enter</kbd> twice to accept the kernel command line extra arguments
+and default command line arguments, use the arrow keys and
+<kbd>Space</kbd> to select both <em>/dev/sda</em> and <em>/dev/sdb</em> (but not
+    <em>/dev/md0</em>) and press <kbd>Enter</kbd> to finalise the reconfiguration.
+(You should then see <code>Installation finished. No error reported</code> appear
+ twice in the progress messages as GRUB is re-installed to both
+ drives.)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_setup_http_proxy_for_apt_optional">5.4. Setup HTTP Proxy for APT (Optional)</h3>
+<div class="paragraph">
+<p>Should you wish to make APT use an HTTP proxy for downloads,
+create the new file <em>/etc/apt/apt.conf.d/00proxies</em> using <em>vi</em> containing:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>ACQUIRE::http::Proxy "http://proxy.some.where:8080/";</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to use a proxy <em>proxy.some.where</em> at port <code>8080</code> for example.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_edit_etcaptsources_list">5.5. Edit /etc/apt/sources.list</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Since <em>Stretch</em> is no longer under security support, you will
+also need to modify <em>sources.list</em> as described in the
+<a href="#_end_of_security_updates">End of security updates</a> in the <a href="#_managing_security_updates">Managing Security Updates</a>
+appendix.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Using your favourite text editor, eg <em>vi</em>, and comment out all <code>cdrom</code> entries
+(unless you don&#8217;t have a decent Internet connection and need to use DVDs,
+whereupon the dialogue presented below may differ) and check you have the
+equivalent of the following entries towards the top of the file, adding
+in <code>contrib</code> and/or <code>non-free</code> as needed:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>deb http://deb.debian.org/debian/ stretch main contrib non-free
+deb-src http://deb.debian.org/debian/ stretch main contrib non-free</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and likewise the equivalent of the following entries towards the bottom of
+the file, again adding in <code>contrib</code> and/or <code>non-free</code> as needed:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>deb http://deb.debian.org/debian/ stretch-updates main contrib non-free
+deb-src http://deb.debian.org/debian/ stretch-updates main contrib non-free</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(where you can use any suitable mirror instead of <em>deb.debian.org</em>)</p>
+</div>
+<div class="paragraph">
+<p>Also add <code>contrib</code> and/or <code>non-free</code> to the lines referring to the
+<em>security.debian.org</em> mirror in the middle of the file.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+you <em>MUST</em> use <code>stretch</code> and <em>NOT</em> <code>stable</code> for the distribution in
+all these entries (but CD/DVD entries might use <code>unstable</code>.)
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update_apts_list_of_packages">5.6. Update APT&#8217;s list of packages</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Recent versions of Debian have the <em>apt</em> program, which gives a more
+     user-friendly interface to the package manager than <em>apt-get</em>. We
+     generally use <em>apt-get</em> except for applying updates.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Next tell APT to update its internal source list of packages using</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get update</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+It is also possible to add additional DVDs at this stage using the
+<code><strong>apt-cdrom add</strong></code> command.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_download_the_fs_linux_10_package_selections">5.7. Download the FS Linux 10 package selections</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Install <em>git</em> and <em>dselect</em></p>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get install git dselect</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Update <em>dselect</em>'s package lists</p>
+<div class="literalblock">
+<div class="content">
+<pre>dselect update</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Get the selections by downloading this repository:</p>
+<div class="literalblock">
+<div class="content">
+<pre>cd /root
+git clone https://github.com/nvi-inc/fsl10
+cd fsl10</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Feed the package selections into <em>dpkg</em> using the command, for <em>amd64</em></p>
+<div class="literalblock">
+<div class="content">
+<pre>dpkg --set-selections &lt; selections/fsl10_amd64.selections</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or, for <em>i386</em></p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>dpkg --set-selections &lt; selections/fsl10_i386.selections</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Start the additional package installation with</p>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get dselect-upgrade</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then press <kbd>Enter</kbd> to confirm any updating of installed packages (where
+you have an Internet connection) and the installation of currently
+~212 new packages (downloading
+~196 MB from the Internet and/or DVDs) for <em>amd64</em>, somewhat more for
+<em>i386</em>&#8201;&#8212;&#8201;unless you did not select the Desktop or added other tasks earlier.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Downloading commences for up to half an hour (depending on your Internet
+access and the exact revision of DVDs used).</p>
+</div>
+<div class="paragraph">
+<p>Installation runs to completion.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_clean_up_the_apt_download_directory">5.8. Clean up the APT download directory</h3>
+<div class="paragraph">
+<p>So that the update mechanism will work correctly, run</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get clean</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_third_stage_installation">6. Third Stage Installation</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_fsadapt">6.1. fsadapt</h3>
+<div class="paragraph">
+<p>In the <em>/root/fsl10</em> directory, start <em>fsadapt</em> with</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>./fsadapt</pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_fs_adaptation_modifications_window_1">6.1.1. FS Adaptation: Modifications (Window 1)</h4>
+<div class="paragraph">
+<p>Using the arrow keys and <kbd>Space</kbd> make your selections and press <kbd>Enter</kbd>.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>For government computers select <code>govt</code> and <code>noident</code>.</p>
+</li>
+<li>
+<p>If you are not using a GPIB board or USB dongle, you can deselect the GPIB option.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_fs_adaptation_setup_window_2">6.1.2. FS Adaptation: Setup (Window 2)</h4>
+<div class="paragraph">
+<p>All of the steps in Window 2 need to be done once (even if you do not
+intend to use the serial ports) with the exception of <code>sshkeys</code> which
+can be used to generate new SSH keys if required.
+If you did not select the GPIB option in the previous page deselect the
+two related options on this page (but do not deselect <code>set_perms</code> as it
+is always required). Otherwise, simply press <kbd>Enter</kbd> with the <code>OK</code>
+selected to continue.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The <code>updates</code> option relies on email to <em>root</em> being re-directed to some
+      mailbox that will be read regularly, so make sure you set that up and
+      test it as well.  The installer sets it up to go the <em>desktop</em> account
+      by default which would definitely be a problem if you have removed that!
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_gpib_driver_configuration_optional">6.1.3. GPIB driver configuration (Optional)</h4>
+<div class="paragraph">
+<p>On the <code>/etc/gpib.conf</code> screen, use the up/down arrow keys to select the
+required GPIB controller and press <kbd>Enter</kbd> on <code>OK</code> to continue.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_serial_port_configuration">6.1.4. Serial port configuration</h4>
+<div class="paragraph">
+<p>On the <code>/etc/default/grub: serial port configuration</code> screen
+up/down arrow keys to select the required RS232 serial card
+(or <code>None</code> if you don&#8217;t have one) and press <kbd>Enter</kbd> on <code>OK</code>
+to continue.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_fs_adaptation_settings_window_3">6.1.5. FS Adaptation: Settings (Window 3)</h4>
+<div class="paragraph">
+<p>On Window 3 you can choose to modify the email or network settings if required.
+Simply press <kbd>Enter</kbd> on <code>OK</code> to continue.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_fs_adaptation_network_services_window_4">6.1.6. FS Adaptation: Network Services (Window 4)</h4>
+<div class="paragraph">
+<p>The Window 4 will show what services are enabled.  Use the up/down
+arrows and <kbd>Space</kbd> to select <code>secure</code> and press <kbd>Enter</kbd> on
+<code>OK</code>.  Thereafter use the up/down arrows and <kbd>Space</kbd> to select
+those services you actually need.  If you need printing, you will need
+to select <code>netipp</code> (remote access to this can be blocked by
+    configuring <em>ufw</em> with either not explicitly allowing or instead
+    denying the CUPS service).  Press <kbd>Enter</kbd> on <code>OK</code> to set them
+up and finish with <em>fsadapt</em>.</p>
+</div>
+<div class="paragraph">
+<p>Note that the <em>fsadapt</em> script can be re-run at a later date should you need to
+change the adaptations.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_set_passwords">6.2. Set Passwords</h3>
+<div class="paragraph">
+<p>Set passwords for the <em>oper</em> and <em>prog</em> accounts with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>passwd oper
+passwd prog</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>entering the passwords twice as prompted.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_install_tools_for_raid_optional">6.3. Install tools for RAID (Optional)</h3>
+<div class="paragraph">
+<p>You can install some useful tools for working with the RAID, if you&#8217;re actually using it, with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>~/fsl10/RAID/install_tools</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The rest of this document assumes the first three of these tools have
+been installed.  The five tools are:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><em>mdstat</em> allows all users to check on the RAID status</p>
+</li>
+<li>
+<p><em>refresh_secondary</em> allows <em>root</em> to refresh a secondary disk that is from the same RAID and has been booted on its own</p>
+</li>
+<li>
+<p><em>blank_secondary</em> allows <em>root</em> to initialize a secondary disk, must be used with extreme care</p>
+</li>
+<li>
+<p><em>drop_primary</em> allows <em>root</em> deliberately to drop the primary disk out of the RAID for use as a backup</p>
+</li>
+<li>
+<p><em>recover_raid</em> allows <em>root</em> to re-add a disk that fell out of (or was removed from) the RAID back into it</p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+More information about RAID operation can be found in the <a href="raid.html">RAID notes for FSL10</a> document.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>See also the <a href="#_setup_additional_disk">Setup additional disk</a> sub-section in the <a href="#_post_install">Post Install</a> section below.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_download_the_field_system">6.4. Download the Field System</h3>
+<div class="literalblock">
+<div class="content">
+<pre>   cd /usr2
+   git clone https://github.com/nvi-inc/fs fs-git
+   cd /usr2/fs-git
+   git checkout -q <em>tag</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code><em>tag</em></code> is the latest available release, be it <em>10.0.0</em> or
+later.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Although <em>10.0.0</em> is the current release at the time this was written,
+and should suffice for an initial installation, it may well not be the
+most up-to-date release when you are installing. To find more recent
+releases, go to:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://github.com/nvi-inc/fs/releases" class="bare">https://github.com/nvi-inc/fs/releases</a></p>
+</div>
+<div class="paragraph">
+<p>You should probably use the most recent release ending in <em>.0</em> (a
+so-called <em>feature</em> release) with no trailing <em>-&lt;string&gt;</em>, e.g.,
+<em>10.0.0</em>. However, if there is a more recent <em>patch</em> release (not
+ending <em>.0</em>) for the most recent feature release, you should use the
+most recent patch release.  For example, if <em>10.1.0</em> is the most
+recent feature release and there are corresponding patch releases,
+<em>10.1.1</em> and <em>10.1.2</em>, the last one, ending <em>.2</em>, is probably the best
+choice.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Releases <em>numbered</em> before <em>10.0.0</em> are listed mostly for historical
+reference. They are not intended for operational use.
+</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_run_fs_install_script">6.5. Run FS install script</h3>
+<div class="paragraph">
+<p>This will set the <em>/usr2/fs</em> link, set <em>/usr2/fs-git permissions</em>, and
+install default copies of all the FS related directories.</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>make install</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and enter <code><strong>y</strong></code> to confirm installation.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_make_the_fs">6.6. Make the FS</h3>
+<div class="paragraph">
+<p>The FS must always be compiled as <em>prog</em>.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Make sure you log-out as <em>root</em>, and log-in again as <em>prog</em>.
+</td>
+</tr>
+</table>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd /usr2/fs
+make &gt;&amp; /dev/null</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>then</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>make -s</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to confirm that everything compiled correctly (no news is good news).</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_reboot">6.7. Reboot</h3>
+<div class="paragraph">
+<p>If you installed the RAID with two disks (and RAID tools) check its
+progress with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>mdstat</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>until the array no-longer shows a recovery in progress.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+Do not reboot until the recovery is complete.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The final steps are to remove any DVD from the machine and to restart the machine
+using <em>reboot</em> as <em>root</em> or <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Del</kbd></span> whilst watching that everything
+starts up smoothly.</p>
+</div>
+<div class="paragraph">
+<p>Your new FS machine should now be ready to be customised to your requirements
+by tailoring the control files in <em>/usr2/control</em> and adding suitable station
+specific software to <em>/usr2/st</em>.  See the files in the <em>/usr2/fs/misc</em> directory
+for more information.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_post_install">7. Post Install</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>All commands (except checking the RAID status) in this section need to be run as <em>root</em>.</p>
+</div>
+<div class="sect2">
+<h3 id="_setup_additional_disk">7.1. Setup additional disk</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+An additional disk should be at least as large as the smallest
+disk already in use in the RAID.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You will need to have hot-swapping enabled in your motherboard&#8217;s
+setup menu, at least for the secondary controller (it should also be
+enabled for the primary).
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+This sub-section assumes you have followed the directions in the <a href="#_install_tools_for_raid_optional">Install tools for RAID (Optional)</a>
+section above.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Ensure the RAID is synced by checking that</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>mdstat</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>shows no recovery in progress. If there is none, shut down the
+machine safely. If you installed with a second disk, remove it and place
+it on the shelf.</p>
+</div>
+<div class="sect3">
+<h4 id="_initialize_new_disk">7.1.1. Initialize new disk</h4>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Do not initialize a disk unless you are sure there is no
+data on it that you need to preserve.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>For the first time use of an additional disk with a new install, the
+disk should be initialized to make sure it has no already existing
+structure.  This should be done even if the disk has been used in a
+different FS computer or a previous install on this computer.</p>
+</div>
+<div class="paragraph">
+<p>Boot with just the primary disk installed. Use the script:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>blank_secondary</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The script will wait for the new disk to be turned on. Insert a new
+disk in the secondary slot. Turn the key to turn the disk on. There
+will be a prompts asking if wish to proceed. If it is a new disk or you
+are sure it safe to erase this disk, it is safe to answer <code><strong>y</strong></code>.
+If you are unsure about this or otherwise need to abort
+answer <code><strong>n</strong></code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_refresh_secondary_disk">7.1.2. Refresh secondary disk</h4>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+You can refresh a disk if it has been erased or has
+previously been used in this RAID and is older than the current
+primary.  If it is newer than the current primary (maybe from a failed
+    FS upgrade that needs to be abandoned) or comes from a different
+RAID (i.e., system) or has a different structure (i.e., was previously
+    used for something else), it will have to be erased first. The
+script should detect these conditions and stop with an appropriate
+message. In that case, consider carefully if it is safe to erase the
+disk (probably not). If you determine it is safe, follow the
+instructions for <a href="#_initialize_new_disk">Initialize new disk</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Boot with only the primary disk installed. The new secondary disk must
+be keyed off or removed. The script will refuse to run if there is a
+second disk already turned on. This will ensure that no other disk is
+installed and mistaken for the disk to be refreshed.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+With the RAID now missing a disk, you may see
+~20 of the <code>volume group
+not found</code> error messages, then the machine will boot. These error
+messages  only appear like this the first time a disk
+from the RAID is booted without its partner.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once booted, login as <em>root</em>.</p>
+</div>
+<div class="paragraph">
+<p>Run the script:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>refresh_secondary</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the script says it is waiting for the second disk, key it on.</p>
+</div>
+<div class="paragraph">
+<p>Once you reach the message that it is recovering, you can resume using
+the computer as usual. You can stop the updating of the recovery
+message with <span class="keyseq"><kbd>Ctrl</kbd>+<kbd>C</kbd></span> as described in the output. You can also
+safely reboot at this point, if it is needed.</p>
+</div>
+<div class="paragraph">
+<p>If later you want to check the progress of the status of the RAID
+re-sync, you can use:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>mdstat</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When the syncing is complete, you can repeat the process of the
+previous sub-section and this sub-section if you have a third disk that needs
+to be set-up.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_consider_additional_customizations">7.2. Consider additional customizations</h3>
+<div class="paragraph">
+<p>Please refer to the appendix <a href="#_additional_setup_items">Additional Setup Items</a> below for
+customizations that your system may need or that you may find useful.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_additional_setup_items">Appendix A: Additional Setup Items</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This appendix covers several customizations that may be helpful
+depending on the requirements for a system. It serves as a reference
+for how to make these changes, but can also be helpful as a checklist
+when setting up a new system. All actions in this section require
+<em>root</em> permissions.</p>
+</div>
+<div class="sect2">
+<h3 id="_additional_security_and_cis_benchmarks">A.1. Additional security and CIS Benchmarks</h3>
+<div class="paragraph">
+<p>For stations that wish to conform to the additional security
+recommendations of the Center for Internet Security (CIS), move on to
+the <a href="cis-setup.html">CIS hardening FSL10</a> document.</p>
+</div>
+<div class="sect3">
+<h4 id="_alternate_hardening">A.1.1. Alternate hardening</h4>
+<div class="paragraph">
+<p>If you don&#8217;t want the complete CIS hardening, which creates some
+inconveniences and is only required in certain environments, you may
+still be interested in applying a subset of the remediations. You can
+pick and choose those from the <a href="cis-setup.html">CIS hardening FSL10</a>
+document and its script.</p>
+</div>
+<div class="paragraph">
+<p>A useful minimum set of features to apply would be to install <em>ufw</em>
+and block everything except <em>ssh</em> and further restrict <em>ssh</em> access with
+TCP Wrappers.</p>
+</div>
+<div class="sect4">
+<h5 id="_ufw_set_up">ufw set-up</h5>
+<div class="paragraph">
+<p>To install and configure <em>ufw</em> to only allow <em>ssh</em> for incoming conections, use the commands:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get -y install ufw
+ufw allow OpenSSH
+ufw --force enable</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Addition set-up for <em>ufw</em> is covered below in the <a href="#_more_firewall_rules">More firewall rules</a> sub-section.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_tcp_wrappers_set_up">TCP Wrappers set-up</h5>
+<div class="paragraph">
+<p>A base set-up for TCP Wrappers is</p>
+</div>
+<div class="listingblock">
+<div class="title">/etc/hosts.deny</div>
+<div class="content">
+<pre>ALL:ALL</pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">/etc/hosts.allow</div>
+<div class="content">
+<pre>sshd:ALL</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It is recommend that you further restrict <em>sshd</em> by using specific
+hosts and/or sub-domains instead of <code>ALL</code>. Please use
+<code><strong>man&#160;hosts_access</strong></code> for more information about configuring TCP
+Wrappers</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_customize_roots_bashrc_file">A.2. Customize root&#8217;s .bashrc file</h3>
+<div class="paragraph">
+<p>There are a few changes you should consider for <em>root</em>'s <em>.bashrc</em> file.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If you have applied the CIS remediations, you should consider
+uncommenting the line that sets the <code>umask</code> to <code>022</code>. The remediations
+set it to <code>027</code> in <em>/etc/profile</em>, which may cause problems with
+routinely created files, including some in this section covering optional changes.</p>
+</li>
+<li>
+<p>Uncomment the the <code>alias</code> commands that add the <code>-i</code> option to the
+commands <em>cp</em>, <em>mv</em>, and <em>rm</em> as the default.  This can help avoid
+some careless errors.</p>
+</li>
+<li>
+<p>Add the command <code>set -o noclobber</code> to avoid accidently overwriting
+existing files with I/O redirection. Other options to consider setting
+are <code>physical</code> and <code>ignoreeof</code>.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_network_configuration_changes">A.3. Network configuration changes</h3>
+<div class="paragraph">
+<p>This sub-section requires using <em>nm-connection-editor</em> on a graphic
+display (<em>nmtui</em> may be an option on a text terminal, but it has not
+been fully verified). You will probably need to be <em>root</em> or
+<em>desktop</em> to do this. When you run this program and select a
+connection, e.g., <code>Wired connection 1</code> under <code>Ethernet</code>, the <code>Edit</code>
+button should become active.  If it stays greyed out, you don&#8217;t have
+sufficent permission. All the sub-sections below assume you are in
+program and have sufficent permision,</p>
+</div>
+<div class="sect3">
+<h4 id="_make_the_connection_always_appear_on_the_same_interface_regardless_of_the_mac_address">A.3.1. Make the connection always appear on the same interface regardless of the MAC address.</h4>
+<div class="paragraph">
+<p>This is useful both to make the connection appear on only one
+interface and/or make it the same interface if the computer (or NIC)
+is changed.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Select your connection snd click <code>Edit</code>.</p>
+</li>
+<li>
+<p>Select the <code>Ethernet</code> tab.</p>
+</li>
+<li>
+<p>Change the <code>Device</code> field to just list the name of the interface (typically <code>eno1</code>) by removing the MAC address in parentheses.</p>
+</li>
+<li>
+<p>You may want to also set the <code>IPv6 Settings</code> to use <code>Method: Ignore</code>.</p>
+</li>
+<li>
+<p>Click <code>Save</code>.</p>
+</li>
+<li>
+<p>Click <code>Close</code>.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_disable_the_second_ethernet_port">A.3.2. Disable the second Ethernet port</h4>
+<div class="paragraph">
+<p>This may be useful if your second port has a IPMI interface and the
+kernel detected a connection there and it is interferring with the
+normal or the IPMI connection.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If there is no <code>Wired connection 2</code>, click <code>Add</code>. Otherwise select
+that connection, click <code>Edit</code>, and skip to step 4.  It <em>may</em> be benign
+to <code>Delete</code> any other connections <em>except</em> <code>Wired connection 1</code>.</p>
+</li>
+<li>
+<p>Make sure <code>Ethernet</code> is selected in the drop down box and click <code>Create&#8230;&#8203;</code>.</p>
+</li>
+<li>
+<p>Change the <code>Connection name:</code> to <code>Wired connection 2</code>.</p>
+</li>
+<li>
+<p>Select the <code>Ethernet</code> tab.</p>
+</li>
+<li>
+<p>Make sure the <code>Device</code> field just lists the second ethernet
+device (typically <code>eno2</code>) with no MAC address in parentheses.</p>
+</li>
+<li>
+<p>Select the <code>IPv4 Settings</code> tab.</p>
+</li>
+<li>
+<p>For <code>Method</code> select <code>Disabled</code>.</p>
+</li>
+<li>
+<p>Select the <code>IPv6 Settings</code> tab.</p>
+</li>
+<li>
+<p>For <code>Method</code> select <code>Ignore</code>.</p>
+</li>
+<li>
+<p>Click <code>Save</code>.</p>
+</li>
+<li>
+<p>Click <code>Close</code>.</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_update_ip_address_hostname_fqdn_and_other_network_information">A.3.3. Update IP address, hostname, FQDN, and other network information</h4>
+<div class="paragraph">
+<p>This is useful if the computer is physically moved to a different
+site or its network information needs to be be updated for a different
+reason. This is typically not needed if you use DHCP, which may still
+require some of the changes in step 6 (please let us know if you gain
+experience).</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Select your connection and click <code>Edit</code>.</p>
+</li>
+<li>
+<p>Select the <code>IPv4 Settings</code> (or <code>IPv6 Settings</code> if you are using IPv6) tab.</p>
+</li>
+<li>
+<p>Adjust your <code>Manual</code> Method configuration: <code>Addresses</code>, <code>DNS Servers</code> (comma separated), and <code>Search domains</code>.</p>
+</li>
+<li>
+<p>Click <code>Save</code>.</p>
+</li>
+<li>
+<p>Click <code>Close</code>.</p>
+</li>
+<li>
+<p>Modify other system files</p>
+<div class="paragraph">
+<p>Update the information as appropriate. The system may have initially
+been installed with the default hostname <em>debian</em> and no domain name.</p>
+</div>
+<div class="paragraph">
+<div class="title">/etc/hostname</div>
+<p>Change your hostname</p>
+</div>
+<div class="paragraph">
+<div class="title">/etc/hosts</div>
+<p>Update your IP address, FQDN (canonical name), and alias (typically the hostname,
+but multiple aliases/nicknames are allowed).</p>
+</div>
+<div class="paragraph">
+<div class="title">/etc/networks</div>
+<p>Use your local subnet (class A, B, or C) for the <em>localnet</em> line.</p>
+</div>
+<div class="paragraph">
+<div class="title">/etc/mailname</div>
+<p>Use fully qualified node name.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If your system doesn&#8217;t have a FQDN or you don&#8217;t want to show it in
+e-mail messages, you may be able to use a fake one. A FQDN may be
+necessary to allow messages to be sent successfully to some remote
+hosts and <em>mailman</em> mail lists. A possible strategy for this is to
+append <em>.net</em> to the node name you use in this file and the next. The
+node name in these two files can be different than the official
+hostname. However, these two mail related files should be consistent.
+You might consider <em>fs1-&lt;xx&gt;.net</em> (or <em>fs2-&lt;xx&gt;.net</em>), where <em>&lt;xx&gt;</em> is
+your station two letter code (lower case).</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<div class="title">/etc/exim4/update-exim4.conf.conf</div>
+<p>Look for <code>hostnames=</code>, use fully qualified domain name.</p>
+</div>
+<div class="paragraph">
+<p>Then execute:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>update-exim4.conf</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>When finished, reboot.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_disable_desktop_user">A.4. Disable Desktop User</h3>
+<div class="paragraph">
+<p>If you do not need the functionality available in the Desktop
+environment, you can disable the <em>desktop</em> account. You can re-enable
+the account later if you need it. To disable it, execute:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>usermod -L desktop</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can undo this by using the <code>-U</code> option instead.</p>
+</div>
+<div class="paragraph">
+<p>To prevent connecting with <em>ssh</em> using a key, create (or add <em>desktop</em>
+to an existing) <code>DenyUsers</code> line in <em>/etc/ssh/sshd_config</em>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>DenyUsers desktop</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And restart <em>sshd</em> with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>systemctl restart sshd</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can undo the <em>ssh</em> block  be removing the line (if it only has
+<em>desktop</em>) or removing <em>desktop</em> from the line and then restarting
+<em>sshd</em>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_remove_modemmanager_package">A.5. Remove ModemManager package</h3>
+<div class="paragraph">
+<p>If you use serial ports, it is strongly advised that you remove the
+ModemManager package to avoid conflicts over access to the ports.
+Execute this command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get purge modemmanger</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_remove_anacron_package">A.6. Remove Anacron package</h3>
+<div class="paragraph">
+<p>If you enabled the weekly update job in <em>fsadapt</em> (it is strongly
+recommended), we recommend that you also remove the <em>anacron</em> package
+so that the job will run at a fixed time every week, even if the
+system is turned off for some periods of time.  Execute this
+command:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get purge anacron</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_more_firewall_rules">A.7. More firewall rules</h3>
+<div class="paragraph">
+<p>The following tersely summarizes some <em>ufw</em> settings that may be useful:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>#SSH
+ufw allow OpenSSH
+#NTP
+ufw allow ntp
+#remote access to metserver (or gromet) on port 50001
+ufw allow 50001
+#anywhere from subnet
+ufw allow from 192.168.4.0/24
+#RDBE multicast to addresses from subnet
+ufw allow in proto udp to 239.0.2.0/24 from 192.168.4.0/24
+#? RDBE multicast to group from subnet ?
+#ufw allow in proto igmp to 239.0.2.0/24 from 192.168.4.0/24</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_configure_e_mail">A.8. Configure e-mail</h3>
+<div class="paragraph">
+<p>The configuration described here (<code>Internet site</code> or <code>mail
+sent by smarthost</code> in the <em>exim4</em> configuration, no incoming
+mail, reply-to-filter, and modified user names), provides
+good support of the FS <em>msg</em> and <em>rdbemsg</em> utilities.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>As <code>root</code>, enter:</p>
+<div class="literalblock">
+<div class="content">
+<pre>dpkg-reconfigure exim4-config</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to change the set-up. Typically you should select <code>internet site</code>, use
+your host name in place of <em>debian</em> when it occurs, and otherwise
+select defaults at all the other prompts.  (The only other recommended
+    choices are <code>local delivery only</code> or <code>mail sent by smarthost;
+    received via SMTP or fetchmail</code>.)  If you want to receive incoming
+mail, you will also need to enable SMTP connections in <code>Window 4</code> of
+<em>fsadapt</em> (and if you are using a firewall, you will need to enable
+    such connections for it).  We recommend that you NOT receive
+incoming mail on this computer.</p>
+</div>
+</li>
+<li>
+<p>If you follow the recommendation not to receive incoming mail
+and your system is not set-up for <code>local delivery only</code>, you
+should set the <code>Reply-To</code> address for outgoing messages to a
+real e-mail account at your institution that is read
+regularly.  You can do this by (all as <em>root</em>):</p>
+<div class="olist loweralpha">
+<ol class="loweralpha" type="a">
+<li>
+<p>Create a file with contents
+(four lines):</p>
+<div class="listingblock">
+<div class="title">/etc/exim4/reply-to-filter</div>
+<div class="content">
+<pre class="highlight"><code># Exim filter          &lt;&lt; THIS LINE REQUIRED
+
+headers remove "Reply-To"
+headers add "Reply-To: email@address"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Where <code>email@address</code> is the e-mail address you want replies to be
+addressed to. If you want more than one, separate them with commas.</p>
+</div>
+</li>
+<li>
+<p>In <em>/etc/exim4/exim4.conf.template</em>, at the beginning of
+the file add (two lines):</p>
+<div class="literalblock">
+<div class="content">
+<pre>#set reply to
+system_filter = /etc/exim4/reply-to-filter</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Then execute</p>
+<div class="literalblock">
+<div class="content">
+<pre>update-exim4.conf
+systemctl restart exim4</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+</li>
+<li>
+<p>You should change your <em>/etc/aliases</em> so <em>root</em> and <em>prog</em> e-mail goes to <em>oper</em>.</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>change <code>root: desktop</code> to <code>root: oper</code></p>
+</li>
+<li>
+<p>add <code>prog: oper</code></p>
+</li>
+<li>
+<p>add <code>desktop: oper</code></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>This is recommended as a &#8220;catch all&#8221; since the <em>oper</em> account is
+presumably under regular use and any messages sent there are likely to
+be noticed.  This is particularly important for system error messages
+since they should be delivered to a mail box on the system in case
+there is a network problem that might prevent them from being
+delivered off system.  You can however add additional off machine
+delivery of these messages to whatever addressees you wish and we
+recommend this as well.  These should include an e-mail account at
+your institution that is read regularly (maybe the same address as the
+    <code>Reply-To</code> address you may have set above would be a good choice).
+To do this, create a <em>.forward</em> file in <em>oper</em>'s home directory. The
+permissions should be <code>-rw-r&#8212;&#8203;r--</code>. The contents should be similar to
+(left justified):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>\oper
+user@node.domain</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>where <code>user@node.domain</code> is the off machine addressee you
+want the messages to go to.  You can add additional lines for
+additional addressees. The backslash (<code>\</code>) before <code>oper</code>
+prevents the mail system from getting into an infinite loop
+re-checking <em>oper</em>'s <em>.forward</em> file.</p>
+</div>
+</li>
+<li>
+<p>If you have made the above changes to forward messages to another an
+e-mail account on another machine, you should customize the User Name
+(not login name, the User Name is the fifth field) of <em>root</em>, <em>prog</em>,
+  <em>oper</em>, and <em>desktop</em> in <em>/etc/passwd</em> to identify the source of the
+  message.  For <em>root</em> and <em>prog</em>, it is recommended to append a
+  string like <code>at node</code> (it is probably best to avoid FQDNs), where
+  node is this machine, e.g., for <em>atri</em> you might change the 5th
+  field for <em>root</em> from</p>
+<div class="literalblock">
+<div class="content">
+<pre>root</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>root at atri</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For <em>oper</em>, you might instead prepend your site name to the
+accounts for clearer reading in <code>ops</code> e-mail messages, e.g.,
+for <em>oper</em> on <em>atri</em> at GSFC, we changed the 5th field for
+<em>oper</em> to:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>GSFC VLBI Operator</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>and for completeness, for <em>prog</em> and <em>desktop</em> we use:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>GSFC VLBI Programmer
+GSFC Desktop User</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These changes will help the recipient (possibly you)
+determine which system generated this message since it may
+not be obvious given the modified return address.</p>
+</div>
+</li>
+<li>
+<p>To give <em>oper</em> an indication at login that there is mail to read, add
+either (to get a count of messages):</p>
+<div class="literalblock">
+<div class="content">
+<pre>test ! -f /var/mail/oper || from -c</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or (to see the senders and subjects):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>test ! -f /var/mail/oper || from</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to end of <em>oper</em>'s <em>.profile</em> file (if using <em>bash</em> as the login
+shell) or <em>.login</em> file (<em>tcsh</em>).</p>
+</div>
+</li>
+<li>
+<p>Lastly, check the default mailbox directory <em>/var/mail/</em> for
+accounts that may have messages that arrived before the e-mail
+system was fully configured.  Be sure to resolve any system
+messages that may have been received. You can check to see what
+accounts have mail with:</p>
+<div class="literalblock">
+<div class="content">
+<pre>ls /var/mail</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>which will list each user account mail file that
+exists. Check and clear each user&#8217;s mailbox (where <code><em>user</em></code> in
+the line below is the account name) that has received mail
+(as <em>root</em>):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>mail -f /var/mail/<em>user</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If there are messages in the <em>desktop</em> user&#8217;s mailbox that you want to
+preserve and <em>oper</em>'s mailbox is empty or non-existent, you could
+consider renaming <em>desktop</em>'s mailbox to be <em>oper</em>'s. If you do so, be
+sure to change the owner of the file to be <em>oper</em>.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_generate_fqdn_in_helo_for_outgoing_mail">A.9. Generate FQDN in HELO for outgoing mail</h3>
+<div class="paragraph">
+<p>If mail from your system is being rejected by some servers because
+<em>exim4</em> is not providing a Fully Qualified Domain Name (FQDN), in its <code>HELO</code>
+message, the following solution should fix the problem.</p>
+</div>
+<div class="paragraph">
+<p>Add the following line to the beginning of <em>/etc/exim4/exim4.conf.template</em>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>MAIN_HARDCODE_PRIMARY_HOSTNAME=ETC_MAILNAME</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then execute:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>update-exim4.conf
+systemctl restart exim4</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_set_x_display_resolution_at_boot">A.10. Set X display resolution at boot</h3>
+<div class="paragraph">
+<p>If your display sometimes starts with the wrong resolution, you may be
+able to configure a better resolution. The following is a description
+of something that worked for at least one system. The details of your
+system may require some changes (beyond the resolution and output name).</p>
+</div>
+<div class="paragraph">
+<p>First you need to determine the correct resolution and output name.
+You may be able to do this with <em>xrandr</em>. If the screen currently has
+the correct resolution, you can just execute:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>xrandr</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The output might look like:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Screen 0: minimum 320 x 200, current 1920 x 1200, maximum 1920 x 2048
+VGA-1 connected primary 1920x1200+0+0 (normal left inverted right x axis y axis) 0mm x 0mm
+   1024x768      60.00
+   800x600       60.32    56.25
+   640x480       59.94
+  1920x1200 (0x42) 154.000MHz +HSync -VSync
+        h: width  1920 start 1968 end 2000 total 2080 skew    0 clock  74.04KHz
+        v: height 1200 start 1203 end 1209 total 1235           clock  59.95Hz</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Where the current screen resolution is <code>1920x1200</code> and the output name is <code>VGA-1</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can then generate the needed <code>Modeline</code> by executing:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cvt 1920 1200</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which might generate output:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre># 1920x1200 59.88 Hz (CVT 2.30MA) hsync: 74.56 kHz; pclk: 193.25 MHz
+ Modeline "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As a test, you can make a script (use an appropriate name), that will
+enable that resolution. Use the output name (<code>VGA-1</code> in this example)
+and the tokens following  <code>Modeline</code> from above. There are three lines
+after the <code>#!/bin/bash</code> line.</p>
+</div>
+<div class="listingblock">
+<div class="title">~/display_1920x1200</div>
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">#!/bin/bash
+xrandr --newmode "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync
+xrandr --addmode VGA-1 1920x1200_60.00
+xrandr --output VGA-1 --mode "1920x1200_60.00"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Be sure to <code><strong>chmod u+x</strong></code> the file before executing.</p>
+</div>
+<div class="paragraph">
+<p>If that is successful, you can use output name (<code>VGA-1</code> in this
+example) and <code>Modeline</code> from above to make a file (you may need to create
+  the directory first):</p>
+</div>
+<div class="listingblock">
+<div class="title">/etc/X11/xorg.conf.d/10-monitor.conf</div>
+<div class="content">
+<pre class="highlight"><code>Section "Monitor"
+Identifier     "VGA-1"
+Option         "Enable" "true"
+Modeline "1920x1200_60.00"  193.25  1920 2056 2256 2592  1200 1203 1209 1245 -hsync +vsync
+EndSection
+
+Section "Screen"
+Identifier     "Screen0"
+Device         "Device0"
+Monitor        "VGA-1"
+DefaultDepth    24
+#Option         "TwinView" "0"
+SubSection "Display"
+    Depth          24
+    Modes          "1920x1200_60.00"
+EndSubSection
+EndSection</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should <em>chmod</em> the permissions for directory with <code>o+rx</code> and the
+file with <code>o+r</code>, if those are not already set.</p>
+</div>
+<div class="paragraph">
+<p>You could then try restarting the display (after closing all windows) with:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>systemctl restart gdm3</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or rebooting.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_fix_for_slow_rebootshutdown_with_wayland_disabled">A.11. Fix for slow reboot/shutdown with Wayland disabled</h3>
+<div class="paragraph">
+<p><mark>TODO: Still slow for some cases (exact ones still not clear)</mark></p>
+</div>
+<div class="paragraph">
+<p>If you have chosen to disable <code>Wayland</code> for <em>gdm3</em> and have a problem with slow reboots/shutdowns, the following may help.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Copy the file <em>/lib/systemd/system/gdm3.service</em> into <em>/etc/systemd/system/</em>.</p>
+</li>
+<li>
+<p>Comment out the <code>KillMode</code> line (which changes it to <code>control-group</code>, the default).</p>
+</li>
+<li>
+<p>Add a line <code>TimeoutStopSec=1</code> to the <code>[Service]</code> section.</p>
+</li>
+<li>
+<p>Execute:</p>
+<div class="literalblock">
+<div class="content">
+<pre>systemctl daemon-reload</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>or reboot.</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_use_keepalive_to_prevent_vlan_firewall_inactivity_time_out">A.12. Use KeepAlive to prevent VLAN firewall inactivity time-out</h3>
+<div class="paragraph">
+<p>If there is a VLAN firewall in use on the local network, it may be
+necessary to use <code>KeepAlive</code> for TCP connections to prevent inactivity
+time-outs for network connections from the FS to the VLBI equipment
+when no activity is occurring with the system. For some devices, having
+the time-out break the connection may cause an issue with the number of
+connections available.</p>
+</div>
+<div class="paragraph">
+<p>To use <code>KeepAlive</code> to prevent the inactivity time-outs, first install
+the package <em>libkeepalive0</em>:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get install libkeepalive0</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then add the follow lines for <em>oper</em> (and <em>prog</em>):</p>
+</div>
+<div class="listingblock">
+<div class="title">~/.profile</div>
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">export KEEPCNT=20
+export KEEPIDLE=180
+export KEEPINTVL=60</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Then add the following alias for <em>oper</em> (and <em>prog</em>):</p>
+</div>
+<div class="listingblock">
+<div class="title">~/.bash_aliases</div>
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">alias fs='LD_PRELOAD=libkeepalive.so fs'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You will need to terminate the FS, log out, and log back in to activate these changes.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If you run the FS from a script, you will need to include the
+setting of <code>LD_PRELOAD</code> explicitly in the script since scripts do not
+pick up aliases.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>A similar alias can used to allow other individual applications
+to avoid the inactivity time-outs. (A better
+solution is available for <em>ssh</em>, discussed below.) It is also possible to put
+<em>export&#160;LD_PRELOAD=libkeepalive.so</em> in <em>~/.profile</em> to enable it for all
+applications, but this may generate some error messages (in the case of
+<em>xterm</em> at least, the error is apparently benign).</p>
+</div>
+<div class="paragraph">
+<p>If you need to have a persistent <em>ssh</em> connection, add the follow for <em>oper</em> (and <em>prog</em>):</p>
+</div>
+<div class="listingblock">
+<div class="title">~/.ssh/config file:</div>
+<div class="content">
+<pre class="highlight"><code>Host *
+    ServerAliveInterval 200
+    ServerAliveCountMax 2</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This can be set selectively per remote system.  The interval of <code>200</code>
+seconds is chosen to be less than the <code>300</code> seconds that some (possibly
+security hardened) servers may use.</p>
+</div>
+<div class="paragraph">
+<p>If not already set correctly, set the <em>~/.ssh/config</em> file&#8217;s
+permissions and ownership for <em>oper</em> (analogously for <em>prog</em>) with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">chmod 644 ~oper/.ssh/config
+chown oper.rtx ~oper/.ssh/config</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_remove_login_banners_for_commands_run_by_ssh_on_remote_systems">A.13. Remove login banners for commands run by ssh on remote systems</h3>
+<div class="paragraph">
+<p>If you use <em>ssh</em> as <em>oper</em> (and maybe <em>prog</em>), to run commands on
+other systems as part of FS operations, you may get login banners
+mixed in with the output.  You can suppress the banners by adding the
+following for <em>oper</em> (and analogously for <em>prog</em>):</p>
+</div>
+<div class="listingblock">
+<div class="title">~/.ssh/config file:</div>
+<div class="content">
+<pre class="highlight"><code>Host *
+    LogLevel ERROR</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will allow errors to be displayed while suppressing the login
+banners of remote systems. This can be set selectively per remote
+system.</p>
+</div>
+<div class="paragraph">
+<p>Please check the end of the <a href="#_use_keepalive_to_prevent_vlan_firewall_inactivity_time_out">Use KeepAlive to prevent VLAN firewall inactivity time-out</a>
+section for setting the ownership and  permissions on <em>~/.ssh/config</em>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_printer_setup">A.14. Printer setup</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Make sure your printer is connected, to the computer or the network, as appropriate.</p>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+Newer computers usually do not have a parallel port
+(IEEE 1284).  If not, and your printer requires a
+parallel connection, you should be able to obtain a
+USB/Parallel converter for less than US$20.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Login in to the X-display or remotely using an X-capable display.</p>
+</li>
+<li>
+<p>Start <em>firefox</em></p>
+</li>
+<li>
+<p>Enter URL: <code><strong>localhost:631</strong></code></p>
+</li>
+<li>
+<p>Select <code>Add printers and classes</code>.</p>
+<div class="paragraph">
+<p>You may be prompted to enter credentials. If your account is a member
+of the <em>lpadmin</em> group, you can use your own credentials; if not, those of the
+<em>root</em> account or another account that is a member of <em>lpadmin</em> will be required.</p>
+</div>
+</li>
+<li>
+<p>Add your printers.</p>
+<div class="paragraph">
+<p>Connected printers may be automatically offered to be added.  You may
+also be able to find printers using the <code>Find Printer</code> function. If
+CUPS offers you the wrong type of printer to be automatically added or
+it is unclear what driver to select for a printer, you may be able to
+get some useful information to help with manually installing your
+printer by searching the Internet for the string <code>cups</code> and your
+printer model.</p>
+</div>
+<div class="paragraph">
+<p>Some printers will work with an <code>AppSocket/HP JetDirect</code> connection of the form <code>socket://<em>hostname</em></code>.</p>
+</div>
+</li>
+<li>
+<p>Be sure to select a printer as the default (usually by selecting
+<code>Printers</code> at the top of the page, then select the printer to be set as the
+default, then from the <code>Administration</code> drop down: <code>Set As Server Default</code>).</p>
+</li>
+<li>
+<p>Quit <em>firefox</em></p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ntp_configuration">A.15. NTP configuration</h3>
+<div class="paragraph">
+<p>For good performance with NTP, please follow the recommendations in
+<em>/usr2/fs/misc/ntp.txt</em>.</p>
+</div>
+<div class="paragraph">
+<p>Additionally, to make the <code>ntpq -c pe</code> output more readable for local
+devices, you can adjust the contents of <em>/etc/hosts</em>. The local
+devices should be listed in the file, but use a nickname (15
+characters or less) that is meaningful locally in place of the
+canonical name (the first name after the IP address). The canonical
+name can be listed after the nickname.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_add_raid_events_scripts">A.16. Add raid-events scripts</h3>
+<div class="paragraph">
+<p>If your system is using a RAID configuration, you may want to install
+the <em>raid-events</em> script. The script provides email notifications of
+when Rebuilds (and array checks) start and end. For full details on
+the script and installation instructions, please see the
+<a href="raid.html#_raid_events">raid-events</a> sub-section in the
+<a href="raid.html#_script_descriptions">Script descriptions</a> section of the
+<a href="raid.html">RAID Notes for FSL 10</a> document.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_add_refresh_spare_usr2">A.17. Add refresh_spare_usr2</h3>
+<div class="paragraph">
+<p>If you are using two systems, an <em>operational</em> and a <em>spare</em>, you may
+want to install the <em>refresh_spare_usr2</em> script. The script can be
+used to backup the <em>/usr2</em> partition on the <em>operational</em> system to
+the <em>spare</em> system. For full details on the script and installation
+instructions, please see the
+<a href="raid.html#_refresh_spare_usr2">refresh_spare_usr2</a> sub-section in
+the <a href="raid.html#_script_descriptions">Script descriptions</a> section of
+the <a href="raid.html">RAID Notes for FSL 10</a> document.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_managing_security_updates">Appendix B: Managing Security Updates</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>It is strongly recommended that you use the weekly <em>cron</em> update
+download (the &#8220;weekly <em>cron</em> job&#8221;) as configured according to the <code>Window 2</code> sub-section in
+the <a href="#_fsadapt">fsadapt</a> section above. This will keep you informed of the
+available updates on a weekly basis.</p>
+</div>
+<div class="paragraph">
+<p>It is also recommended that you remove <em>anacron</em> as described in the
+<a href="#_remove_anacron_package">Remove Anacron package</a> section below. This will cause the updates
+to always be downloaded at what should be innocuous time, early Sunday
+morning (but this can be adjusted if need be).</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+An optional method for identifying available  updates without using
+the weekly <em>cron</em> job is described below in the section
+<a href="#_manually_checking_for_updates">Manually checking for updates</a>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect2">
+<h3 id="_installing_updates_upgrading">B.1. Installing updates (Upgrading)</h3>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Tip</div>
+</td>
+<td class="content">
+It is recommended that a disk rotation be performed before any
+update is installed. This will make recovery much easier if a problem with the
+update is discovered.  Please see the FSL10 Raid document section
+<a href="raid.html#_recoverable_testing">Recoverable testing</a> for a
+streamlined method to manage testing of updates.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If updates are needed, the weekly <em>cron</em> job will send a message to <em>root</em>
+(or whoever e-mail to <em>root</em> is aliased to, typically <em>oper</em>) with
+instructions on how to install the updates. You can choose a
+convenient time, when not in (or about to start) operations, to install
+the updates and test the system.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Important</div>
+</td>
+<td class="content">
+The weekly <em>cron</em> job
+message will include instructions for handling a kernel update if one is available.
+ See the <a href="#_kernel_updates">Kernel updates</a> sub-section below for additional
+considerations for kernel updates.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The commands for installing the updates given by the message are (note
+        the use of <em>apt</em> instead of <em>apt-get</em>):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt upgrade</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Enter <code><strong>y</strong></code> to confirm as needed. Then</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt clean</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the weekly <em>cron</em> job was installed according to the <a href="#_fsadapt">fsadapt</a>
+section above (for <code>Window 2</code>), the first of these commands (with
+        <code>upgrade</code>) will show if any NEWS items are included in the
+update. If there are, they will be displayed by a paging program at the beginning of the upgrade and
+you will be given an extra chance to abort before installing.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+NEWS items are, rarely occurring, announcements that may
+indicate additional steps are needed beyond the standard installation
+process. If any NEWS items are displayed, you should consider
+whether these will effect your system and how to handle them before
+installing. The first command above (with <code>upgrade</code>) will also cause e-mails
+to be sent to <em>root</em> with the NEWS information.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kernel_updates">B.2. Kernel updates</h3>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Warning</div>
+</td>
+<td class="content">
+Kernel updates require extra care and testing. If you are
+using a RAID, you should consider using the
+<a href="raid.html#_recoverable_testing">Recoverable testing</a>
+procedure to give more, and easier, options for recovery in case there
+is a problem.  That procedure contains special instructions for kernel
+update testing.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If there is a kernel update available, the weekly <em>cron</em> job output
+will include a warning at the end with additional instructions
+depending on which type is available.  There are two types of kernel
+updates:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>ABI updates, e.g., from <em>4.9.0-11-amd64</em> to
+<em>4.9.0-12-amd64</em> (with <em>11</em> and <em>12</em> being the ABI versions), which change the kernel ABI (Application Binary
+        Interface). The warning for this case is:</p>
+<div class="literalblock">
+<div class="content">
+<pre>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+NB: The Linux kernel image is one of the packages due to be upgraded.
+NB: (The kernal ABI has changed as per the linux-latest source package above
+NB:  so all out-of-tree modules WILL NEED TO BE REBUILT after you REBOOT.)
+NB: Please allow _extra time_ for TESTING after the upgrade.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Non-ABI updates, which update the kernel, but do not change the
+ABI. The warning for this case is:</p>
+<div class="literalblock">
+<div class="content">
+<pre>!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+NB: The Linux kernel image is one of the packages due to be upgraded.
+NB: (Upgrading will OVERWRITE the running kernel and require you to REBOOT!)
+NB: Please allow _extra time_ for TESTING after the upgrade.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!</pre>
+</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Be sure to allow time to follow the instructions when planning to
+install these updates.  As described in the ABI update warning, you
+will need to rebuild any out-of-tree modules after rebooting for that
+case. This is discussed in the <a href="#_updating_out_of_tree_modules">Updating out-of-tree modules</a>
+sub-section below.</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Caution</div>
+</td>
+<td class="content">
+In extreme circumstances, an ABI (but <em>not</em> a non-ABI) kernel
+update can be deferred to a later date when more extensive testing can
+be performed by using <em>apt-get</em> in place of <em>apt</em> in the instructions
+for installing the update. This works because an ABI update involves
+new packages. The  <em>apt-get</em> command will install the updates for existing
+packages, but it will not install the new packages. While this method can
+be used to install the other updates, it is not recommended since
+there are presumably security patches needed for the kernel and they
+are not being installed in this case.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_updating_out_of_tree_modules">B.2.1. Updating out-of-tree modules</h4>
+<div class="paragraph">
+<p>When a ABI update is installed, it will be necessary to update any,
+so-called, <em>out-of-tree</em> modules that use the kernel ABI. This must be
+done <em>after</em> rebooting with the new kernel installed.</p>
+</div>
+<div class="paragraph">
+<p>For a normal FSL10 installations, unless you have installed other
+out-of-tree modules, the only module that needs to be rebuilt is the
+GPIB driver (if it is installed).  You will need to recompile it (usually using <em>fsadapt</em>,
+        <code>Window 2</code>, <code>config_gpib</code> only) <em>after</em> the initial reboot
+        and then (to keep these instructions simple) reboot <em>again</em>.</p>
+</div>
+<div class="paragraph">
+<p>If you have installed other out-of-tree modules (e.g., you use a
+special driver for some of your NICs), you will need to update them
+appropriately <em>after</em> the initial reboot and then (to keep these
+        instructions simple) reboot <em>again</em>.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_recovery_from_a_failed_update">B.3. Recovery from a failed update</h3>
+<div class="paragraph">
+<p>If an update fails, e.g., an updated kernel fails to boot or another problem is discovered,
+you can recover as described in FSL10 RAID document
+<a href="raid.html#_recoverable_testing">Recoverable testing</a>
+section, if you were following that method, or from a shelf disk
+according to the FSL10 RAID document <a href="raid.html#_recover_from_a_shelf_disk">Recover from
+a shelf disk</a> section if not and you have a good shelf disk.</p>
+</div>
+<div class="sect3">
+<h4 id="_additional_recovery_option_for_a_failed_abi_kernel_update">B.3.1. Additional recovery option for a failed ABI kernel update</h4>
+<div class="paragraph">
+<p>For a ABI update that has failed, it is also possible to try to use
+the previous kernel on the current system. For a single boot, use the
+<code>Advanced</code> option in the <em>grub</em> menu at boot and then select the
+previous kernel. You can change back permanently to the previous
+kernel by purging the new kernel and its headers. To do this, use:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>dpkg -l|grep linux-image
+dpkg -l|grep linux-headers</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to determine the ABI version to be removed. For example, for the
+first command above, you may get:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>linux-image-4.9.0-11-amd64
+linux-image-4.9.0-12-amd64</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The package with <em>12</em> would be the later version that should be purged:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get purge linux-image-4.9.0-12-amd64</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Likewise with the linux-headers. For example, for the <em>12</em> ABI
+version, there will be two packages you should purge:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>linux-headers-4.9.0-12-amd64
+linux-headers-4.9.0-12-common</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_manually_checking_for_updates">B.4. Manually checking for updates</h3>
+<div class="paragraph">
+<p>If you do not use the weekly <em>cron</em> job to check for updates, or if
+you want to make sure you have the very latest updates when you
+install them, you can run the distributed copy of the weekly update
+script manually to check for updates:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>/root/fsl10/etc_cron.weekly_apt-show-upgradeable</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If there is no output, there are no updates to install.</p>
+</div>
+<div class="paragraph">
+<p>If there is output, there are updates to install.
+You can install them by following the installation procedure in
+sub-section <a href="#_installing_updates_upgrading">Installing updates (Upgrading)</a> above, except you will use the
+instructions from the output of the script above instead of from the
+weekly <em>cron</em> job (the outputs should be equivalent for the same set of
+        updates). Additionally, please read the following <strong>NOTE</strong>.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If the weekly <em>cron</em> job has not been installed, you may not get a
+    display of NEWS items and a chance to abort when you install the updates. You
+    can use the method below with the <code>--which=news</code> parameter to
+    check for NEWS before installing an update.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Any NEWS items will be included in the script output along with the
+packages to be updated. If you would like to see any NEWS items more
+distinctly after the previous command and before installing the
+updates, you can run the script again using the <code>--which=news</code> option:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>/root/fsl10/etc_cron.weekly_apt-show-upgradeable --which=news</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If there are updates available and no NEWS items, you will only get
+the installation instructions.</p>
+</div>
+<div class="paragraph">
+<p>You can use this second form of running the script to check for
+updates initially, if you do not need to review which updates are
+available (you will still get warnings about kernel updates). As
+usual, you will see no output at all if there are no updates
+available.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_end_of_security_updates">B.5. End of security updates</h3>
+<div class="paragraph">
+<p>When support for <em>stretch</em> ends, currently expected in June 2022,
+there will be no more security updates.  At that time, the existing
+packages will be migrated to the Debian archive site. This will be
+visible in the output from the weekly <em>cron</em> job script as errors that
+the packages files can&#8217;t be found. Two steps are needed at that time:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>If you have been using the weekly <em>cron</em> job, it should be deleted:</p>
+<div class="literalblock">
+<div class="content">
+<pre>rm /etc/cron.weekly/apt-show-upgradeable</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>(you may need to answer <code><strong>y</strong></code> to confirm)</p>
+</div>
+</li>
+<li>
+<p>Change the <em>/etc/apt/sources.list</em> file to point to the archive
+site. Although there will be no more security updates, this will enable
+downloading of additional packages if they are needed. The new lines that
+should replace the corresponding existing lines are:</p>
+<div class="literalblock">
+<div class="content">
+<pre>deb http://archive.debian.org/debian/ stretch main contrib non-free
+deb http://archive.debian.org/debian-security stretch/updates main contrib non-free</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And if you are using <code>deb-src</code> lines:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>deb-src http://archive.debian.org/debian/ stretch main contrib non-free
+deb-src http://archive.debian.org/debian-security stretch/updates main contrib non-free</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Otherwise the <code>deb-src</code> lines can be commented out (with a leading <code>#</code>).  Any other <code>deb</code> or
+<code>deb-src</code> lines relating to updates, proposed-updates etc. should likewise be commented out.</p>
+</div>
+<div class="paragraph">
+<p>In addition, if you want to install packages from more recent
+distributions that have been backported to <em>stretch</em> you can add:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>deb http://archive.debian.org/debian-backports stretch-backports main contrib non-free</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However, the &#8220;backports&#8221; are not normally needed.</p>
+</div>
+<div class="paragraph">
+<p>Lastly, update the index files:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>apt-get update</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This may generate an error about a <code>Release</code> file having expired, but that is benign.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+Now that stretch is no longer supported, it is strongly advised that you move
+your FS machine behind a firewall or upgrade it to a more recent FS Linux release.
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_rescue_mode">Appendix C: Rescue mode</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Rescue mode is useful for repairing some problems that prevent booting
+and/or logging in.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+If your computer&#8217;s <em>setup</em> utility is locked with a password, you
+may need that password to select booting from your installation media.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+You should provide suitable values for your system when a
+specific value is required. Values that agree with the FSL10 install
+described in this document (or reasonable defaults) are shown in parentheses.
+</td>
+</tr>
+</table>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Boot from installation media</p>
+</li>
+<li>
+<p>Select <code>Advanced options &#8230;&#8203;</code></p>
+</li>
+<li>
+<p>Select <code>&#8230;&#8203; Rescue mode</code></p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>You could instead add parameters to the boot line (by entering <kbd>e</kbd> for UEFI or
+<kbd>Tab</kbd> for BIOS on the <code>&#8230;&#8203; Rescue mode</code> line instead), following the
+directions in the <a href="#_set_boot_options_and_boot_installer">Set boot options and boot installer</a> section above.
+This is not necessary nor usually helpful, but if you use this approach the
+most useful parameters are probably <code>netcfg/disable_dhcp=true</code> and/or
+<code>time/zone=UTC</code>. Use of added parameters will change the dialogue
+below.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Select Language (<code>English</code>)</p>
+</li>
+<li>
+<p>Select Location (<code>United States</code>)</p>
+</li>
+<li>
+<p>Select Keymap (<code>American English</code>)</p>
+</li>
+<li>
+<p>Network configuration</p>
+<div class="paragraph">
+<p>If no network is currently available (or you know that you do not need it
+for the rescue), simply press <kbd>Enter</kbd> when DHCP autoconfiguration starts and
+press <kbd>Enter</kbd> again for the resulting <code>Network autoconfiguration failed</code>
+message. Thereafter select <code>Do not configure the network at this time</code> and
+enter in the machine&#8217;s hostname when prompted before continuing below.</p>
+</div>
+<div class="paragraph">
+<p>If the DHCP autoconfiguration succeeds before you can stop it, you may
+as well confirm the hostname and domainname and continue with the
+network anyway, since you never know when it might prove useful.
+(However, if you want to make sure you don&#8217;t use the network, you can
+ select <code>Go Back</code> and press <kbd>Enter</kbd> for the resulting <code>Network
+ autoconfiguration failed</code> message.  Thereafter select <code>Do not
+ configure the network at this time</code> and enter in the machine&#8217;s
+ hostname when prompted before continuing below.)</p>
+</div>
+<div class="paragraph">
+<p>Otherwise if the DHCP autoconfiguration fails and you want to use the
+network, press <kbd>Enter</kbd> for the resulting <code>Network autoconfiguration
+failed</code> message. You can then select the appropriate option, most
+likely <code>Configure network manually</code> and give appropriate responses to the
+prompts, ultimately continuing below.</p>
+</div>
+</li>
+<li>
+<p>Select time zone (<code>Eastern</code>)</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+The selected time zone will have no effect on the timestamps
+stored on the disk for any changes you may make, but will affect the displayed times you see.
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Select <code>Assemble RAID array</code></p>
+</li>
+<li>
+<p>Press <kbd>Space</kbd> on <code>Automatic</code></p>
+<div class="paragraph">
+<p>Press <kbd>Enter</kbd> to continue</p>
+</div>
+</li>
+<li>
+<p>Select your root file system (<em>/dev/vg0/root</em>)</p>
+</li>
+<li>
+<p>Select <code>Yes</code> to mount separate <em>/boot</em> partition (<em>/boot</em>), unless it is corrupt</p>
+</li>
+<li>
+<p>Select <code>Yes</code> to mount separate <em>/boot/efi</em> partition (<em>/boot/efi</em>), unless it is corrupt</p>
+</li>
+<li>
+<p>Select <em>Execute a shell in /dev/vg0/root</em> (or whatever your root file system is)</p>
+</li>
+<li>
+<p>Select <code>Continue</code> to enter rescue mode</p>
+</li>
+<li>
+<p>Use whatever commands are needed for your repair</p>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you need to use the network, DNS does not appear to work by
+default in recovery mode. Use of explicit IP addresses does work. If
+you need to use DNS, you can make it functional by deleting the symbolic
+link <em>/etc/resolv.conf</em> and creating it as a normal file with the
+nameserver information you want, e.g.:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>rm /etc/resolv.conf
+cat &gt;&gt;/etc/resolv.conf &lt;&lt;EOF
+nameserver 8.8.8.8
+EOF</pre>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</li>
+<li>
+<p>Use the <em>exit</em> command to exit when done</p>
+</li>
+<li>
+<p>Select <code>Reboot the system</code></p>
+</li>
+<li>
+<p>&#8220;Bob&#8217;s your uncle&#8221; (i.e., you are done!)</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2025-05-27 07:47:26 -0400
+</div>
+</div>
+</body>
+</html>
