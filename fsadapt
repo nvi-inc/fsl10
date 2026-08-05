@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020 NVI, Inc.
+# Copyright (c) 2020, 2026 NVI, Inc.
 #
 # This file is part of FSL10 Linux distribution.
 # (see http://github.com/nvi-inc/fsl10).
@@ -564,7 +564,7 @@ chroot "${NEW_ROOT}" apt-get -y install pgplot5 libpgplot-perl
 
     goinst)
 # Install/Upgrade Go programming language (if needed)
-LATEST_VERSION=$(curl --fail -s 'https://golang.org/VERSION?m=text' | cut -c3-)
+LATEST_VERSION=$(curl --fail -s 'https://go.dev/VERSION?m=text'|head -1|cut -c3-)
 GOARCH=$(dpkg --print-architecture |  sed -e 's/^i//')
 curl --fail -o /tmp/go.tar.gz "https://dl.google.com/go/go$LATEST_VERSION.linux-$GOARCH.tar.gz"
 [ -d /usr/local/go ] && rm -r /usr/local/go
